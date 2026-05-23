@@ -20,6 +20,7 @@ PlanX Suitability Lab is a production-ready raster MCDA plugin for QGIS, designe
   - `wlc_suitability` (chunk-aware weighted linear combination)
   - `owa_suitability` (chunk-aware OWA with criteria + order weights)
   - `topsis_suitability` (benefit/cost impacts + ideal/anti-ideal proximity)
+  - `uncertainty_adjusted_suitability` (robust score from mean-std with risk aversion factor)
   - `scenario_comparator` (delta raster + stats summary)
 - Uncertainty:
   - `montecarlo_suitability` with chunk processing and outputs:
@@ -30,6 +31,7 @@ PlanX Suitability Lab is a production-ready raster MCDA plugin for QGIS, designe
   - `xai_geoshapley_lite`
 - Reporting:
   - `suitability_html_report`
+  - `scenario_markdown_brief`
   - `numerical_qa_check`
   - `beta_evidence_report` (release readiness evidence report)
 - Dashboard:
@@ -51,4 +53,3 @@ PlanX Suitability Lab is a production-ready raster MCDA plugin for QGIS, designe
 - Use aligned 0-100 criteria rasters for best MCDA behavior.
 - Run `synthetic_pipeline_runner` first when validating new environments.
 - Full command details are available in `docs/COMMAND_GUIDE.html`.
-

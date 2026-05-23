@@ -57,7 +57,9 @@ class SyntheticPipelineRunnerAlgorithm(QgsProcessingAlgorithm):
         mc_p50 = os.path.join(outdir, "unc_p50.tif")
         mc_p95 = os.path.join(outdir, "unc_p95.tif")
         mc_stb = os.path.join(outdir, "stability_index.tif")
+        robust_out = os.path.join(outdir, "suitability_robust.tif")
         rep = os.path.join(outdir, "suitability_report.html")
+        brief = os.path.join(outdir, "scenario_brief.md")
         q = os.path.join(outdir, "beta_evidence.html")
 
         processing.run(
@@ -126,6 +128,17 @@ class SyntheticPipelineRunnerAlgorithm(QgsProcessingAlgorithm):
             context=context,
             feedback=feedback,
         )
+        processing.run(
+            "planx_suitability_lab:uncertainty_adjusted_suitability",
+            {
+                "MEAN": mc_mean,
+                "STD": mc_std,
+                "RISK": 1.0,
+                "OUTPUT": robust_out,
+            },
+            context=context,
+            feedback=feedback,
+        )
         qa = processing.run(
             "planx_suitability_lab:numerical_qa_check",
             {
@@ -145,6 +158,19 @@ class SyntheticPipelineRunnerAlgorithm(QgsProcessingAlgorithm):
                 "WEIGHT_METHOD": "Equal criteria; OWA descending order weights; TOPSIS impacts=B,B,B,C",
                 "QA_SUMMARY": qa["OUTPUT"],
                 "OUTPUT": rep,
+            },
+            context=context,
+            feedback=feedback,
+        )
+        processing.run(
+            "planx_suitability_lab:scenario_markdown_brief",
+            {
+                "PROJECT": "PlanX Synthetic Smoke Study",
+                "BASELINE": "WLC baseline",
+                "SCENARIO": "OWA/TOPSIS and robust overlay",
+                "QA": qa["OUTPUT"],
+                "NOTES": "Synthetic smoke run for environment verification.",
+                "OUTPUT": brief,
             },
             context=context,
             feedback=feedback,
@@ -172,7 +198,9 @@ class SyntheticPipelineRunnerAlgorithm(QgsProcessingAlgorithm):
             "UNC_P50": mc_p50,
             "UNC_P95": mc_p95,
             "STABILITY": mc_stb,
+            "ROBUST": robust_out,
             "SUITABILITY_REPORT": rep,
+            "SCENARIO_BRIEF": brief,
             "QA_SUMMARY": qa["OUTPUT"],
             "EVIDENCE_HTML": q,
             self.OUTDIR: outdir,

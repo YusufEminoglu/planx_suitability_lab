@@ -3,6 +3,12 @@
 All notable changes to **PlanX Suitability Lab** are documented here.  
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning: [SemVer](https://semver.org/).
 
+## [1.1.0] - 2026-05-23
+
+- Added uncertainty-adjusted suitability algorithm (`uncertainty_adjusted_suitability`) for risk-averse planning outputs based on uncertainty mean and standard deviation.
+- Added scenario markdown brief generator (`scenario_markdown_brief`) for studio and decision memo workflows.
+- Expanded synthetic pipeline runner to produce robust suitability and markdown planning brief artifacts.
+
 ## [1.0.0] - 2026-05-23
 
 - Promoted plugin from beta track to production-ready release.
@@ -20,4 +26,3 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning: [S
 - Expanded synthetic pipeline runner to execute WLC, OWA, TOPSIS, deltas, uncertainty, QA and HTML reporting.
 - Upgraded release evidence reporting and dashboard release-readiness UX.
 - Documentation refreshed for release usage and operator guidance.
-

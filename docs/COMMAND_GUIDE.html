@@ -48,6 +48,7 @@
     <p><code>wlc_suitability</code>: bounded [0,100] weighted linear combination + hard mask.</p>
     <p><code>owa_suitability</code>: true OWA with criteria weights + order weights + ordering mode + optional hard mask.</p>
     <p><code>topsis_suitability</code>: TOPSIS ranking in raster space with benefit/cost impacts + optional hard mask.</p>
+    <p><code>uncertainty_adjusted_suitability</code>: robust score from <code>unc_mean - lambda * unc_std</code> (clipped to 0-100).</p>
     <p><code>scenario_comparator</code>: delta map across two suitability scenarios.</p>
   </div>
 
@@ -56,6 +57,7 @@
     <p><code>montecarlo_suitability</code>: <code>unc_mean</code>, <code>unc_std</code>, <code>unc_p05</code>, <code>unc_p50</code>, <code>unc_p95</code>, <code>stability_index</code>.</p>
     <p><code>xai_global_sensitivity</code>, <code>xai_local_contribution</code>, <code>xai_geoshapley_lite</code>.</p>
     <p><code>numerical_qa_check</code>: checks suitability bounds and percentile consistency.</p>
+    <p><code>scenario_markdown_brief</code>: planning memo style markdown output with QA and recommendation template.</p>
     <p><code>beta_evidence_report</code>: outputs registry-level release readiness HTML evidence.</p>
   </div>
 

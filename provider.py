@@ -21,6 +21,7 @@ from .processing.weights.scenario_weight_pack import ScenarioWeightPackAlgorithm
 from .processing.compose.wlc_suitability import WLCSuitabilityAlgorithm
 from .processing.compose.owa_suitability import OWASuitabilityAlgorithm
 from .processing.compose.topsis_suitability import TOPSISSuitabilityAlgorithm
+from .processing.compose.uncertainty_adjusted_suitability import UncertaintyAdjustedSuitabilityAlgorithm
 from .processing.compose.scenario_comparator import ScenarioComparatorAlgorithm
 from .processing.uncertainty.montecarlo_suitability import MonteCarloSuitabilityAlgorithm
 from .processing.xai.global_sensitivity import GlobalSensitivityAlgorithm
@@ -29,6 +30,7 @@ from .processing.xai.geoshapley_lite import GeoShapleyLiteAlgorithm
 from .processing.reporting.suitability_html_report import SuitabilityHtmlReportAlgorithm
 from .processing.reporting.numerical_qa_check import NumericalQACheckAlgorithm
 from .processing.reporting.beta_evidence_report import BetaEvidenceReportAlgorithm
+from .processing.reporting.scenario_markdown_brief import ScenarioMarkdownBriefAlgorithm
 
 
 class PlanXSuitabilityLabProvider(QgsProcessingProvider):
@@ -64,6 +66,7 @@ class PlanXSuitabilityLabProvider(QgsProcessingProvider):
         self.addAlgorithm(WLCSuitabilityAlgorithm())
         self.addAlgorithm(OWASuitabilityAlgorithm())
         self.addAlgorithm(TOPSISSuitabilityAlgorithm())
+        self.addAlgorithm(UncertaintyAdjustedSuitabilityAlgorithm())
         self.addAlgorithm(ScenarioComparatorAlgorithm())
         self.addAlgorithm(MonteCarloSuitabilityAlgorithm())
         self.addAlgorithm(GlobalSensitivityAlgorithm())
@@ -72,3 +75,4 @@ class PlanXSuitabilityLabProvider(QgsProcessingProvider):
         self.addAlgorithm(SuitabilityHtmlReportAlgorithm())
         self.addAlgorithm(NumericalQACheckAlgorithm())
         self.addAlgorithm(BetaEvidenceReportAlgorithm())
+        self.addAlgorithm(ScenarioMarkdownBriefAlgorithm())
