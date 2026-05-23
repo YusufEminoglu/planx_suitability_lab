@@ -3,49 +3,115 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from qgis.core import QgsProcessingAlgorithm, QgsProcessingParameterString, QgsProcessingParameterFileDestination
+from qgis.core import (
+    QgsProcessingAlgorithm,
+    QgsProcessingParameterFileDestination,
+    QgsProcessingParameterString,
+)
 
 
 class SuitabilityHtmlReportAlgorithm(QgsProcessingAlgorithm):
-    SUMMARY = 'SUMMARY'
-    OUTPUT = 'OUTPUT'
+    PROJECT = "PROJECT"
+    SUMMARY = "SUMMARY"
+    WEIGHT_METHOD = "WEIGHT_METHOD"
+    QA_SUMMARY = "QA_SUMMARY"
+    OUTPUT = "OUTPUT"
 
     def name(self):
-        return 'suitability_html_report'
+        return "suitability_html_report"
 
     def displayName(self):
-        return 'Reporting: Suitability HTML Report'
+        return "Reporting: Suitability HTML Report"
 
     def group(self):
-        return 'Reporting'
+        return "Reporting"
 
     def groupId(self):
-        return 'reporting'
+        return "reporting"
 
     def createInstance(self):
         return SuitabilityHtmlReportAlgorithm()
 
     def initAlgorithm(self, config=None):
-        self.addParameter(QgsProcessingParameterString(self.SUMMARY, 'Summary notes', multiLine=True, defaultValue='PlanX Suitability Lab run summary.'))
-        self.addParameter(QgsProcessingParameterFileDestination(self.OUTPUT, 'HTML report', fileFilter='HTML files (*.html)'))
+        self.addParameter(QgsProcessingParameterString(self.PROJECT, "Project name", defaultValue="PlanX Suitability Study"))
+        self.addParameter(
+            QgsProcessingParameterString(
+                self.SUMMARY,
+                "Summary notes",
+                multiLine=True,
+                defaultValue="PlanX Suitability Lab run summary.",
+            )
+        )
+        self.addParameter(
+            QgsProcessingParameterString(
+                self.WEIGHT_METHOD,
+                "Active weight method / scenario",
+                defaultValue="AHP / PCA / Entropy",
+            )
+        )
+        self.addParameter(
+            QgsProcessingParameterString(
+                self.QA_SUMMARY,
+                "QA summary (optional)",
+                multiLine=True,
+                defaultValue="",
+                optional=True,
+            )
+        )
+        self.addParameter(QgsProcessingParameterFileDestination(self.OUTPUT, "HTML report", fileFilter="HTML files (*.html)"))
 
     def processAlgorithm(self, parameters, context, feedback):
+        project = self.parameterAsString(parameters, self.PROJECT, context)
         txt = self.parameterAsString(parameters, self.SUMMARY, context)
+        weight_method = self.parameterAsString(parameters, self.WEIGHT_METHOD, context)
+        qa = self.parameterAsString(parameters, self.QA_SUMMARY, context).strip()
         out = self.parameterAsFileOutput(parameters, self.OUTPUT, context)
-        html = f"""
-<!doctype html><html><head><meta charset='utf-8'><title>PlanX Suitability Report</title></head>
+
+        qa_block = (
+            f"<h2>QA / Numerical Acceptance</h2><pre>{qa}</pre>"
+            if qa
+            else "<h2>QA / Numerical Acceptance</h2><p>No QA summary was provided in this run.</p>"
+        )
+        html = f"""<!doctype html>
+<html>
+<head>
+  <meta charset='utf-8'>
+  <title>PlanX Suitability Report</title>
+  <style>
+    body {{ font-family: Segoe UI, Arial, sans-serif; margin: 24px; color: #122b30; background: #f6fbfa; }}
+    h1, h2 {{ color: #0e4b59; }}
+    .card {{ background: #fff; border: 1px solid #d8e9e5; border-radius: 10px; padding: 14px; margin: 10px 0; }}
+    pre {{ background: #f1f7f5; border: 1px solid #d8e9e5; padding: 10px; white-space: pre-wrap; }}
+  </style>
+</head>
 <body>
-<h1>PlanX Suitability Lab - HTML Report</h1>
-<p><b>Generated:</b> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
-<p>{txt}</p>
-<ul>
-<li>Policy: hard constraints (mask * weighted score)</li>
-<li>Weight methods: AHP / PCA / Entropy</li>
-<li>Uncertainty: Monte Carlo summary outputs</li>
-<li>XAI: global sensitivity + local contributions + GeoShapley-lite</li>
-</ul>
-</body></html>
+<h1>PlanX Suitability Lab - Report</h1>
+<div class='card'>
+  <p><b>Project:</b> {project}</p>
+  <p><b>Generated:</b> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+  <p><b>Weight scenario:</b> {weight_method}</p>
+</div>
+<div class='card'>
+  <h2>Executive Summary</h2>
+  <pre>{txt}</pre>
+</div>
+<div class='card'>
+  <h2>Method Snapshot</h2>
+  <ul>
+    <li>Policy: hard constraints (mask * weighted score)</li>
+    <li>Weight engines: AHP / PCA / Entropy (+ scenario pack)</li>
+    <li>Compose: WLC + OWA + scenario delta</li>
+    <li>Uncertainty: Monte Carlo (mean/std/p05/p50/p95/stability)</li>
+    <li>Explainability: global sensitivity + local contributions + GeoShapley-lite</li>
+  </ul>
+</div>
+<div class='card'>
+  {qa_block}
+</div>
+</body>
+</html>
 """
-        with open(out, 'w', encoding='utf-8') as f:
+        with open(out, "w", encoding="utf-8") as f:
             f.write(html)
         return {self.OUTPUT: out}
+

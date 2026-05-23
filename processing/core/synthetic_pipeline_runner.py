@@ -105,15 +105,6 @@ class SyntheticPipelineRunnerAlgorithm(QgsProcessingAlgorithm):
             context=context,
             feedback=feedback,
         )
-        processing.run(
-            "planx_suitability_lab:suitability_html_report",
-            {
-                "SUMMARY": "Synthetic run completed with WLC, OWA, scenario delta and Monte Carlo uncertainty outputs.",
-                "OUTPUT": rep,
-            },
-            context=context,
-            feedback=feedback,
-        )
         qa = processing.run(
             "planx_suitability_lab:numerical_qa_check",
             {
@@ -121,6 +112,18 @@ class SyntheticPipelineRunnerAlgorithm(QgsProcessingAlgorithm):
                 "P05": mc_p05,
                 "P50": mc_p50,
                 "P95": mc_p95,
+            },
+            context=context,
+            feedback=feedback,
+        )
+        processing.run(
+            "planx_suitability_lab:suitability_html_report",
+            {
+                "PROJECT": "PlanX Synthetic Smoke Study",
+                "SUMMARY": "Synthetic run completed with WLC, OWA, scenario delta and Monte Carlo uncertainty outputs.",
+                "WEIGHT_METHOD": "Equal criteria + descending risk-tolerant order weights",
+                "QA_SUMMARY": qa["OUTPUT"],
+                "OUTPUT": rep,
             },
             context=context,
             feedback=feedback,

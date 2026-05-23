@@ -27,3 +27,6 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning: [S
 - Rebuilt OWA composition as true multi-raster OWA with criteria weights + order weights + optional hard mask.
 - Expanded data harmonizer to batch-align all input rasters into an output folder with manifest and preview output.
 - Expanded synthetic pipeline runner to execute WLC + OWA + scenario delta + Monte Carlo + numerical QA + reports in one flow.
+- Expanded vector rasterizer to support both constant burn and field-driven rasterization modes.
+- Expanded proximity builder with target value selection, distance unit option and max-distance control.
+- Expanded suitability HTML report with project/weight scenario metadata and embedded QA summary.
