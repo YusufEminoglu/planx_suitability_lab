@@ -47,12 +47,15 @@ class SyntheticPipelineRunnerAlgorithm(QgsProcessingAlgorithm):
             feedback=feedback,
         )
         wlc_out = os.path.join(outdir, "suitability_wlc.tif")
+        owa_out = os.path.join(outdir, "suitability_owa.tif")
+        delta_out = os.path.join(outdir, "suitability_delta_owa_minus_wlc.tif")
         mc_mean = os.path.join(outdir, "unc_mean.tif")
         mc_std = os.path.join(outdir, "unc_std.tif")
         mc_p05 = os.path.join(outdir, "unc_p05.tif")
         mc_p50 = os.path.join(outdir, "unc_p50.tif")
         mc_p95 = os.path.join(outdir, "unc_p95.tif")
         mc_stb = os.path.join(outdir, "stability_index.tif")
+        rep = os.path.join(outdir, "suitability_report.html")
         q = os.path.join(outdir, "beta_evidence.html")
 
         processing.run(
@@ -67,11 +70,31 @@ class SyntheticPipelineRunnerAlgorithm(QgsProcessingAlgorithm):
             feedback=feedback,
         )
         processing.run(
+            "planx_suitability_lab:owa_suitability",
+            {
+                "INPUT_RASTERS": [syn["CRITERION_1"], syn["CRITERION_2"], syn["CRITERION_3"], syn["CRITERION_4"]],
+                "CRITERIA_WEIGHTS": "0.25,0.25,0.25,0.25",
+                "ORDER_WEIGHTS": "0.4,0.3,0.2,0.1",
+                "SORT_MODE": 0,
+                "CONSTRAINT": syn["CONSTRAINT_MASK"],
+                "OUTPUT": owa_out,
+            },
+            context=context,
+            feedback=feedback,
+        )
+        processing.run(
+            "planx_suitability_lab:scenario_comparator",
+            {"A": wlc_out, "B": owa_out, "OUTPUT": delta_out},
+            context=context,
+            feedback=feedback,
+        )
+        processing.run(
             "planx_suitability_lab:montecarlo_suitability",
             {
                 "INPUT": wlc_out,
                 "ITER": 120,
                 "SIGMA": 0.08,
+                "BLOCK": 256,
                 "OUT_MEAN": mc_mean,
                 "OUT_STD": mc_std,
                 "OUT_P05": mc_p05,
@@ -83,9 +106,30 @@ class SyntheticPipelineRunnerAlgorithm(QgsProcessingAlgorithm):
             feedback=feedback,
         )
         processing.run(
+            "planx_suitability_lab:suitability_html_report",
+            {
+                "SUMMARY": "Synthetic run completed with WLC, OWA, scenario delta and Monte Carlo uncertainty outputs.",
+                "OUTPUT": rep,
+            },
+            context=context,
+            feedback=feedback,
+        )
+        qa = processing.run(
+            "planx_suitability_lab:numerical_qa_check",
+            {
+                "SUIT": wlc_out,
+                "P05": mc_p05,
+                "P50": mc_p50,
+                "P95": mc_p95,
+            },
+            context=context,
+            feedback=feedback,
+        )
+        processing.run(
             "planx_suitability_lab:beta_evidence_report",
             {
-                "SUMMARY": "Synthetic pipeline executed: synthetic -> WLC -> Monte Carlo.",
+                "SUMMARY": "Synthetic pipeline executed: synthetic -> WLC/OWA -> delta -> Monte Carlo -> QA -> reports.\n\n"
+                + qa["OUTPUT"],
                 "OUTPUT": q,
             },
             context=context,
@@ -94,13 +138,16 @@ class SyntheticPipelineRunnerAlgorithm(QgsProcessingAlgorithm):
         return {
             "SYNTHETIC_DIR": syn["OUTPUT_DIR"],
             "WLC": wlc_out,
+            "OWA": owa_out,
+            "DELTA": delta_out,
             "UNC_MEAN": mc_mean,
             "UNC_STD": mc_std,
             "UNC_P05": mc_p05,
             "UNC_P50": mc_p50,
             "UNC_P95": mc_p95,
             "STABILITY": mc_stb,
+            "SUITABILITY_REPORT": rep,
+            "QA_SUMMARY": qa["OUTPUT"],
             "EVIDENCE_HTML": q,
             self.OUTDIR: outdir,
         }
-

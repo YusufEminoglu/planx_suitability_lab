@@ -168,10 +168,10 @@ class SuitabilityDashboard(QDialog):
 
     def _copy_hub(self):
         txt = (
-            'PlanX Suitability Lab 0.2.0 beta - expanded raster MCDA workflow release.\n'
-            '- Added synthetic pipeline runner, scenario weight pack and beta evidence HTML report.\n'
-            '- Upgraded Monte Carlo with chunk processing and full p05/p50/p95 stability outputs.\n'
-            '- Upgraded XAI global sensitivity and GeoShapley-lite with sampled baseline attribution.'
+            'PlanX Suitability Lab 0.3.0 beta - hardened raster MCDA workflow release.\n'
+            '- Added advanced normalizer/reclassifier modes (min-max, fuzzy linear/sigmoid/gaussian).\n'
+            '- Rebuilt OWA as true multi-raster composition using criteria and order weights.\n'
+            '- Expanded harmonizer to batch outputs and synthetic runner to full WLC/OWA/QA/report chain.'
         )
         QApplication.clipboard().setText(txt)
 

@@ -21,7 +21,7 @@
 
   <div class="card">
     <h2>1) Prepare / Hazirlik</h2>
-    <p><code>data_harmonizer</code>: Align CRS, extent, resolution, nodata to one snap raster.</p>
+    <p><code>data_harmonizer</code>: Align CRS, extent, resolution, nodata and export full aligned raster stack folder + manifest.</p>
     <p><code>synthetic_sample_raster</code>: Generate 4 criterion rasters + hard mask for smoke testing.</p>
     <p><code>synthetic_pipeline_runner</code>: One-click synthetic end-to-end workflow execution.</p>
     <p><b>Tip:</b> Start with the most trusted base raster as <code>SNAP_RASTER</code>.</p>
@@ -30,6 +30,7 @@
   <div class="card">
     <h2>2) Criteria / Kriterler</h2>
     <p><code>vector_rasterizer</code>, <code>proximity_builder</code>, <code>normalizer_reclassifier</code>, <code>constraint_builder</code></p>
+    <p><b>Normalizer modes:</b> Min-Max (benefit/cost), Fuzzy Linear (benefit/cost), Fuzzy Sigmoid (benefit/cost), Fuzzy Gaussian.</p>
     <p><b>Tip:</b> Keep all criterion scores in 0-100 before weighted overlay.</p>
   </div>
 
@@ -45,7 +46,7 @@
   <div class="card">
     <h2>4) Compose / Bilesim</h2>
     <p><code>wlc_suitability</code>: bounded [0,100] weighted linear combination + hard mask.</p>
-    <p><code>owa_suitability</code>: risk-attitude transformed alternative output.</p>
+    <p><code>owa_suitability</code>: true OWA with criteria weights + order weights + ordering mode + optional hard mask.</p>
     <p><code>scenario_comparator</code>: delta map across two suitability scenarios.</p>
   </div>
 
