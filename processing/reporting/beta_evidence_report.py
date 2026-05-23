@@ -52,9 +52,12 @@ class BetaEvidenceReportAlgorithm(QgsProcessingAlgorithm):
             "planx_suitability_lab:wlc_suitability",
             "planx_suitability_lab:owa_suitability",
             "planx_suitability_lab:topsis_suitability",
+            "planx_suitability_lab:uncertainty_adjusted_suitability",
             "planx_suitability_lab:montecarlo_suitability",
             "planx_suitability_lab:xai_global_sensitivity",
             "planx_suitability_lab:suitability_html_report",
+            "planx_suitability_lab:scenario_markdown_brief",
+            "planx_suitability_lab:suitability_class_area_stats",
             "planx_suitability_lab:numerical_qa_check",
         ]
         rows = []

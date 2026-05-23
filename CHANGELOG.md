@@ -3,6 +3,12 @@
 All notable changes to **PlanX Suitability Lab** are documented here.  
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning: [SemVer](https://semver.org/).
 
+## [1.2.0] - 2026-05-23
+
+- Added suitability class-area statistics algorithm (`suitability_class_area_stats`) for class-based coverage analysis and reporting.
+- Integrated class-stat summaries into synthetic pipeline QA and reporting chain.
+- Standardized weight and sensitivity table outputs to geometry-free tables for cleaner Processing behavior.
+
 ## [1.1.0] - 2026-05-23
 
 - Added uncertainty-adjusted suitability algorithm (`uncertainty_adjusted_suitability`) for risk-averse planning outputs based on uncertainty mean and standard deviation.

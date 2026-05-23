@@ -5,6 +5,7 @@ from collections import defaultdict
 
 from qgis.PyQt.QtCore import QVariant
 from qgis.core import (
+    Qgis,
     QgsFeature,
     QgsField,
     QgsFields,
@@ -66,7 +67,7 @@ class ScenarioWeightPackAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField("criterion_id", QVariant.Int))
         fields.append(QgsField("weight_raw", QVariant.Double))
         fields.append(QgsField("weight_norm", QVariant.Double))
-        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, 1, None)
+        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, None)
 
         for method, cid, w in rows:
             denom = by_method[method] if by_method[method] > 0 else 1.0
@@ -91,4 +92,3 @@ class ScenarioWeightPackAlgorithm(QgsProcessingAlgorithm):
             sink.addFeature(feat)
 
         return {self.OUTPUT: dest}
-

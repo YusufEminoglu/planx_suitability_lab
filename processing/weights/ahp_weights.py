@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from qgis.core import (
+    Qgis,
     QgsFeature,
     QgsFields,
     QgsField,
@@ -46,7 +47,7 @@ class AHPWeightsAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField('weight', QVariant.Double))
         fields.append(QgsField('cr', QVariant.Double))
         fields.append(QgsField('cr_ok', QVariant.Int))
-        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, 1, None)
+        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, None)
         cr_ok = 1 if cr <= 0.10 else 0
         if cr_ok == 0:
             feedback.reportError(f'AHP consistency ratio is high (CR={cr:.4f} > 0.10). Consider revising pairwise judgments.')

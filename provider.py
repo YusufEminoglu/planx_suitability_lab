@@ -31,6 +31,7 @@ from .processing.reporting.suitability_html_report import SuitabilityHtmlReportA
 from .processing.reporting.numerical_qa_check import NumericalQACheckAlgorithm
 from .processing.reporting.beta_evidence_report import BetaEvidenceReportAlgorithm
 from .processing.reporting.scenario_markdown_brief import ScenarioMarkdownBriefAlgorithm
+from .processing.reporting.suitability_class_area_stats import SuitabilityClassAreaStatsAlgorithm
 
 
 class PlanXSuitabilityLabProvider(QgsProcessingProvider):
@@ -76,3 +77,4 @@ class PlanXSuitabilityLabProvider(QgsProcessingProvider):
         self.addAlgorithm(NumericalQACheckAlgorithm())
         self.addAlgorithm(BetaEvidenceReportAlgorithm())
         self.addAlgorithm(ScenarioMarkdownBriefAlgorithm())
+        self.addAlgorithm(SuitabilityClassAreaStatsAlgorithm())

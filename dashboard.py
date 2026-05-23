@@ -168,10 +168,10 @@ class SuitabilityDashboard(QDialog):
 
     def _copy_hub(self):
         txt = (
-            'PlanX Suitability Lab 1.1.0 - stable raster MCDA release.\n'
+            'PlanX Suitability Lab 1.2.0 - stable raster MCDA release.\n'
             '- Added advanced normalizer/reclassifier modes (min-max, fuzzy linear/sigmoid/gaussian).\n'
             '- Added chunk-aware WLC/OWA and TOPSIS composition (criteria/order/impact aware).\n'
-            '- Added uncertainty-adjusted robust suitability and scenario markdown brief outputs.'
+            '- Added robust suitability, class-area statistics and scenario markdown briefing outputs.'
         )
         QApplication.clipboard().setText(txt)
 

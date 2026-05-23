@@ -60,6 +60,7 @@ class SyntheticPipelineRunnerAlgorithm(QgsProcessingAlgorithm):
         robust_out = os.path.join(outdir, "suitability_robust.tif")
         rep = os.path.join(outdir, "suitability_report.html")
         brief = os.path.join(outdir, "scenario_brief.md")
+        class_stats = os.path.join(outdir, "suitability_class_stats.gpkg")
         q = os.path.join(outdir, "beta_evidence.html")
 
         processing.run(
@@ -150,13 +151,24 @@ class SyntheticPipelineRunnerAlgorithm(QgsProcessingAlgorithm):
             context=context,
             feedback=feedback,
         )
+        stats = processing.run(
+            "planx_suitability_lab:suitability_class_area_stats",
+            {
+                "INPUT": robust_out,
+                "BREAKS": "20,40,60,80",
+                "BLOCK": 512,
+                "OUTPUT": class_stats,
+            },
+            context=context,
+            feedback=feedback,
+        )
         processing.run(
             "planx_suitability_lab:suitability_html_report",
             {
                 "PROJECT": "PlanX Synthetic Smoke Study",
-                "SUMMARY": "Synthetic run completed with WLC, OWA, TOPSIS, scenario deltas and Monte Carlo uncertainty outputs.",
+                "SUMMARY": "Synthetic run completed with WLC, OWA, TOPSIS, robust suitability, scenario deltas and Monte Carlo uncertainty outputs.",
                 "WEIGHT_METHOD": "Equal criteria; OWA descending order weights; TOPSIS impacts=B,B,B,C",
-                "QA_SUMMARY": qa["OUTPUT"],
+                "QA_SUMMARY": qa["OUTPUT"] + "\n" + stats["SUMMARY"],
                 "OUTPUT": rep,
             },
             context=context,
@@ -168,7 +180,7 @@ class SyntheticPipelineRunnerAlgorithm(QgsProcessingAlgorithm):
                 "PROJECT": "PlanX Synthetic Smoke Study",
                 "BASELINE": "WLC baseline",
                 "SCENARIO": "OWA/TOPSIS and robust overlay",
-                "QA": qa["OUTPUT"],
+                "QA": qa["OUTPUT"] + "\n" + stats["SUMMARY"],
                 "NOTES": "Synthetic smoke run for environment verification.",
                 "OUTPUT": brief,
             },
@@ -179,7 +191,9 @@ class SyntheticPipelineRunnerAlgorithm(QgsProcessingAlgorithm):
             "planx_suitability_lab:beta_evidence_report",
             {
                 "SUMMARY": "Synthetic pipeline executed: synthetic -> WLC/OWA/TOPSIS -> deltas -> Monte Carlo -> QA -> reports.\n\n"
-                + qa["OUTPUT"],
+                + qa["OUTPUT"]
+                + "\n"
+                + stats["SUMMARY"],
                 "OUTPUT": q,
             },
             context=context,
@@ -202,6 +216,8 @@ class SyntheticPipelineRunnerAlgorithm(QgsProcessingAlgorithm):
             "SUITABILITY_REPORT": rep,
             "SCENARIO_BRIEF": brief,
             "QA_SUMMARY": qa["OUTPUT"],
+            "CLASS_STATS": class_stats,
+            "CLASS_STATS_SUMMARY": stats["SUMMARY"],
             "EVIDENCE_HTML": q,
             self.OUTDIR: outdir,
         }

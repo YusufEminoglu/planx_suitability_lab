@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-from qgis.core import QgsFeature, QgsFields, QgsField, QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParameterFeatureSource, QgsProcessingParameterFeatureSink
+from qgis.core import Qgis, QgsFeature, QgsFields, QgsField, QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParameterFeatureSource, QgsProcessingParameterFeatureSink
 from qgis.PyQt.QtCore import QVariant
 
 
@@ -33,7 +33,7 @@ class WeightConsolidatorAlgorithm(QgsProcessingAlgorithm):
         fields = QgsFields()
         fields.append(QgsField('criterion_id', QVariant.Int))
         fields.append(QgsField('weight', QVariant.Double))
-        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, 1, None)
+        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, None)
         total = 0.0
         rows = []
         for f in src.getFeatures():

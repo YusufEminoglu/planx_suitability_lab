@@ -5,6 +5,7 @@ import numpy as np
 from osgeo import gdal
 from qgis.PyQt.QtCore import QVariant
 from qgis.core import (
+    Qgis,
     QgsFeature,
     QgsField,
     QgsFields,
@@ -88,7 +89,7 @@ class GlobalSensitivityAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField("std", QVariant.Double))
         fields.append(QgsField("weighted_std", QVariant.Double))
         fields.append(QgsField("importance", QVariant.Double))
-        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, 1, None)
+        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, None)
         for row in stats:
             f = QgsFeature(fields)
             f["criterion"] = row[0]
@@ -99,4 +100,3 @@ class GlobalSensitivityAlgorithm(QgsProcessingAlgorithm):
             f["importance"] = abs(row[4]) / total
             sink.addFeature(f)
         return {self.OUTPUT: dest}
-
