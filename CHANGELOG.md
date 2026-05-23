@@ -3,6 +3,13 @@
 All notable changes to **PlanX Suitability Lab** are documented here.  
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning: [SemVer](https://semver.org/).
 
+## [1.2.2] - 2026-05-23
+
+- Reworked dashboard into a studio console with module cards and grouped catalog browsing.
+- Added module filtering (search + group) and in-dashboard direct run buttons.
+- Added recent-runs panel with timestamps and quick log clearing.
+- Improved workflow navigation and quick-actions ergonomics.
+
 ## [1.2.1] - 2026-05-23
 
 - Rebuilt the dashboard UI as a studio-grade console with cleaner layout, grouped workflow catalog, and improved visual hierarchy.

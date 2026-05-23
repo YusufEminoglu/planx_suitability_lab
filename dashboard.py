@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+from datetime import datetime
 
 import processing
 from qgis.PyQt.QtCore import Qt, QUrl
@@ -14,7 +15,9 @@ from qgis.PyQt.QtWidgets import (
     QGridLayout,
     QHBoxLayout,
     QLabel,
+    QLineEdit,
     QPushButton,
+    QScrollArea,
     QTabWidget,
     QTextBrowser,
     QVBoxLayout,
@@ -86,6 +89,7 @@ REQUIRED_IDS = [
     "planx_suitability_lab:wlc_suitability",
     "planx_suitability_lab:owa_suitability",
     "planx_suitability_lab:topsis_suitability",
+    "planx_suitability_lab:uncertainty_adjusted_suitability",
     "planx_suitability_lab:montecarlo_suitability",
     "planx_suitability_lab:xai_global_sensitivity",
     "planx_suitability_lab:numerical_qa_check",
@@ -98,8 +102,10 @@ class SuitabilityDashboard(QDialog):
     def __init__(self, iface, parent=None):
         super().__init__(parent)
         self.iface = iface
+        self.recent_runs = []
+        self.card_widgets = []
         self.setWindowTitle("PlanX Suitability Lab - Studio Console")
-        self.resize(1280, 840)
+        self.resize(1320, 860)
         self._apply_style()
         self._build_ui()
         self._refresh()
@@ -137,10 +143,7 @@ class SuitabilityDashboard(QDialog):
                 border-top-right-radius: 7px;
                 margin-right: 2px;
             }
-            QTabBar::tab:selected {
-                background: #ffffff;
-                font-weight: 700;
-            }
+            QTabBar::tab:selected { background: #ffffff; font-weight: 700; }
             QTextBrowser {
                 background: #ffffff;
                 border: 1px solid #d7e3e6;
@@ -163,13 +166,20 @@ class SuitabilityDashboard(QDialog):
                 border: 1px solid #b8cdd4;
             }
             QPushButton#ghost:hover { background: #f2f8f9; }
-            QComboBox {
+            QComboBox, QLineEdit {
                 background: #ffffff;
                 border: 1px solid #c9d9de;
                 border-radius: 7px;
                 padding: 6px;
                 color: #17323a;
             }
+            QFrame[classCard="true"] {
+                background: #fbfefe;
+                border: 1px solid #d5e5e8;
+                border-radius: 12px;
+            }
+            QLabel[classTitle="true"] { color: #173741; font-weight: 700; font-size: 13px; }
+            QLabel[classMeta="true"] { color: #4a6871; font-size: 11px; }
             """
         )
 
@@ -204,23 +214,50 @@ class SuitabilityDashboard(QDialog):
         workflow_tab = QWidget()
         wf = QVBoxLayout(workflow_tab)
         wf.setContentsMargins(10, 10, 10, 10)
+        top = QHBoxLayout()
         self.workflow_combo = QComboBox()
         for group, items in ALGO_GROUPS:
             for title_txt, aid, desc in items:
                 self.workflow_combo.addItem(f"{group} - {title_txt}", (aid, desc))
-        wf.addWidget(self.workflow_combo)
-        row = QHBoxLayout()
-        self.workflow_desc = QTextBrowser()
-        self.workflow_desc.setMaximumHeight(100)
-        row.addWidget(self.workflow_desc, 1)
-        run_sel = QPushButton("Run Selected Algorithm")
+        top.addWidget(self.workflow_combo, 1)
+        run_sel = QPushButton("Run Selected")
         run_sel.clicked.connect(self._run_selected)
-        row.addWidget(run_sel)
-        wf.addLayout(row)
+        top.addWidget(run_sel)
+        wf.addLayout(top)
+        self.workflow_desc = QTextBrowser()
+        self.workflow_desc.setMaximumHeight(95)
+        wf.addWidget(self.workflow_desc)
         self.workflow_map = QTextBrowser()
         wf.addWidget(self.workflow_map, 1)
         self.workflow_combo.currentIndexChanged.connect(self._update_selected_desc)
         self.tabs.addTab(workflow_tab, "Workflow")
+
+        modules_tab = QWidget()
+        ml = QVBoxLayout(modules_tab)
+        ml.setContentsMargins(10, 10, 10, 10)
+        filter_row = QHBoxLayout()
+        self.search = QLineEdit()
+        self.search.setPlaceholderText("Filter modules (name, group, id)...")
+        self.search.textChanged.connect(self._filter_cards)
+        filter_row.addWidget(self.search, 1)
+        self.group_filter = QComboBox()
+        self.group_filter.addItem("All Groups", "")
+        for g, _ in ALGO_GROUPS:
+            self.group_filter.addItem(g, g)
+        self.group_filter.currentIndexChanged.connect(self._filter_cards)
+        filter_row.addWidget(self.group_filter)
+        ml.addLayout(filter_row)
+
+        self.cards_scroll = QScrollArea()
+        self.cards_scroll.setWidgetResizable(True)
+        cards_host = QWidget()
+        self.cards_grid = QGridLayout(cards_host)
+        self.cards_grid.setContentsMargins(4, 4, 4, 4)
+        self.cards_grid.setHorizontalSpacing(10)
+        self.cards_grid.setVerticalSpacing(10)
+        self.cards_scroll.setWidget(cards_host)
+        ml.addWidget(self.cards_scroll, 1)
+        self.tabs.addTab(modules_tab, "Modules")
 
         quick_tab = QWidget()
         ql = QGridLayout(quick_tab)
@@ -243,6 +280,17 @@ class SuitabilityDashboard(QDialog):
             ql.addWidget(b, i // 2, i % 2)
         self.tabs.addTab(quick_tab, "Quick Actions")
 
+        runlog_tab = QWidget()
+        rl = QVBoxLayout(runlog_tab)
+        rl.setContentsMargins(10, 10, 10, 10)
+        self.runlog = QTextBrowser()
+        rl.addWidget(self.runlog, 1)
+        clear_log = QPushButton("Clear Run Log")
+        clear_log.setObjectName("ghost")
+        clear_log.clicked.connect(self._clear_runlog)
+        rl.addWidget(clear_log, 0, Qt.AlignRight)
+        self.tabs.addTab(runlog_tab, "Recent Runs")
+
         self.readiness = QTextBrowser()
         self.tabs.addTab(self.readiness, "Readiness")
 
@@ -254,6 +302,49 @@ class SuitabilityDashboard(QDialog):
         hint.setStyleSheet("color:#35545f;")
         footer.addWidget(hint, 1)
         root.addLayout(footer)
+
+        self._build_cards()
+
+    def _build_cards(self):
+        for w in self.card_widgets:
+            w.setParent(None)
+        self.card_widgets = []
+        idx = 0
+        for group, items in ALGO_GROUPS:
+            for title_txt, aid, desc in items:
+                card = QFrame()
+                card.setProperty("classCard", "true")
+                v = QVBoxLayout(card)
+                v.setContentsMargins(10, 10, 10, 10)
+                t = QLabel(title_txt)
+                t.setProperty("classTitle", "true")
+                m = QLabel(f"{group} | {aid}")
+                m.setProperty("classMeta", "true")
+                d = QLabel(desc)
+                d.setWordWrap(True)
+                d.setStyleSheet("color:#294e58; font-size:12px;")
+                run = QPushButton("Run")
+                run.clicked.connect(lambda _, x=aid, n=title_txt: self._run_algorithm(x, n))
+                v.addWidget(t)
+                v.addWidget(m)
+                v.addWidget(d, 1)
+                v.addWidget(run, 0, Qt.AlignRight)
+                card.meta = (group.lower(), title_txt.lower(), aid.lower(), desc.lower())
+                r = idx // 3
+                c = idx % 3
+                self.cards_grid.addWidget(card, r, c)
+                self.card_widgets.append(card)
+                idx += 1
+
+    def _filter_cards(self):
+        q = (self.search.text() or "").strip().lower()
+        group = self.group_filter.currentData() or ""
+        g = group.lower().strip()
+        for card in self.card_widgets:
+            mg, mt, ma, md = card.meta
+            ok_q = (q in mg) or (q in mt) or (q in ma) or (q in md) if q else True
+            ok_g = (mg == g) if g else True
+            card.setVisible(ok_q and ok_g)
 
     def _build_workflow_html(self):
         parts = ["<h2>Operational Map</h2>"]
@@ -272,12 +363,34 @@ class SuitabilityDashboard(QDialog):
         aid, desc = data
         self.workflow_desc.setHtml(f"<b>{aid}</b><br>{desc}")
 
+    def _track_run(self, algo_id, label):
+        ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.recent_runs.insert(0, f"[{ts}] {label} ({algo_id})")
+        self.recent_runs = self.recent_runs[:30]
+        self._refresh_runlog()
+
+    def _refresh_runlog(self):
+        if not self.recent_runs:
+            self.runlog.setHtml("<h3>Recent Runs</h3><p>No runs yet.</p>")
+            return
+        html = "<h3>Recent Runs</h3><ul>" + "".join(f"<li>{line}</li>" for line in self.recent_runs) + "</ul>"
+        self.runlog.setHtml(html)
+
+    def _clear_runlog(self):
+        self.recent_runs = []
+        self._refresh_runlog()
+
+    def _run_algorithm(self, algo_id, label):
+        processing.execAlgorithmDialog(algo_id)
+        self._track_run(algo_id, label)
+
     def _run_selected(self):
         data = self.workflow_combo.currentData()
         if not data:
             return
         aid, _ = data
-        processing.execAlgorithmDialog(aid)
+        label = self.workflow_combo.currentText()
+        self._run_algorithm(aid, label)
 
     def _refresh(self):
         layers = list(QgsProject.instance().mapLayers().values())
@@ -302,6 +415,7 @@ class SuitabilityDashboard(QDialog):
         )
         self.workflow_map.setHtml(self._build_workflow_html())
         self._update_selected_desc()
+        self._refresh_runlog()
 
         self.readiness.setHtml(
             "<h2>Release Checks</h2>"
@@ -338,10 +452,10 @@ class SuitabilityDashboard(QDialog):
 
     def _copy_hub(self):
         txt = (
-            "PlanX Suitability Lab 1.2.0 - production MCDA release.\n"
+            "PlanX Suitability Lab 1.2.1 - production MCDA release.\n"
             "- Added TOPSIS, robust suitability, and class-area stats for decision-grade analysis.\n"
             "- Strengthened chunk-aware raster engines and geometry-free analytics tables.\n"
-            "- Expanded synthetic pipeline and release-evidence reporting workflows."
+            "- Introduced redesigned studio dashboard and unique custom icon."
         )
         QApplication.clipboard().setText(txt)
 
@@ -351,10 +465,10 @@ class SuitabilityDashboard(QDialog):
             QDesktopServices.openUrl(QUrl.fromLocalFile(guide_path))
 
     def _run_synthetic_pipeline(self):
-        processing.execAlgorithmDialog("planx_suitability_lab:synthetic_pipeline_runner")
+        self._run_algorithm("planx_suitability_lab:synthetic_pipeline_runner", "Synthetic Pipeline")
 
     def _run_release_evidence(self):
-        processing.execAlgorithmDialog("planx_suitability_lab:beta_evidence_report")
+        self._run_algorithm("planx_suitability_lab:beta_evidence_report", "Release Evidence")
 
     def keyPressEvent(self, event):
         if event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_R:
