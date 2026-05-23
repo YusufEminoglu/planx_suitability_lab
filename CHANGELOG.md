@@ -3,6 +3,12 @@
 All notable changes to **PlanX Suitability Lab** are documented here.  
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning: [SemVer](https://semver.org/).
 
+## [1.2.1] - 2026-05-23
+
+- Rebuilt the dashboard UI as a studio-grade console with cleaner layout, grouped workflow catalog, and improved visual hierarchy.
+- Added a fully custom PlanX Suitability Lab icon (PNG) and removed prior duplicate icon usage.
+- Updated quick-action UX, readiness labeling, and release changelog helper text in dashboard.
+
 ## [1.2.0] - 2026-05-23
 
 - Added suitability class-area statistics algorithm (`suitability_class_area_stats`) for class-based coverage analysis and reporting.
