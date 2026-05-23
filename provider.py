@@ -12,10 +12,12 @@ from .processing.core.proximity_builder import ProximityBuilderAlgorithm
 from .processing.core.normalizer import NormalizerAlgorithm
 from .processing.core.constraint_builder import ConstraintBuilderAlgorithm
 from .processing.core.synthetic_sample_raster import SyntheticSampleRasterAlgorithm
+from .processing.core.synthetic_pipeline_runner import SyntheticPipelineRunnerAlgorithm
 from .processing.weights.ahp_weights import AHPWeightsAlgorithm
 from .processing.weights.pca_weights import PCAWeightsAlgorithm
 from .processing.weights.entropy_weights import EntropyWeightsAlgorithm
 from .processing.weights.weight_consolidator import WeightConsolidatorAlgorithm
+from .processing.weights.scenario_weight_pack import ScenarioWeightPackAlgorithm
 from .processing.compose.wlc_suitability import WLCSuitabilityAlgorithm
 from .processing.compose.owa_suitability import OWASuitabilityAlgorithm
 from .processing.compose.scenario_comparator import ScenarioComparatorAlgorithm
@@ -25,6 +27,7 @@ from .processing.xai.local_contribution import LocalContributionAlgorithm
 from .processing.xai.geoshapley_lite import GeoShapleyLiteAlgorithm
 from .processing.reporting.suitability_html_report import SuitabilityHtmlReportAlgorithm
 from .processing.reporting.numerical_qa_check import NumericalQACheckAlgorithm
+from .processing.reporting.beta_evidence_report import BetaEvidenceReportAlgorithm
 
 
 class PlanXSuitabilityLabProvider(QgsProcessingProvider):
@@ -51,10 +54,12 @@ class PlanXSuitabilityLabProvider(QgsProcessingProvider):
         self.addAlgorithm(NormalizerAlgorithm())
         self.addAlgorithm(ConstraintBuilderAlgorithm())
         self.addAlgorithm(SyntheticSampleRasterAlgorithm())
+        self.addAlgorithm(SyntheticPipelineRunnerAlgorithm())
         self.addAlgorithm(AHPWeightsAlgorithm())
         self.addAlgorithm(PCAWeightsAlgorithm())
         self.addAlgorithm(EntropyWeightsAlgorithm())
         self.addAlgorithm(WeightConsolidatorAlgorithm())
+        self.addAlgorithm(ScenarioWeightPackAlgorithm())
         self.addAlgorithm(WLCSuitabilityAlgorithm())
         self.addAlgorithm(OWASuitabilityAlgorithm())
         self.addAlgorithm(ScenarioComparatorAlgorithm())
@@ -64,3 +69,4 @@ class PlanXSuitabilityLabProvider(QgsProcessingProvider):
         self.addAlgorithm(GeoShapleyLiteAlgorithm())
         self.addAlgorithm(SuitabilityHtmlReportAlgorithm())
         self.addAlgorithm(NumericalQACheckAlgorithm())
+        self.addAlgorithm(BetaEvidenceReportAlgorithm())

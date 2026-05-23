@@ -16,3 +16,6 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning: [S
   `Ctrl+R`, `Ctrl+D`, `Ctrl+I`, `Ctrl+H`.
 - Added synthetic sample raster pack generator for fast end-to-end smoke setup.
 - Added numerical QA checker for suitability bounds and Monte Carlo percentile order checks.
+- Added scenario weight pack to merge AHP/PCA/Entropy outputs and emit a blended-average scenario.
+- Added synthetic end-to-end pipeline runner (synthetic -> WLC -> Monte Carlo -> evidence report).
+- Added beta evidence HTML report and dashboard quick actions for pipeline/evidence runs.

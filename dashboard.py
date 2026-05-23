@@ -86,6 +86,12 @@ class SuitabilityDashboard(QDialog):
         sample = QPushButton('Run Synthetic Pack')
         sample.clicked.connect(self._run_synthetic_pack)
         row.addWidget(sample)
+        pipe = QPushButton('Run Synthetic Pipeline')
+        pipe.clicked.connect(self._run_synthetic_pipeline)
+        row.addWidget(pipe)
+        beta_report = QPushButton('Generate Beta Evidence')
+        beta_report.clicked.connect(self._run_beta_evidence)
+        row.addWidget(beta_report)
         body.addLayout(row)
 
         shell.addLayout(body, 1)
@@ -176,6 +182,12 @@ class SuitabilityDashboard(QDialog):
 
     def _run_synthetic_pack(self):
         processing.execAlgorithmDialog('planx_suitability_lab:synthetic_sample_raster')
+
+    def _run_synthetic_pipeline(self):
+        processing.execAlgorithmDialog('planx_suitability_lab:synthetic_pipeline_runner')
+
+    def _run_beta_evidence(self):
+        processing.execAlgorithmDialog('planx_suitability_lab:beta_evidence_report')
 
     def keyPressEvent(self, event):
         if event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_R:
