@@ -16,6 +16,7 @@ class MonteCarloSuitabilityAlgorithm(QgsProcessingAlgorithm):
     INPUT = "INPUT"
     ITER = "ITER"
     SIGMA = "SIGMA"
+    BLOCK = "BLOCK"
     OUT_MEAN = "OUT_MEAN"
     OUT_STD = "OUT_STD"
     OUT_P05 = "OUT_P05"
@@ -59,6 +60,16 @@ class MonteCarloSuitabilityAlgorithm(QgsProcessingAlgorithm):
                 maxValue=0.5,
             )
         )
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.BLOCK,
+                "Block size (pixels)",
+                type=QgsProcessingParameterNumber.Integer,
+                defaultValue=256,
+                minValue=64,
+                maxValue=2048,
+            )
+        )
         self.addParameter(QgsProcessingParameterRasterDestination(self.OUT_MEAN, "unc_mean"))
         self.addParameter(QgsProcessingParameterRasterDestination(self.OUT_STD, "unc_std"))
         self.addParameter(QgsProcessingParameterRasterDestination(self.OUT_P05, "unc_p05"))
@@ -66,7 +77,7 @@ class MonteCarloSuitabilityAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterRasterDestination(self.OUT_P95, "unc_p95"))
         self.addParameter(QgsProcessingParameterRasterDestination(self.OUT_STAB, "stability_index"))
 
-    def _write_like(self, template_ds, output_path, array, nodata):
+    def _create_like(self, template_ds, output_path, nodata):
         driver = gdal.GetDriverByName("GTiff")
         out_ds = driver.Create(
             output_path,
@@ -74,20 +85,20 @@ class MonteCarloSuitabilityAlgorithm(QgsProcessingAlgorithm):
             template_ds.RasterYSize,
             1,
             gdal.GDT_Float32,
+            options=["COMPRESS=LZW", "TILED=YES"],
         )
         out_ds.SetGeoTransform(template_ds.GetGeoTransform())
         out_ds.SetProjection(template_ds.GetProjection())
-        band = out_ds.GetRasterBand(1)
-        band.WriteArray(array.astype(np.float32))
+        out_band = out_ds.GetRasterBand(1)
         if nodata is not None:
-            band.SetNoDataValue(float(nodata))
-        band.FlushCache()
-        out_ds = None
+            out_band.SetNoDataValue(float(nodata))
+        return out_ds, out_band
 
     def processAlgorithm(self, parameters, context, feedback):
         rl = self.parameterAsRasterLayer(parameters, self.INPUT, context)
         iterations = int(self.parameterAsInt(parameters, self.ITER, context))
         sigma = float(self.parameterAsDouble(parameters, self.SIGMA, context))
+        block = int(self.parameterAsInt(parameters, self.BLOCK, context))
 
         out_mean = self.parameterAsOutputLayer(parameters, self.OUT_MEAN, context)
         out_std = self.parameterAsOutputLayer(parameters, self.OUT_STD, context)
@@ -100,48 +111,87 @@ class MonteCarloSuitabilityAlgorithm(QgsProcessingAlgorithm):
         if ds is None:
             raise QgsProcessingException("Cannot open input raster for Monte Carlo simulation.")
         band = ds.GetRasterBand(1)
-        arr = band.ReadAsArray().astype(np.float32)
         nodata = band.GetNoDataValue()
+        xsize = ds.RasterXSize
+        ysize = ds.RasterYSize
 
-        valid_mask = np.isfinite(arr)
-        if nodata is not None:
-            valid_mask &= arr != nodata
-        base = np.clip(arr, 0.0, 100.0)
-        if not np.any(valid_mask):
-            raise QgsProcessingException("Input suitability raster has no valid cells.")
+        mean_ds, mean_band = self._create_like(ds, out_mean, nodata)
+        std_ds, std_band = self._create_like(ds, out_std, nodata)
+        p05_ds, p05_band = self._create_like(ds, out_p05, nodata)
+        p50_ds, p50_band = self._create_like(ds, out_p50, nodata)
+        p95_ds, p95_band = self._create_like(ds, out_p95, nodata)
+        stb_ds, stb_band = self._create_like(ds, out_stb, nodata)
 
         rng = np.random.default_rng(42)
-        sims = np.empty((iterations, base.shape[0], base.shape[1]), dtype=np.float32)
-        scale = np.maximum(base / 100.0, 0.05)
-        for i in range(iterations):
+        blocks_x = (xsize + block - 1) // block
+        blocks_y = (ysize + block - 1) // block
+        total_blocks = max(1, blocks_x * blocks_y)
+        done = 0
+
+        for yoff in range(0, ysize, block):
             if feedback.isCanceled():
                 break
-            noise = rng.normal(loc=0.0, scale=sigma, size=base.shape).astype(np.float32)
-            sim = np.clip(base * (1.0 + noise * scale), 0.0, 100.0)
-            sim[~valid_mask] = np.nan
-            sims[i] = sim
-            if i % 10 == 0:
-                feedback.setProgress(int((i / max(1, iterations)) * 100))
+            rows = min(block, ysize - yoff)
+            for xoff in range(0, xsize, block):
+                if feedback.isCanceled():
+                    break
+                cols = min(block, xsize - xoff)
+                base = band.ReadAsArray(xoff, yoff, cols, rows).astype(np.float32)
+                valid = np.isfinite(base)
+                if nodata is not None:
+                    valid &= base != nodata
+                base = np.clip(base, 0.0, 100.0)
 
-        mean_arr = np.nanmean(sims, axis=0)
-        std_arr = np.nanstd(sims, axis=0)
-        p05_arr = np.nanpercentile(sims, 5, axis=0)
-        p50_arr = np.nanpercentile(sims, 50, axis=0)
-        p95_arr = np.nanpercentile(sims, 95, axis=0)
-        spread = np.maximum(p95_arr - p05_arr, 0.0)
-        stab_arr = np.clip(100.0 - spread, 0.0, 100.0)
+                if not np.any(valid):
+                    fill = np.full((rows, cols), nodata if nodata is not None else np.nan, dtype=np.float32)
+                    mean_band.WriteArray(fill, xoff, yoff)
+                    std_band.WriteArray(fill, xoff, yoff)
+                    p05_band.WriteArray(fill, xoff, yoff)
+                    p50_band.WriteArray(fill, xoff, yoff)
+                    p95_band.WriteArray(fill, xoff, yoff)
+                    stb_band.WriteArray(fill, xoff, yoff)
+                    done += 1
+                    feedback.setProgress(int((done / total_blocks) * 100))
+                    continue
 
-        if nodata is not None:
-            for out_arr in (mean_arr, std_arr, p05_arr, p50_arr, p95_arr, stab_arr):
-                out_arr[~valid_mask] = nodata
+                scale = np.maximum(base / 100.0, 0.05)
+                noise = rng.normal(loc=0.0, scale=sigma, size=(iterations, rows, cols)).astype(np.float32)
+                sims = np.clip(base[None, :, :] * (1.0 + noise * scale[None, :, :]), 0.0, 100.0)
+                sims = np.where(valid[None, :, :], sims, np.nan).astype(np.float32)
 
-        self._write_like(ds, out_mean, mean_arr, nodata)
-        self._write_like(ds, out_std, std_arr, nodata)
-        self._write_like(ds, out_p05, p05_arr, nodata)
-        self._write_like(ds, out_p50, p50_arr, nodata)
-        self._write_like(ds, out_p95, p95_arr, nodata)
-        self._write_like(ds, out_stb, stab_arr, nodata)
-        feedback.setProgress(100)
+                mean_arr = np.nanmean(sims, axis=0).astype(np.float32)
+                std_arr = np.nanstd(sims, axis=0).astype(np.float32)
+                p05_arr = np.nanpercentile(sims, 5, axis=0).astype(np.float32)
+                p50_arr = np.nanpercentile(sims, 50, axis=0).astype(np.float32)
+                p95_arr = np.nanpercentile(sims, 95, axis=0).astype(np.float32)
+                spread = np.maximum(p95_arr - p05_arr, 0.0)
+                stb_arr = np.clip(100.0 - spread, 0.0, 100.0).astype(np.float32)
+
+                if nodata is not None:
+                    mean_arr[~valid] = nodata
+                    std_arr[~valid] = nodata
+                    p05_arr[~valid] = nodata
+                    p50_arr[~valid] = nodata
+                    p95_arr[~valid] = nodata
+                    stb_arr[~valid] = nodata
+
+                mean_band.WriteArray(mean_arr, xoff, yoff)
+                std_band.WriteArray(std_arr, xoff, yoff)
+                p05_band.WriteArray(p05_arr, xoff, yoff)
+                p50_band.WriteArray(p50_arr, xoff, yoff)
+                p95_band.WriteArray(p95_arr, xoff, yoff)
+                stb_band.WriteArray(stb_arr, xoff, yoff)
+
+                done += 1
+                feedback.setProgress(int((done / total_blocks) * 100))
+
+        mean_ds = None
+        std_ds = None
+        p05_ds = None
+        p50_ds = None
+        p95_ds = None
+        stb_ds = None
+        ds = None
         return {
             self.OUT_MEAN: out_mean,
             self.OUT_STD: out_std,
@@ -150,4 +200,3 @@ class MonteCarloSuitabilityAlgorithm(QgsProcessingAlgorithm):
             self.OUT_P95: out_p95,
             self.OUT_STAB: out_stb,
         }
-

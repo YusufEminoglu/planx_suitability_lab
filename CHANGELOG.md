@@ -3,7 +3,7 @@
 All notable changes to **PlanX Suitability Lab** are documented here.  
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning: [SemVer](https://semver.org/).
 
-## [0.1.0] - 2026-05-23
+## [0.2.0] - 2026-05-23
 
 - Initial beta release of Processing-first raster MCDA architecture with dashboard launcher.
 - Added core preparation modules: harmonizer, rasterizer, proximity builder, normalizer/reclassifier, hard-constraint mask builder.
@@ -19,3 +19,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning: [S
 - Added scenario weight pack to merge AHP/PCA/Entropy outputs and emit a blended-average scenario.
 - Added synthetic end-to-end pipeline runner (synthetic -> WLC -> Monte Carlo -> evidence report).
 - Added beta evidence HTML report and dashboard quick actions for pipeline/evidence runs.
+- Upgraded global sensitivity from placeholder values to sampled statistical importance using criterion std and active weights.
+- Upgraded GeoShapley-lite to multi-criterion weighted attribution with sampled global baseline.
+- Upgraded local contributions with percent-share rasters and total absolute contribution denominator.
+- Refactored Monte Carlo to block/chunk processing for more predictable memory behavior on larger rasters.

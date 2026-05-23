@@ -8,7 +8,7 @@ PlanX Suitability Lab is a raster-first MCDA plugin for QGIS focused on land sui
 - Weights: AHP, PCA-derived (variance proxy), Entropy, weight consolidator, scenario weight pack (AHP/PCA/Entropy + blended average)
 - Compose: WLC suitability, OWA suitability, scenario comparator
 - Uncertainty: Monte Carlo suitability summary outputs (`unc_mean`, `unc_std`, `unc_p05`, `unc_p50`, `unc_p95`, `stability_index`)
-- Explainability: global sensitivity table, local contribution rasters, GeoShapley-lite approximation
+- Explainability: sampled global sensitivity table, local contribution rasters (+ percent shares), GeoShapley-lite approximation with sampled baseline
 - Reporting: suitability HTML report, beta evidence HTML report
 - QA: numerical acceptance checker (bounds + percentile order)
 - Dashboard: guided flow tabs (`Prepare -> Criteria -> Weights -> Compose -> Uncertainty -> Explain -> Report`) and beta diagnostics helpers
@@ -19,6 +19,7 @@ PlanX Suitability Lab is a raster-first MCDA plugin for QGIS focused on land sui
 - Processing-first architecture with dashboard launcher
 - QGIS native + NumPy only
 - Hard-constraint policy: final suitability = `constraint_mask * weighted_score`
+- Memory-aware uncertainty processing via chunked Monte Carlo blocks for larger rasters
 
 ## Notes
 

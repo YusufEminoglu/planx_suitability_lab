@@ -22,6 +22,8 @@
   <div class="card">
     <h2>1) Prepare / Hazirlik</h2>
     <p><code>data_harmonizer</code>: Align CRS, extent, resolution, nodata to one snap raster.</p>
+    <p><code>synthetic_sample_raster</code>: Generate 4 criterion rasters + hard mask for smoke testing.</p>
+    <p><code>synthetic_pipeline_runner</code>: One-click synthetic end-to-end workflow execution.</p>
     <p><b>Tip:</b> Start with the most trusted base raster as <code>SNAP_RASTER</code>.</p>
   </div>
 
@@ -37,6 +39,7 @@
     <p><code>pca_derived_weights</code>: variance-driven weights.</p>
     <p><code>entropy_weights</code>: information-content driven weights.</p>
     <p><code>weight_consolidator</code>: pick active scenario weights.</p>
+    <p><code>scenario_weight_pack</code>: merge AHP/PCA/Entropy tables and add blended average scenario.</p>
   </div>
 
   <div class="card">
@@ -50,6 +53,8 @@
     <h2>5) Uncertainty + Explainability</h2>
     <p><code>montecarlo_suitability</code>: <code>unc_mean</code>, <code>unc_std</code>, <code>unc_p05</code>, <code>unc_p50</code>, <code>unc_p95</code>, <code>stability_index</code>.</p>
     <p><code>xai_global_sensitivity</code>, <code>xai_local_contribution</code>, <code>xai_geoshapley_lite</code>.</p>
+    <p><code>numerical_qa_check</code>: checks suitability bounds and percentile consistency.</p>
+    <p><code>beta_evidence_report</code>: outputs registry-level beta readiness HTML evidence.</p>
   </div>
 
   <div class="card">
@@ -66,4 +71,3 @@
   </div>
 </body>
 </html>
-
