@@ -1,0 +1,28 @@
+[general]
+name=PlanX Suitability Lab
+qgisMinimumVersion=3.28
+qgisMaximumVersion=3.99
+description=Raster-based MCDA land suitability workflows with explainable analytics and uncertainty.
+version=0.1.0
+author=Yusuf Eminoglu
+email=yusuf.eminoglu@deu.edu.tr
+
+about=PlanX Suitability Lab provides an end-to-end raster MCDA pipeline in QGIS: data harmonization, criterion generation, AHP/PCA/Entropy weighting, WLC/OWA suitability composition, Monte Carlo uncertainty, and explainability outputs for planning-grade decision support. Developed with feedback from educational workflows at Dokuz Eylul University, Department of City and Regional Planning.
+
+tracker=https://github.com/YusufEminoglu/planx_suitability_lab/issues
+repository=https://github.com/YusufEminoglu/planx_suitability_lab
+homepage=https://github.com/YusufEminoglu/planx_suitability_lab
+
+category=Processing
+hasProcessingProvider=yes
+tags=planx,qgis,processing,mcda,suitability,raster,ahp,pca,entropy,topsis,xai,montecarlo
+icon=icons/icon.png
+
+experimental=False
+deprecated=False
+license=GPL-3
+
+changelog=
+    PlanX Suitability Lab 0.1.0 - Initial release.
+
+

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>PlanX Suitability Lab - Command Guide</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: "Segoe UI", Arial, sans-serif; margin: 24px; color: #102a2f; background: #f4faf9; }
+    h1, h2 { color: #0f4c5c; }
+    .card { background: #fff; border: 1px solid #d7e8e5; border-radius: 12px; padding: 16px; margin-bottom: 14px; }
+    code { background: #edf4f2; padding: 2px 6px; border-radius: 6px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+    th, td { border: 1px solid #d7e8e5; padding: 8px; text-align: left; }
+    th { background: #e6f3f0; }
+  </style>
+</head>
+<body>
+  <h1>PlanX Suitability Lab - Detailed Command Guide (EN/TR)</h1>
+  <p><b>EN:</b> This guide explains each beta command and practical tips for reliable MCDA results.</p>
+  <p><b>TR:</b> Bu rehber beta komutlarini ve guvenilir MCDA sonucu icin pratik ipuclarini aciklar.</p>
+
+  <div class="card">
+    <h2>1) Prepare / Hazirlik</h2>
+    <p><code>data_harmonizer</code>: Align CRS, extent, resolution, nodata to one snap raster.</p>
+    <p><b>Tip:</b> Start with the most trusted base raster as <code>SNAP_RASTER</code>.</p>
+  </div>
+
+  <div class="card">
+    <h2>2) Criteria / Kriterler</h2>
+    <p><code>vector_rasterizer</code>, <code>proximity_builder</code>, <code>normalizer_reclassifier</code>, <code>constraint_builder</code></p>
+    <p><b>Tip:</b> Keep all criterion scores in 0-100 before weighted overlay.</p>
+  </div>
+
+  <div class="card">
+    <h2>3) Weights / Agirliklar</h2>
+    <p><code>ahp_weights</code>: pairwise matrix + consistency ratio.</p>
+    <p><code>pca_derived_weights</code>: variance-driven weights.</p>
+    <p><code>entropy_weights</code>: information-content driven weights.</p>
+    <p><code>weight_consolidator</code>: pick active scenario weights.</p>
+  </div>
+
+  <div class="card">
+    <h2>4) Compose / Bilesim</h2>
+    <p><code>wlc_suitability</code>: bounded [0,100] weighted linear combination + hard mask.</p>
+    <p><code>owa_suitability</code>: risk-attitude transformed alternative output.</p>
+    <p><code>scenario_comparator</code>: delta map across two suitability scenarios.</p>
+  </div>
+
+  <div class="card">
+    <h2>5) Uncertainty + Explainability</h2>
+    <p><code>montecarlo_suitability</code>: <code>unc_mean</code>, <code>unc_std</code>, <code>unc_p05</code>, <code>unc_p50</code>, <code>unc_p95</code>, <code>stability_index</code>.</p>
+    <p><code>xai_global_sensitivity</code>, <code>xai_local_contribution</code>, <code>xai_geoshapley_lite</code>.</p>
+  </div>
+
+  <div class="card">
+    <h2>Dashboard Shortcuts</h2>
+    <table>
+      <thead><tr><th>Shortcut</th><th>Action</th></tr></thead>
+      <tbody>
+        <tr><td><code>Ctrl+R</code></td><td>Refresh dashboard checks</td></tr>
+        <tr><td><code>Ctrl+D</code></td><td>Copy diagnostics</td></tr>
+        <tr><td><code>Ctrl+I</code></td><td>Copy issue template</td></tr>
+        <tr><td><code>Ctrl+H</code></td><td>Open this command guide</td></tr>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>
+

@@ -1,0 +1,9 @@
+﻿Copy GPL-3.0-or-later or MIT here. Recommended for the PlanX suite: GPL-3.0-or-later.
+
+Quick start (GPL-3):
+  curl -L https://www.gnu.org/licenses/gpl-3.0.txt -o LICENSE
+
+If you choose MIT instead, replace this file with the MIT license text and
+update the `license=` line in metadata.txt.
+
+
