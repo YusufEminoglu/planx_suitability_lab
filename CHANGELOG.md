@@ -14,3 +14,5 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning: [S
 - Added explainability and reporting modules: global sensitivity, local contribution, GeoShapley-lite, and HTML report generator.
 - Added EN/TR command guide at `docs/COMMAND_GUIDE.html` and dashboard keyboard shortcuts:
   `Ctrl+R`, `Ctrl+D`, `Ctrl+I`, `Ctrl+H`.
+- Added synthetic sample raster pack generator for fast end-to-end smoke setup.
+- Added numerical QA checker for suitability bounds and Monte Carlo percentile order checks.

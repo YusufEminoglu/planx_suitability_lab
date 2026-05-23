@@ -11,6 +11,7 @@ from .processing.core.rasterizer import RasterizerAlgorithm
 from .processing.core.proximity_builder import ProximityBuilderAlgorithm
 from .processing.core.normalizer import NormalizerAlgorithm
 from .processing.core.constraint_builder import ConstraintBuilderAlgorithm
+from .processing.core.synthetic_sample_raster import SyntheticSampleRasterAlgorithm
 from .processing.weights.ahp_weights import AHPWeightsAlgorithm
 from .processing.weights.pca_weights import PCAWeightsAlgorithm
 from .processing.weights.entropy_weights import EntropyWeightsAlgorithm
@@ -23,6 +24,7 @@ from .processing.xai.global_sensitivity import GlobalSensitivityAlgorithm
 from .processing.xai.local_contribution import LocalContributionAlgorithm
 from .processing.xai.geoshapley_lite import GeoShapleyLiteAlgorithm
 from .processing.reporting.suitability_html_report import SuitabilityHtmlReportAlgorithm
+from .processing.reporting.numerical_qa_check import NumericalQACheckAlgorithm
 
 
 class PlanXSuitabilityLabProvider(QgsProcessingProvider):
@@ -48,6 +50,7 @@ class PlanXSuitabilityLabProvider(QgsProcessingProvider):
         self.addAlgorithm(ProximityBuilderAlgorithm())
         self.addAlgorithm(NormalizerAlgorithm())
         self.addAlgorithm(ConstraintBuilderAlgorithm())
+        self.addAlgorithm(SyntheticSampleRasterAlgorithm())
         self.addAlgorithm(AHPWeightsAlgorithm())
         self.addAlgorithm(PCAWeightsAlgorithm())
         self.addAlgorithm(EntropyWeightsAlgorithm())
@@ -60,3 +63,4 @@ class PlanXSuitabilityLabProvider(QgsProcessingProvider):
         self.addAlgorithm(LocalContributionAlgorithm())
         self.addAlgorithm(GeoShapleyLiteAlgorithm())
         self.addAlgorithm(SuitabilityHtmlReportAlgorithm())
+        self.addAlgorithm(NumericalQACheckAlgorithm())

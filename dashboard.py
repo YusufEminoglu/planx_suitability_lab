@@ -83,6 +83,9 @@ class SuitabilityDashboard(QDialog):
         guide = QPushButton('Open Command Guide (EN/TR)')
         guide.clicked.connect(self._open_command_guide)
         row.addWidget(guide)
+        sample = QPushButton('Run Synthetic Pack')
+        sample.clicked.connect(self._run_synthetic_pack)
+        row.addWidget(sample)
         body.addLayout(row)
 
         shell.addLayout(body, 1)
@@ -170,6 +173,9 @@ class SuitabilityDashboard(QDialog):
         guide_path = os.path.join(os.path.dirname(__file__), 'docs', 'COMMAND_GUIDE.html')
         if os.path.exists(guide_path):
             QDesktopServices.openUrl(QUrl.fromLocalFile(guide_path))
+
+    def _run_synthetic_pack(self):
+        processing.execAlgorithmDialog('planx_suitability_lab:synthetic_sample_raster')
 
     def keyPressEvent(self, event):
         if event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_R:
