@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-import json
-
 from qgis.core import (
     QgsFeature,
     QgsFields,
@@ -47,11 +45,16 @@ class AHPWeightsAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField('criterion_id', QVariant.Int))
         fields.append(QgsField('weight', QVariant.Double))
         fields.append(QgsField('cr', QVariant.Double))
+        fields.append(QgsField('cr_ok', QVariant.Int))
         sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, 1, None)
+        cr_ok = 1 if cr <= 0.10 else 0
+        if cr_ok == 0:
+            feedback.reportError(f'AHP consistency ratio is high (CR={cr:.4f} > 0.10). Consider revising pairwise judgments.')
         for i, wi in enumerate(w, start=1):
             f = QgsFeature(fields)
             f['criterion_id'] = i
             f['weight'] = float(wi)
             f['cr'] = float(cr)
+            f['cr_ok'] = cr_ok
             sink.addFeature(f)
         return {self.OUTPUT: dest}

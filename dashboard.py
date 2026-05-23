@@ -44,7 +44,7 @@ class SuitabilityDashboard(QDialog):
     def _build_ui(self):
         shell = QHBoxLayout(self)
         self.nav = QListWidget()
-        for lab in ('Overview / Genel', 'Flow / Akis', 'Beta Readiness'):
+        for lab in ('Overview / Genel', 'Flow / Akis', 'Release Readiness'):
             QListWidgetItem(lab, self.nav)
         self.nav.setFixedWidth(160)
         self.nav.setCurrentRow(0)
@@ -89,7 +89,7 @@ class SuitabilityDashboard(QDialog):
         pipe = QPushButton('Run Synthetic Pipeline')
         pipe.clicked.connect(self._run_synthetic_pipeline)
         row.addWidget(pipe)
-        beta_report = QPushButton('Generate Beta Evidence')
+        beta_report = QPushButton('Generate Release Evidence')
         beta_report.clicked.connect(self._run_beta_evidence)
         row.addWidget(beta_report)
         body.addLayout(row)
@@ -122,14 +122,14 @@ class SuitabilityDashboard(QDialog):
             '<li><b>Prepare</b>: harmonize rasters and extent/resolution | rasterlari hizala</li>'
             '<li><b>Criteria</b>: build criteria/proximity/masks | kriter/proximity/maske uret</li>'
             '<li><b>Weights</b>: AHP, PCA, Entropy</li>'
-            '<li><b>Compose</b>: WLC/OWA</li>'
+            '<li><b>Compose</b>: WLC/OWA/TOPSIS</li>'
             '<li><b>Uncertainty</b>: Monte Carlo outputs</li>'
             '<li><b>Explain</b>: global/local contributions</li>'
             '<li><b>Report</b>: HTML summary</li>'
             '</ol>'
         )
         self.beta.setHtml(
-            f'<h2>Beta Readiness: {status}</h2>'
+            f'<h2>Release Readiness: {status}</h2>'
             f'<p>Layers: {len(layers)} ({len(vectors)} vector, {len(rasters)} raster)</p>'
             f'<p>Registered steps: {len(STEPS)-len(miss)}/{len(STEPS)}</p>'
             f"<p>Missing: {', '.join(miss) if miss else 'None'}</p>"
@@ -168,10 +168,10 @@ class SuitabilityDashboard(QDialog):
 
     def _copy_hub(self):
         txt = (
-            'PlanX Suitability Lab 0.3.0 beta - hardened raster MCDA workflow release.\n'
+            'PlanX Suitability Lab 1.0.0 - stable raster MCDA release.\n'
             '- Added advanced normalizer/reclassifier modes (min-max, fuzzy linear/sigmoid/gaussian).\n'
-            '- Rebuilt OWA as true multi-raster composition using criteria and order weights.\n'
-            '- Expanded harmonizer to batch outputs and synthetic runner to full WLC/OWA/QA/report chain.'
+            '- Added chunk-aware WLC/OWA and TOPSIS composition (criteria/order/impact aware).\n'
+            '- Expanded harmonizer to batch outputs and synthetic runner to full WLC/OWA/TOPSIS/QA/report chain.'
         )
         QApplication.clipboard().setText(txt)
 

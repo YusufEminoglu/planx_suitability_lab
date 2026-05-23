@@ -9,6 +9,7 @@ from qgis.core import (
     QgsProcessingException,
     QgsProcessingParameterEnum,
     QgsProcessingParameterMultipleLayers,
+    QgsProcessingParameterNumber,
     QgsProcessingParameterRasterDestination,
     QgsProcessingParameterRasterLayer,
     QgsProcessingParameterString,
@@ -23,6 +24,7 @@ class OWASuitabilityAlgorithm(QgsProcessingAlgorithm):
     ORDER_WEIGHTS = "ORDER_WEIGHTS"
     SORT_MODE = "SORT_MODE"
     CONSTRAINT = "CONSTRAINT"
+    BLOCK = "BLOCK"
     OUTPUT = "OUTPUT"
 
     SORT_OPTIONS = ["Descending (high score first)", "Ascending (low score first)"]
@@ -50,30 +52,26 @@ class OWASuitabilityAlgorithm(QgsProcessingAlgorithm):
                 QgsProcessing.TypeRaster,
             )
         )
-        self.addParameter(
-            QgsProcessingParameterString(
-                self.CRITERIA_WEIGHTS,
-                "Criteria weights CSV (optional)",
-                defaultValue="",
-                optional=True,
-            )
-        )
-        self.addParameter(
-            QgsProcessingParameterString(
-                self.ORDER_WEIGHTS,
-                "Order weights CSV (optional)",
-                defaultValue="",
-                optional=True,
-            )
-        )
+        self.addParameter(QgsProcessingParameterString(self.CRITERIA_WEIGHTS, "Criteria weights CSV (optional)", defaultValue="", optional=True))
+        self.addParameter(QgsProcessingParameterString(self.ORDER_WEIGHTS, "Order weights CSV (optional)", defaultValue="", optional=True))
         self.addParameter(QgsProcessingParameterEnum(self.SORT_MODE, "Ordering mode", options=self.SORT_OPTIONS, defaultValue=0))
         self.addParameter(QgsProcessingParameterRasterLayer(self.CONSTRAINT, "Constraint mask raster (0/1)", optional=True))
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.BLOCK,
+                "Block size (pixels)",
+                type=QgsProcessingParameterNumber.Integer,
+                defaultValue=256,
+                minValue=64,
+                maxValue=2048,
+            )
+        )
         self.addParameter(QgsProcessingParameterRasterDestination(self.OUTPUT, "suitability_owa"))
 
-    def _write_like(self, template_ds, output_path, array, nodata):
+    def _create_output(self, template_ds, out_path, nodata):
         driver = gdal.GetDriverByName("GTiff")
         out_ds = driver.Create(
-            output_path,
+            out_path,
             template_ds.RasterXSize,
             template_ds.RasterYSize,
             1,
@@ -82,82 +80,112 @@ class OWASuitabilityAlgorithm(QgsProcessingAlgorithm):
         )
         out_ds.SetGeoTransform(template_ds.GetGeoTransform())
         out_ds.SetProjection(template_ds.GetProjection())
-        band = out_ds.GetRasterBand(1)
-        band.WriteArray(array.astype(np.float32))
-        if nodata is not None:
-            band.SetNoDataValue(float(nodata))
-        band.FlushCache()
-        out_ds = None
+        out_band = out_ds.GetRasterBand(1)
+        out_band.SetNoDataValue(float(nodata))
+        return out_ds, out_band
 
     def processAlgorithm(self, parameters, context, feedback):
         layers = ensure_list(self.parameterAsLayerList(parameters, self.INPUT_RASTERS, context))[:6]
         if not layers:
             raise QgsProcessingException("No criterion rasters provided for OWA.")
         n = len(layers)
-        criteria_w = parse_weights_csv(self.parameterAsString(parameters, self.CRITERIA_WEIGHTS, context), n)
-        order_w = parse_weights_csv(self.parameterAsString(parameters, self.ORDER_WEIGHTS, context), n)
+        criteria_w = np.array(parse_weights_csv(self.parameterAsString(parameters, self.CRITERIA_WEIGHTS, context), n), dtype=np.float32)
+        order_w = np.array(parse_weights_csv(self.parameterAsString(parameters, self.ORDER_WEIGHTS, context), n), dtype=np.float32)
         sort_mode = int(self.parameterAsEnum(parameters, self.SORT_MODE, context))
+        block = int(self.parameterAsInt(parameters, self.BLOCK, context))
         out = self.parameterAsOutputLayer(parameters, self.OUTPUT, context)
         constraint = self.parameterAsRasterLayer(parameters, self.CONSTRAINT, context)
 
-        arrays = []
-        nodata = None
+        datasets = []
+        bands = []
+        nodatas = []
+        xsize = None
+        ysize = None
         template_ds = None
-        valid = None
-        shape = None
         for lyr in layers:
             ds = gdal.Open(lyr.source(), gdal.GA_ReadOnly)
             if ds is None:
                 raise QgsProcessingException(f"Cannot open raster: {lyr.name()}")
-            arr = ds.GetRasterBand(1).ReadAsArray().astype(np.float32)
-            nd = ds.GetRasterBand(1).GetNoDataValue()
-            if template_ds is None:
+            b = ds.GetRasterBand(1)
+            if xsize is None:
+                xsize = ds.RasterXSize
+                ysize = ds.RasterYSize
                 template_ds = ds
-                nodata = nd
-                shape = arr.shape
-                valid = np.isfinite(arr)
-                if nd is not None:
-                    valid &= arr != nd
-            else:
-                if arr.shape != shape:
-                    raise QgsProcessingException("All input rasters must share the same extent/resolution grid.")
-                m = np.isfinite(arr)
-                if nd is not None:
-                    m &= arr != nd
-                valid &= m
-            arrays.append(np.clip(arr, 0.0, 100.0))
+            elif ds.RasterXSize != xsize or ds.RasterYSize != ysize:
+                raise QgsProcessingException("All input rasters must share the same grid dimensions.")
+            datasets.append(ds)
+            bands.append(b)
+            nodatas.append(b.GetNoDataValue())
 
-        stack = np.stack(arrays, axis=0)  # (n,h,w)
-        if sort_mode == 0:
-            order_idx = np.argsort(stack, axis=0)[::-1, :, :]
-        else:
-            order_idx = np.argsort(stack, axis=0)
-        sorted_vals = np.take_along_axis(stack, order_idx, axis=0)
-
-        cw = np.array(criteria_w, dtype=np.float32)[:, None, None]
-        cw_grid = np.broadcast_to(cw, stack.shape)
-        sorted_cw = np.take_along_axis(cw_grid, order_idx, axis=0)
-        ow = np.array(order_w, dtype=np.float32)[:, None, None]
-
-        alpha = sorted_cw * ow
-        denom = np.sum(alpha, axis=0)
-        num = np.sum(alpha * sorted_vals, axis=0)
-        result = np.where(denom > 1e-12, num / denom, 0.0).astype(np.float32)
-        result = np.clip(result, 0.0, 100.0)
-
+        c_band = None
+        c_nodata = None
         if constraint is not None:
             cds = gdal.Open(constraint.source(), gdal.GA_ReadOnly)
-            carr = cds.GetRasterBand(1).ReadAsArray().astype(np.float32)
-            cnd = cds.GetRasterBand(1).GetNoDataValue()
-            cmask = np.isfinite(carr)
-            if cnd is not None:
-                cmask &= carr != cnd
-            pass_mask = (carr > 0.5) & cmask
-            result = np.where(pass_mask, result, 0.0)
-            valid &= cmask
+            if cds is None:
+                raise QgsProcessingException("Cannot open constraint raster.")
+            if cds.RasterXSize != xsize or cds.RasterYSize != ysize:
+                raise QgsProcessingException("Constraint raster must match criterion grid dimensions.")
+            c_band = cds.GetRasterBand(1)
+            c_nodata = c_band.GetNoDataValue()
 
-        out_nodata = nodata if nodata is not None else -9999.0
-        result = np.where(valid, result, out_nodata)
-        self._write_like(template_ds, out, result, out_nodata)
+        out_nodata = nodatas[0] if nodatas[0] is not None else -9999.0
+        out_ds, out_band = self._create_output(template_ds, out, out_nodata)
+
+        blocks_x = (xsize + block - 1) // block
+        blocks_y = (ysize + block - 1) // block
+        total_blocks = max(1, blocks_x * blocks_y)
+        done = 0
+
+        for yoff in range(0, ysize, block):
+            if feedback.isCanceled():
+                break
+            rows = min(block, ysize - yoff)
+            for xoff in range(0, xsize, block):
+                if feedback.isCanceled():
+                    break
+                cols = min(block, xsize - xoff)
+
+                arrs = []
+                valid = np.ones((rows, cols), dtype=bool)
+                for j, b in enumerate(bands):
+                    a = b.ReadAsArray(xoff, yoff, cols, rows).astype(np.float32)
+                    arrs.append(np.clip(a, 0.0, 100.0))
+                    m = np.isfinite(a)
+                    nd = nodatas[j]
+                    if nd is not None:
+                        m &= a != nd
+                    valid &= m
+
+                stack = np.stack(arrs, axis=0)  # (n,rows,cols)
+                order_idx = np.argsort(stack, axis=0)
+                if sort_mode == 0:
+                    order_idx = order_idx[::-1, :, :]
+                sorted_vals = np.take_along_axis(stack, order_idx, axis=0)
+
+                cw_grid = np.broadcast_to(criteria_w[:, None, None], stack.shape)
+                sorted_cw = np.take_along_axis(cw_grid, order_idx, axis=0)
+                alpha = sorted_cw * order_w[:, None, None]
+                denom = np.sum(alpha, axis=0)
+                num = np.sum(alpha * sorted_vals, axis=0)
+                result = np.where(denom > 1e-12, num / denom, 0.0).astype(np.float32)
+                result = np.clip(result, 0.0, 100.0)
+
+                if c_band is not None:
+                    c_arr = c_band.ReadAsArray(xoff, yoff, cols, rows).astype(np.float32)
+                    c_valid = np.isfinite(c_arr)
+                    if c_nodata is not None:
+                        c_valid &= c_arr != c_nodata
+                    pass_mask = (c_arr > 0.5) & c_valid
+                    result = np.where(pass_mask, result, 0.0)
+                    valid &= c_valid
+
+                result = np.where(valid, result, out_nodata).astype(np.float32)
+                out_band.WriteArray(result, xoff, yoff)
+                done += 1
+                feedback.setProgress(int((done / total_blocks) * 100))
+
+        out_ds = None
+        for ds in datasets:
+            ds = None
         return {self.OUTPUT: out}
 

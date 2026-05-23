@@ -3,7 +3,7 @@ name=PlanX Suitability Lab
 qgisMinimumVersion=3.28
 qgisMaximumVersion=3.99
 description=Raster-based MCDA land suitability workflows with explainable analytics and uncertainty.
-version=0.3.0
+version=1.0.0
 author=Yusuf Eminoglu
 email=yusuf.eminoglu@deu.edu.tr
 
@@ -23,4 +23,4 @@ deprecated=False
 license=GPL-3
 
 changelog=
-    PlanX Suitability Lab 0.3.0 - Beta hardening with advanced normalizer modes, true multi-raster OWA composition and multi-output harmonizer stack.
+    PlanX Suitability Lab 1.0.0 - Production release with chunk-aware WLC/OWA/TOPSIS composition, upgraded harmonization, uncertainty, QA and release-readiness reporting.

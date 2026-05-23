@@ -20,6 +20,7 @@ from .processing.weights.weight_consolidator import WeightConsolidatorAlgorithm
 from .processing.weights.scenario_weight_pack import ScenarioWeightPackAlgorithm
 from .processing.compose.wlc_suitability import WLCSuitabilityAlgorithm
 from .processing.compose.owa_suitability import OWASuitabilityAlgorithm
+from .processing.compose.topsis_suitability import TOPSISSuitabilityAlgorithm
 from .processing.compose.scenario_comparator import ScenarioComparatorAlgorithm
 from .processing.uncertainty.montecarlo_suitability import MonteCarloSuitabilityAlgorithm
 from .processing.xai.global_sensitivity import GlobalSensitivityAlgorithm
@@ -62,6 +63,7 @@ class PlanXSuitabilityLabProvider(QgsProcessingProvider):
         self.addAlgorithm(ScenarioWeightPackAlgorithm())
         self.addAlgorithm(WLCSuitabilityAlgorithm())
         self.addAlgorithm(OWASuitabilityAlgorithm())
+        self.addAlgorithm(TOPSISSuitabilityAlgorithm())
         self.addAlgorithm(ScenarioComparatorAlgorithm())
         self.addAlgorithm(MonteCarloSuitabilityAlgorithm())
         self.addAlgorithm(GlobalSensitivityAlgorithm())

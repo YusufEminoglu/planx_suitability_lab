@@ -3,30 +3,21 @@
 All notable changes to **PlanX Suitability Lab** are documented here.  
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning: [SemVer](https://semver.org/).
 
-## [0.3.0] - 2026-05-23
+## [1.0.0] - 2026-05-23
 
-- Initial beta release of Processing-first raster MCDA architecture with dashboard launcher.
-- Added core preparation modules: harmonizer, rasterizer, proximity builder, normalizer/reclassifier, hard-constraint mask builder.
-- Added weighting modules: AHP (CR output), PCA-derived weights, entropy weights, and a weight consolidator.
-- Added composition modules: WLC (bounded 0-100 + hard mask), OWA transform, and scenario comparator.
-- Upgraded Monte Carlo uncertainty to NumPy-based simulation with reproducible random seed and outputs:
-  `unc_mean`, `unc_std`, `unc_p05`, `unc_p50`, `unc_p95`, `stability_index`.
-- Added explainability and reporting modules: global sensitivity, local contribution, GeoShapley-lite, and HTML report generator.
-- Added EN/TR command guide at `docs/COMMAND_GUIDE.html` and dashboard keyboard shortcuts:
-  `Ctrl+R`, `Ctrl+D`, `Ctrl+I`, `Ctrl+H`.
-- Added synthetic sample raster pack generator for fast end-to-end smoke setup.
-- Added numerical QA checker for suitability bounds and Monte Carlo percentile order checks.
-- Added scenario weight pack to merge AHP/PCA/Entropy outputs and emit a blended-average scenario.
-- Added synthetic end-to-end pipeline runner (synthetic -> WLC -> Monte Carlo -> evidence report).
-- Added beta evidence HTML report and dashboard quick actions for pipeline/evidence runs.
-- Upgraded global sensitivity from placeholder values to sampled statistical importance using criterion std and active weights.
-- Upgraded GeoShapley-lite to multi-criterion weighted attribution with sampled global baseline.
-- Upgraded local contributions with percent-share rasters and total absolute contribution denominator.
-- Refactored Monte Carlo to block/chunk processing for more predictable memory behavior on larger rasters.
-- Rebuilt normalizer/reclassifier with explicit methods: min-max benefit/cost, fuzzy linear benefit/cost, fuzzy sigmoid benefit/cost, fuzzy gaussian benefit.
-- Rebuilt OWA composition as true multi-raster OWA with criteria weights + order weights + optional hard mask.
-- Expanded data harmonizer to batch-align all input rasters into an output folder with manifest and preview output.
-- Expanded synthetic pipeline runner to execute WLC + OWA + scenario delta + Monte Carlo + numerical QA + reports in one flow.
-- Expanded vector rasterizer to support both constant burn and field-driven rasterization modes.
-- Expanded proximity builder with target value selection, distance unit option and max-distance control.
-- Expanded suitability HTML report with project/weight scenario metadata and embedded QA summary.
+- Promoted plugin from beta track to production-ready release.
+- Added chunk-aware computation in core heavy compose workflows for better large-raster behavior.
+- Rebuilt WLC as nodata-safe, block-based weighted overlay with hard-constraint policy support.
+- Rebuilt OWA as nodata-safe, block-based ordered weighting using both criteria and order weights.
+- Added TOPSIS suitability algorithm with benefit/cost impacts and hard-constraint support.
+- Upgraded scenario comparator to block-based delta engine with stats summary output.
+- Upgraded normalizer with explicit min-max and fuzzy linear/sigmoid/gaussian modes.
+- Upgraded harmonizer to export a full aligned raster stack folder plus manifest.
+- Expanded rasterizer with field-driven mode and proximity builder with target-value/distance controls.
+- Upgraded Monte Carlo to chunk-based execution with full percentile and stability outputs.
+- Upgraded AHP output with CR acceptance flag and inconsistency warnings.
+- Upgraded PCA/entropy sampling logic for more robust objective weight estimation.
+- Expanded synthetic pipeline runner to execute WLC, OWA, TOPSIS, deltas, uncertainty, QA and HTML reporting.
+- Upgraded release evidence reporting and dashboard release-readiness UX.
+- Documentation refreshed for release usage and operator guidance.
+

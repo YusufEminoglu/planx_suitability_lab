@@ -48,7 +48,9 @@ class SyntheticPipelineRunnerAlgorithm(QgsProcessingAlgorithm):
         )
         wlc_out = os.path.join(outdir, "suitability_wlc.tif")
         owa_out = os.path.join(outdir, "suitability_owa.tif")
+        topsis_out = os.path.join(outdir, "suitability_topsis.tif")
         delta_out = os.path.join(outdir, "suitability_delta_owa_minus_wlc.tif")
+        delta_topsis = os.path.join(outdir, "suitability_delta_topsis_minus_wlc.tif")
         mc_mean = os.path.join(outdir, "unc_mean.tif")
         mc_std = os.path.join(outdir, "unc_std.tif")
         mc_p05 = os.path.join(outdir, "unc_p05.tif")
@@ -83,8 +85,27 @@ class SyntheticPipelineRunnerAlgorithm(QgsProcessingAlgorithm):
             feedback=feedback,
         )
         processing.run(
+            "planx_suitability_lab:topsis_suitability",
+            {
+                "INPUT_RASTERS": [syn["CRITERION_1"], syn["CRITERION_2"], syn["CRITERION_3"], syn["CRITERION_4"]],
+                "WEIGHTS_CSV": "0.25,0.25,0.25,0.25",
+                "IMPACTS_CSV": "B,B,B,C",
+                "CONSTRAINT": syn["CONSTRAINT_MASK"],
+                "BLOCK": 256,
+                "OUTPUT": topsis_out,
+            },
+            context=context,
+            feedback=feedback,
+        )
+        processing.run(
             "planx_suitability_lab:scenario_comparator",
             {"A": wlc_out, "B": owa_out, "OUTPUT": delta_out},
+            context=context,
+            feedback=feedback,
+        )
+        processing.run(
+            "planx_suitability_lab:scenario_comparator",
+            {"A": wlc_out, "B": topsis_out, "OUTPUT": delta_topsis},
             context=context,
             feedback=feedback,
         )
@@ -120,8 +141,8 @@ class SyntheticPipelineRunnerAlgorithm(QgsProcessingAlgorithm):
             "planx_suitability_lab:suitability_html_report",
             {
                 "PROJECT": "PlanX Synthetic Smoke Study",
-                "SUMMARY": "Synthetic run completed with WLC, OWA, scenario delta and Monte Carlo uncertainty outputs.",
-                "WEIGHT_METHOD": "Equal criteria + descending risk-tolerant order weights",
+                "SUMMARY": "Synthetic run completed with WLC, OWA, TOPSIS, scenario deltas and Monte Carlo uncertainty outputs.",
+                "WEIGHT_METHOD": "Equal criteria; OWA descending order weights; TOPSIS impacts=B,B,B,C",
                 "QA_SUMMARY": qa["OUTPUT"],
                 "OUTPUT": rep,
             },
@@ -131,7 +152,7 @@ class SyntheticPipelineRunnerAlgorithm(QgsProcessingAlgorithm):
         processing.run(
             "planx_suitability_lab:beta_evidence_report",
             {
-                "SUMMARY": "Synthetic pipeline executed: synthetic -> WLC/OWA -> delta -> Monte Carlo -> QA -> reports.\n\n"
+                "SUMMARY": "Synthetic pipeline executed: synthetic -> WLC/OWA/TOPSIS -> deltas -> Monte Carlo -> QA -> reports.\n\n"
                 + qa["OUTPUT"],
                 "OUTPUT": q,
             },
@@ -142,7 +163,9 @@ class SyntheticPipelineRunnerAlgorithm(QgsProcessingAlgorithm):
             "SYNTHETIC_DIR": syn["OUTPUT_DIR"],
             "WLC": wlc_out,
             "OWA": owa_out,
+            "TOPSIS": topsis_out,
             "DELTA": delta_out,
+            "DELTA_TOPSIS": delta_topsis,
             "UNC_MEAN": mc_mean,
             "UNC_STD": mc_std,
             "UNC_P05": mc_p05,

@@ -1,26 +1,54 @@
 # PlanX Suitability Lab
 
-PlanX Suitability Lab is a raster-first MCDA plugin for QGIS focused on land suitability workflows.
+PlanX Suitability Lab is a production-ready raster MCDA plugin for QGIS, designed for land suitability studies with strong reproducibility, uncertainty tracking, and explainability.
 
-## Beta v0.1.0 scope
+## Release Scope (v1.0.0)
 
-- Core: data harmonizer (batch stack), vector rasterizer (field or constant burn), proximity builder (values/units/max distance), normalizer/reclassifier (min-max + fuzzy modes), hard constraint mask builder, synthetic sample raster pack, synthetic pipeline runner
-- Weights: AHP, PCA-derived (variance proxy), Entropy, weight consolidator, scenario weight pack (AHP/PCA/Entropy + blended average)
-- Compose: WLC suitability, true OWA suitability (criteria + order weights), scenario comparator
-- Uncertainty: Monte Carlo suitability summary outputs (`unc_mean`, `unc_std`, `unc_p05`, `unc_p50`, `unc_p95`, `stability_index`)
-- Explainability: sampled global sensitivity table, local contribution rasters (+ percent shares), GeoShapley-lite approximation with sampled baseline
-- Reporting: suitability HTML report (project/scenario/QA sections), beta evidence HTML report
-- QA: numerical acceptance checker (bounds + percentile order)
-- Dashboard: guided flow tabs (`Prepare -> Criteria -> Weights -> Compose -> Uncertainty -> Explain -> Report`) and beta diagnostics helpers
-- Documentation UX: detailed EN/TR HTML command guide with dashboard access and keyboard shortcuts (`Ctrl+R`, `Ctrl+D`, `Ctrl+I`, `Ctrl+H`)
+- Core preparation:
+  - `data_harmonizer` (batch CRS/extent/resolution alignment to output stack + manifest)
+  - `vector_rasterizer` (constant burn or field-driven rasterization)
+  - `proximity_builder` (target values, distance units, max distance)
+  - `normalizer_reclassifier` (min-max and fuzzy linear/sigmoid/gaussian)
+  - `constraint_builder` (hard 0/1 mask policy)
+  - `synthetic_sample_raster`, `synthetic_pipeline_runner` (smoke and QA automation)
+- Weight engines:
+  - `ahp_weights` (CR and CR acceptance flag)
+  - `pca_derived_weights` (sampled covariance PCA-based weights)
+  - `entropy_weights` (sampled entropy-information weights)
+  - `weight_consolidator`, `scenario_weight_pack`
+- Compose engines:
+  - `wlc_suitability` (chunk-aware weighted linear combination)
+  - `owa_suitability` (chunk-aware OWA with criteria + order weights)
+  - `topsis_suitability` (benefit/cost impacts + ideal/anti-ideal proximity)
+  - `scenario_comparator` (delta raster + stats summary)
+- Uncertainty:
+  - `montecarlo_suitability` with chunk processing and outputs:
+    `unc_mean`, `unc_std`, `unc_p05`, `unc_p50`, `unc_p95`, `stability_index`
+- Explainability:
+  - `xai_global_sensitivity`
+  - `xai_local_contribution`
+  - `xai_geoshapley_lite`
+- Reporting:
+  - `suitability_html_report`
+  - `numerical_qa_check`
+  - `beta_evidence_report` (release readiness evidence report)
+- Dashboard:
+  - guided workflow pages
+  - diagnostics and issue template helpers
+  - command guide opener
+  - one-click synthetic smoke pipeline runner
 
-## Technical defaults
+## Technical Policy
 
-- Processing-first architecture with dashboard launcher
-- QGIS native + NumPy only
-- Hard-constraint policy: final suitability = `constraint_mask * weighted_score`
-- Memory-aware uncertainty processing via chunked Monte Carlo blocks for larger rasters
+- QGIS native + NumPy only (no mandatory external scientific stack)
+- Hard-constraint policy:
+  - final suitability = `constraint_mask * score`
+- Large-raster resilience:
+  - chunk-based processing in heavy modules (WLC/OWA/TOPSIS/Monte Carlo/comparator)
 
 ## Notes
 
-This beta targets reproducibility and explainability. Some advanced statistical implementations are lightweight proxies in v0.1.0 and are designed to be strengthened in subsequent versions.
+- Use aligned 0-100 criteria rasters for best MCDA behavior.
+- Run `synthetic_pipeline_runner` first when validating new environments.
+- Full command details are available in `docs/COMMAND_GUIDE.html`.
+

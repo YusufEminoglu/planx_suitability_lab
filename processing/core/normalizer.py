@@ -136,9 +136,11 @@ class NormalizerAlgorithm(QgsProcessingAlgorithm):
         elif method in (1, 3):  # cost min-max / fuzzy linear cost
             norm = (high - x) / (high - low)
         elif method == 4:  # sigmoid benefit
-            norm = 1.0 / (1.0 + np.exp(-(x - mid) / spread))
+            z = np.clip((x - mid) / spread, -60.0, 60.0)
+            norm = 1.0 / (1.0 + np.exp(-z))
         elif method == 5:  # sigmoid cost
-            norm = 1.0 - (1.0 / (1.0 + np.exp(-(x - mid) / spread)))
+            z = np.clip((x - mid) / spread, -60.0, 60.0)
+            norm = 1.0 - (1.0 / (1.0 + np.exp(-z)))
         elif method == 6:  # gaussian benefit
             norm = np.exp(-0.5 * ((x - mid) / spread) ** 2)
 
@@ -147,4 +149,3 @@ class NormalizerAlgorithm(QgsProcessingAlgorithm):
             norm[~valid] = nodata
         self._write_like(ds, out, norm, nodata)
         return {self.OUTPUT: out}
-
