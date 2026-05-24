@@ -3,6 +3,66 @@
 All notable changes to **PlanX Suitability Lab** are documented here.  
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning: [SemVer](https://semver.org/).
 
+## [Unreleased]
+
+- Added `vikor_suitability` as a fourth major compose engine (WLC/OWA/TOPSIS/VIKOR) for compromise-based MCDA decision support.
+- Added `scenario_robustness_leaderboard` to fuse benchmark, dominance, minimax-regret and portfolio-diversity evidence into one elite robustness rank.
+- Added `scenario_governance_audit` to convert robustness/benchmark/minimax/selection evidence into scenario-level governance-risk flags and portfolio status.
+- Upgraded `scenario_selection_recommender` to consume optional robustness evidence and switch to a robustness-hardening strategy when needed.
+- Extended synthetic pipeline with VIKOR outputs (`suitability_vikor`, delta-vs-WLC), robustness leaderboard artifact, and robust selection wiring.
+- Refreshed dashboard visual system (studio theme polish), bilingual button/tab labels, and runbook/changelog helper texts.
+- Rebuilt the studio dashboard visual hierarchy with stronger module cards, accent-group styling, and cleaner status presentation.
+- Added per-module live registry health chips (`Ready` / `Missing`) plus `Critical` tagging for release-essential modules.
+- Added visible-module counter, shortcut help popup, and `Copy Shortcuts` quick action for better operator ergonomics.
+- Regenerated `icons/icon.png` as a unique, production-grade PlanX Suitability Lab mark.
+- Synced command guide shortcut table with real dashboard keybindings and added status-chip behavior notes.
+- Added `critic_weights` objective weighting algorithm (contrast + inter-criterion conflict), with per-criterion diagnostics.
+- Added `weight_consensus_audit` to quantify agreement/disagreement across weighting methods using CV-based confidence classes.
+- Added `ensemble_suitability` for multi-scenario synthesis with `mean/std/p10/p90/confidence` rasters.
+- Extended `scenario_weight_pack` to ingest optional CRITIC tables and included new modules in synthetic smoke pipeline and release-evidence checks.
+- Added `opportunity_loss_map` to identify high-suitability areas excluded by hard constraints (score + class outputs).
+- Added `scenario_similarity_matrix` for pairwise scenario QA (Pearson, MAE, RMSE, agreement class).
+- Added `method_benchmark_leaderboard` to rank MCDA scenario methods by composite performance (mean, high-coverage, p90, stability).
+- Added `scenario_portfolio_diversity` to quantify method redundancy/diversification strength and effective-scenario depth.
+- Added `risk_opportunity_matrix_map` for strategy zoning from robust suitability and uncertainty (invest / validate / defer classes).
+- Added `risk_opportunity_area_stats` for planning-facing area splits of risk-opportunity strategy classes.
+- Added `regret_fragility_map` for cross-scenario regret spread mapping (stable/watch/fragile classes).
+- Added `minimax_regret_selector` implementing Savage minimax-regret scenario selection under deep uncertainty.
+- Added `scenario_dominance_matrix` for pairwise scenario win/loss/tie diagnostics and net-dominance ranking.
+- Added `regret_fragility_area_stats` for area shares of stable/watch/fragile regret classes.
+- Added `scenario_selection_recommender` to select primary/challenger scenario using benchmark, minimax regret, portfolio diversity and readiness context.
+- Added `implementation_wave_planner` to generate four-phase execution waves from priority zones and risk-opportunity classes.
+- Added `deployment_readiness_gate` to synthesize scorecard + minimax + wave + fragility diagnostics into GO/CONDITIONAL/HOLD release decisions.
+- Added `priority_zoning_from_suitability` for action-oriented implementation zones from suitability, confidence, and constraint-loss.
+- Added `policy_sensitivity_frontier` for lambda-sweep decision frontier diagnostics (mean/median/p90 and area-above-threshold metrics).
+- Added `action_playbook_generator` to transform zoning/uncertainty diagnostics into an implementation-ready Markdown action plan.
+- Added `intervention_budget_phasing` to quantify impact-capture vs budget steps for phased implementation planning.
+- Added `release_narrative_builder` to automatically assemble bilingual release narrative paragraphs from diagnostic evidence tables.
+- Added `criterion_redundancy_diagnostics` for correlation + VIF-based criterion overlap diagnostics.
+- Added `constraint_impact_audit` to quantify suitability/high-suitability loss by each hard-constraint mask and union effect.
+- Added `alignment_audit` to verify raster grid consistency (pixel size, extent, dimensions) before MCDA composition.
+- Added `priority_transition_matrix` to quantify baseline-to-scenario implementation zone shifts with transition classes.
+- Added `spatial_fragmentation_audit` to assess compactness and patch fragmentation of high-suitability areas.
+- Extended synthetic pipeline chain with baseline priority zoning plus transition and fragmentation diagnostics.
+- Added `scenario_consensus_zone` for cross-scenario agreement mapping (consensus count + consensus class raster outputs).
+- Added `consensus_zone_area_stats` for planning-facing area breakdown of consensus classes.
+- Added `threshold_coverage_curve` for policy-threshold sweeps (area and percent above threshold).
+- Added `scenario_disagreement_attention` to map contested suitability zones with conflict score and attention classes.
+- Added `attention_class_area_stats` for area distribution of disagreement attention classes.
+- Added `executive_kpi_snapshot` for single-row management KPI extraction from key output rasters.
+- Added `policy_gate_recommender` for automated threshold/lambda gate suggestions from curve and frontier diagnostics.
+- Added `decision_quadrant_map` to segment areas by suitability/conflict quadrants for execution strategy.
+- Added `decision_quadrant_area_stats` for area share by quadrant class.
+- Added `intervention_conflict_matrix` to combine priority and conflict into direct execution classes.
+- Added `intervention_conflict_area_stats` for area share by intervention class.
+- Added `actionability_scorecard` to synthesize KPI, budget, and policy-gate diagnostics into an overall readiness grade.
+- Extended synthetic pipeline and readiness scope with consensus diagnostics artifacts.
+- Added a new Navigator tab in dashboard with staged publication run-order, gate coverage table, and next-critical execution shortcut.
+- Added dashboard Command Palette (`Ctrl+K`) for fast search-and-run across all modules and operational quick actions.
+- Added dashboard EN/TR language mode switch, `Ctrl+N` next-critical run shortcut, and `Ctrl+L` language toggle.
+- Reworked `Ctrl+N` flow into a persisted guided critical-run sequence instead of registry-missing checks.
+- Extended synthetic pipeline outputs and report chains with redundancy + constraint-impact diagnostics.
+
 ## [1.2.3] - 2026-05-24
 
 - Added persistent module favorites (star pinning) in dashboard cards.

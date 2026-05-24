@@ -39,8 +39,10 @@
     <p><code>ahp_weights</code>: pairwise matrix + consistency ratio.</p>
     <p><code>pca_derived_weights</code>: variance-driven weights.</p>
     <p><code>entropy_weights</code>: information-content driven weights.</p>
+    <p><code>critic_weights</code>: objective weights from contrast intensity and inter-criterion conflict.</p>
     <p><code>weight_consolidator</code>: pick active scenario weights.</p>
-    <p><code>scenario_weight_pack</code>: merge AHP/PCA/Entropy tables and add blended average scenario.</p>
+    <p><code>scenario_weight_pack</code>: merge AHP/PCA/Entropy/CRITIC tables and add blended average scenario.</p>
+    <p><code>weight_consensus_audit</code>: method-agreement diagnostics (mean, range, CV%, HIGH/MEDIUM/LOW agreement).</p>
   </div>
 
   <div class="card">
@@ -48,6 +50,16 @@
     <p><code>wlc_suitability</code>: bounded [0,100] weighted linear combination + hard mask.</p>
     <p><code>owa_suitability</code>: true OWA with criteria weights + order weights + ordering mode + optional hard mask.</p>
     <p><code>topsis_suitability</code>: TOPSIS ranking in raster space with benefit/cost impacts + optional hard mask.</p>
+    <p><code>vikor_suitability</code>: VIKOR compromise ranking (group utility + individual regret) with optional hard mask.</p>
+    <p><code>ensemble_suitability</code>: multi-scenario synthesis (<code>ensemble_mean/std/p10/p90/confidence</code>).</p>
+    <p><code>scenario_consensus_zone</code>: computes per-cell scenario agreement and outputs consensus count + consensus zone classes.</p>
+    <p><code>scenario_disagreement_attention</code>: maps cross-scenario conflict score and attention classes for contested high-value areas.</p>
+    <p><code>decision_quadrant_map</code>: classifies cells by suitability (high/low) and disagreement (high/low) to support execution strategy zoning.</p>
+    <p><code>intervention_conflict_matrix</code>: combines priority and conflict into actionable classes (quick-win, resolve-first, co-design, re-screen).</p>
+    <p><code>risk_opportunity_matrix_map</code>: combines robust suitability and uncertainty into invest-now / validate-then-invest / defer strategy classes.</p>
+    <p><code>regret_fragility_map</code>: computes scenario-spread regret fragility score and classes (stable/watch/fragile) for contested-zone detection.</p>
+    <p><code>opportunity_loss_map</code>: maps suitability forfeited by hard constraints, with loss class (0=None, 1=Low, 2=Medium, 3=High).</p>
+    <p><code>priority_zoning_from_suitability</code>: action zoning from suitability, confidence and opportunity-loss (0 low, 1 longlist, 2 feasibility, 3 immediate, 4 constraint revisit).</p>
     <p><code>uncertainty_adjusted_suitability</code>: robust score from <code>unc_mean - lambda * unc_std</code> (clipped to 0-100).</p>
     <p><code>scenario_comparator</code>: delta map across two suitability scenarios.</p>
   </div>
@@ -59,7 +71,36 @@
     <p><code>numerical_qa_check</code>: checks suitability bounds and percentile consistency.</p>
     <p><code>scenario_markdown_brief</code>: planning memo style markdown output with QA and recommendation template.</p>
     <p><code>suitability_class_area_stats</code>: class-based area share table (coverage and percent by score band).</p>
-    <p><code>beta_evidence_report</code>: outputs registry-level release readiness HTML evidence.</p>
+    <p><code>scenario_similarity_matrix</code>: pairwise scenario agreement table with Pearson r, MAE and RMSE.</p>
+    <p><code>scenario_dominance_matrix</code>: pairwise win/loss/tie matrix with net-dominance rank to show which scenario most often outperforms others cell-by-cell.</p>
+    <p><code>method_benchmark_leaderboard</code>: ranks scenario rasters by composite MCDA execution score (mean, p90, high-coverage and stability).</p>
+    <p><code>scenario_robustness_leaderboard</code>: fuses benchmark, dominance, minimax-regret and diversity evidence into a single robustness rank and tier.</p>
+    <p><code>scenario_portfolio_diversity</code>: portfolio redundancy/diversification audit with diversity index, effective method depth and scenario uniqueness roles.</p>
+    <p><code>minimax_regret_selector</code>: identifies the scenario with minimum worst-case regret (Savage criterion) and reports rank diagnostics.</p>
+    <p><code>scenario_governance_audit</code>: flags governance risk per scenario (regret, robustness, volatility) and emits portfolio-level governance status.</p>
+    <p><code>alignment_audit</code>: validates criterion raster alignment against a snap/reference raster (pixel size, extent, dimensions).</p>
+    <p><code>policy_sensitivity_frontier</code>: lambda-sweep frontier table (mean/median/p90 and area shares above 60/80).</p>
+    <p><code>criterion_redundancy_diagnostics</code>: criterion overlap diagnostics with pairwise correlations, per-criterion max/mean abs correlation and VIF flags.</p>
+    <p><code>constraint_impact_audit</code>: quantifies suitability loss and high-suitability exclusion by each hard-constraint mask and total union.</p>
+    <p><code>priority_transition_matrix</code>: baseline vs scenario priority-zone transition table with transition classes (upgrade/stable/downgrade).</p>
+    <p><code>spatial_fragmentation_audit</code>: patch-count and compactness diagnostics for high-suitability spatial structure.</p>
+    <p><code>consensus_zone_area_stats</code>: area distribution table for consensus zone classes (low to near-unanimous).</p>
+    <p><code>attention_class_area_stats</code>: area distribution table for disagreement attention classes (watch/review/high/critical).</p>
+    <p><code>threshold_coverage_curve</code>: threshold sweep table (area and percent above each suitability cutoff) for policy tuning.</p>
+    <p><code>executive_kpi_snapshot</code>: one-row management dashboard metrics across suitability, robustness, eligibility, consensus and conflict.</p>
+    <p><code>policy_gate_recommender</code>: proposes threshold and lambda gates from threshold-coverage and frontier tables.</p>
+    <p><code>decision_quadrant_area_stats</code>: area distribution table across decision quadrants (quick-win vs contested vs low-priority buckets).</p>
+    <p><code>intervention_conflict_area_stats</code>: area distribution table for intervention conflict classes.</p>
+    <p><code>risk_opportunity_area_stats</code>: area distribution table for robust/uncertainty strategy classes.</p>
+    <p><code>regret_fragility_area_stats</code>: area distribution table for regret fragility classes (stable/watch/fragile).</p>
+    <p><code>actionability_scorecard</code>: computes an overall readiness score (A-D) using KPI, budget capture and policy-gate diagnostics.</p>
+    <p><code>scenario_selection_recommender</code>: proposes primary and challenger scenarios by combining benchmark, robustness, minimax-regret, portfolio diversity and policy-readiness context.</p>
+    <p><code>implementation_wave_planner</code>: builds a four-wave execution plan from priority zoning and risk-opportunity classes.</p>
+    <p><code>deployment_readiness_gate</code>: produces an automated GO/CONDITIONAL/HOLD publication gate from scorecard, minimax, wave and fragility diagnostics.</p>
+    <p><code>intervention_budget_phasing</code>: budget-step capture curve from priority zones and index (cells, cumulative impact, capture %).</p>
+    <p><code>action_playbook_generator</code>: creates a structured markdown implementation playbook from priority zones, frontier, and scenario similarity diagnostics.</p>
+    <p><code>release_narrative_builder</code>: auto-generates EN/TR one-paragraph release narrative from frontier, budget and similarity evidence.</p>
+    <p><code>beta_evidence_report</code>: outputs registry-level release readiness HTML evidence; optionally verifies key artifact files from a synthetic/real run output directory.</p>
   </div>
 
   <div class="card">
@@ -67,12 +108,19 @@
     <table>
       <thead><tr><th>Shortcut</th><th>Action</th></tr></thead>
       <tbody>
+        <tr><td><code>Ctrl+K</code></td><td>Open command palette</td></tr>
         <tr><td><code>Ctrl+R</code></td><td>Refresh dashboard checks</td></tr>
         <tr><td><code>Ctrl+D</code></td><td>Copy diagnostics</td></tr>
         <tr><td><code>Ctrl+I</code></td><td>Copy issue template</td></tr>
-        <tr><td><code>Ctrl+H</code></td><td>Open this command guide</td></tr>
+        <tr><td><code>Ctrl+H</code></td><td>Show shortcut help popup</td></tr>
+        <tr><td><code>Ctrl+G</code></td><td>Open this command guide</td></tr>
+        <tr><td><code>Ctrl+P</code></td><td>Run synthetic pipeline quickly</td></tr>
+        <tr><td><code>Ctrl+N</code></td><td>Run next guided critical workflow step</td></tr>
+        <tr><td><code>Ctrl+L</code></td><td>Toggle dashboard language mode (EN/TR)</td></tr>
       </tbody>
     </table>
+    <p><b>EN:</b> Module cards show <b>Ready/Missing</b> status, and Navigator tab provides gate-level publication checklist.</p>
+    <p><b>TR:</b> Modul kartlari <b>Ready/Missing</b> durumunu gosterir; Navigator sekmesi yayin oncesi gate tabanli kontrol listesi sunar.</p>
   </div>
 </body>
 </html>

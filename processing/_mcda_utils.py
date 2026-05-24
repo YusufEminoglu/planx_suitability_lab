@@ -240,3 +240,47 @@ def entropy_weights_from_rasters(rasters: List[str]) -> List[float]:
         return [1.0 / n] * n
     return (d / s).tolist()
 
+
+def critic_weights_from_rasters(rasters: List[str], impacts: List[int] | None = None) -> Tuple[List[float], np.ndarray, np.ndarray]:
+    """
+    CRITIC objective weighting.
+    Returns:
+      - normalized weights
+      - per-criterion standard deviation on normalized values
+      - per-criterion contrast sum (sum(1-corr))
+    """
+    n = len(rasters)
+    if n == 0:
+        return [], np.array([], dtype=np.float64), np.array([], dtype=np.float64)
+    X = _sample_matrix_from_rasters(rasters, target_samples=10000)
+    if X.shape[0] < 3:
+        w = np.array([1.0 / n] * n, dtype=np.float64)
+        return w.tolist(), np.zeros(n, dtype=np.float64), np.ones(n, dtype=np.float64)
+
+    if impacts is None or len(impacts) != n:
+        impacts = [1] * n
+
+    mins = np.min(X, axis=0)
+    maxs = np.max(X, axis=0)
+    den = np.where((maxs - mins) <= 1e-12, 1.0, (maxs - mins))
+    Z = np.empty_like(X, dtype=np.float64)
+    for j in range(n):
+        if impacts[j] >= 0:
+            Z[:, j] = (X[:, j] - mins[j]) / den[j]
+        else:
+            Z[:, j] = (maxs[j] - X[:, j]) / den[j]
+    Z = np.clip(Z, 0.0, 1.0)
+
+    sigma = np.std(Z, axis=0)
+    corr = np.corrcoef(Z, rowvar=False)
+    corr = np.where(np.isfinite(corr), corr, 0.0)
+    np.fill_diagonal(corr, 1.0)
+    contrast = np.sum(1.0 - corr, axis=1)
+    scores = sigma * contrast
+    scores = np.where(np.isfinite(scores), scores, 0.0)
+    s = float(np.sum(scores))
+    if s <= 1e-12:
+        w = np.array([1.0 / n] * n, dtype=np.float64)
+        return w.tolist(), sigma, contrast
+    w = scores / s
+    return w.tolist(), sigma, contrast

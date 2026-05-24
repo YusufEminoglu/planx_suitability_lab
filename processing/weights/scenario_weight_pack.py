@@ -20,13 +20,14 @@ class ScenarioWeightPackAlgorithm(QgsProcessingAlgorithm):
     AHP = "AHP"
     PCA = "PCA"
     ENT = "ENT"
+    CRIT = "CRIT"
     OUTPUT = "OUTPUT"
 
     def name(self):
         return "scenario_weight_pack"
 
     def displayName(self):
-        return "Weights: Scenario Weight Pack (AHP/PCA/Entropy)"
+        return "Weights: Scenario Weight Pack (AHP/PCA/Entropy/CRITIC)"
 
     def group(self):
         return "Weights"
@@ -41,6 +42,14 @@ class ScenarioWeightPackAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterFeatureSource(self.AHP, "AHP weight table", [QgsProcessing.TypeVector]))
         self.addParameter(QgsProcessingParameterFeatureSource(self.PCA, "PCA weight table", [QgsProcessing.TypeVector]))
         self.addParameter(QgsProcessingParameterFeatureSource(self.ENT, "Entropy weight table", [QgsProcessing.TypeVector]))
+        self.addParameter(
+            QgsProcessingParameterFeatureSource(
+                self.CRIT,
+                "CRITIC weight table (optional)",
+                [QgsProcessing.TypeVector],
+                optional=True,
+            )
+        )
         self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Scenario weights table", QgsProcessing.TypeVector))
 
     def _collect(self, src, method_name):
@@ -56,8 +65,11 @@ class ScenarioWeightPackAlgorithm(QgsProcessingAlgorithm):
         ahp = self.parameterAsSource(parameters, self.AHP, context)
         pca = self.parameterAsSource(parameters, self.PCA, context)
         ent = self.parameterAsSource(parameters, self.ENT, context)
+        crit = self.parameterAsSource(parameters, self.CRIT, context)
 
         rows = self._collect(ahp, "AHP") + self._collect(pca, "PCA") + self._collect(ent, "ENTROPY")
+        if crit is not None:
+            rows += self._collect(crit, "CRITIC")
         by_method = defaultdict(float)
         for method, _, w in rows:
             by_method[method] += w
