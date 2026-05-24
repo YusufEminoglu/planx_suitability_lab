@@ -11,6 +11,7 @@ from qgis.core import (
     QgsProcessingParameterRasterDestination,
     QgsProcessingParameterRasterLayer,
 )
+from .._mcda_utils import smart_output_path
 
 
 class NormalizerAlgorithm(QgsProcessingAlgorithm):
@@ -112,6 +113,7 @@ class NormalizerAlgorithm(QgsProcessingAlgorithm):
         mid = float(self.parameterAsDouble(parameters, self.MID, context))
         spread = float(self.parameterAsDouble(parameters, self.SPREAD, context))
         out = self.parameterAsOutputLayer(parameters, self.OUTPUT, context)
+        out = smart_output_path(out, rl, "normalizer_reclassifier")
 
         if high <= low:
             raise QgsProcessingException("HIGH must be greater than LOW.")

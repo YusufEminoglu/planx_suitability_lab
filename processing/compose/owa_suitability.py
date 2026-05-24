@@ -15,7 +15,7 @@ from qgis.core import (
     QgsProcessingParameterString,
 )
 
-from .._mcda_utils import ensure_list, parse_weights_csv
+from .._mcda_utils import ensure_list, parse_weights_csv, smart_output_path
 
 
 class OWASuitabilityAlgorithm(QgsProcessingAlgorithm):
@@ -94,6 +94,7 @@ class OWASuitabilityAlgorithm(QgsProcessingAlgorithm):
         sort_mode = int(self.parameterAsEnum(parameters, self.SORT_MODE, context))
         block = int(self.parameterAsInt(parameters, self.BLOCK, context))
         out = self.parameterAsOutputLayer(parameters, self.OUTPUT, context)
+        out = smart_output_path(out, layers[0], "owa_suitability")
         constraint = self.parameterAsRasterLayer(parameters, self.CONSTRAINT, context)
 
         datasets = []
@@ -188,4 +189,3 @@ class OWASuitabilityAlgorithm(QgsProcessingAlgorithm):
         for ds in datasets:
             ds = None
         return {self.OUTPUT: out}
-

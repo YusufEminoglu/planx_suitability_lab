@@ -10,6 +10,7 @@ from qgis.core import (
     QgsProcessingParameterNumber,
     QgsProcessingParameterRasterDestination,
 )
+from .._mcda_utils import smart_output_path
 
 
 class RasterizerAlgorithm(QgsProcessingAlgorithm):
@@ -54,6 +55,7 @@ class RasterizerAlgorithm(QgsProcessingAlgorithm):
         burn = self.parameterAsDouble(parameters, self.BURN, context)
         pix = self.parameterAsDouble(parameters, self.PIXEL, context)
         out = self.parameterAsOutputLayer(parameters, self.OUTPUT, context)
+        out = smart_output_path(out, src, "vector_rasterizer")
         processing.run('gdal:rasterize', {
             'INPUT': src,
             'FIELD': field if field else None,

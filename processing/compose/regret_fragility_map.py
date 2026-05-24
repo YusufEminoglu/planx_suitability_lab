@@ -13,7 +13,7 @@ from qgis.core import (
     QgsProcessingParameterRasterLayer,
 )
 
-from .._mcda_utils import ensure_list
+from .._mcda_utils import ensure_list, smart_output_path
 
 
 class RegretFragilityMapAlgorithm(QgsProcessingAlgorithm):
@@ -129,6 +129,8 @@ class RegretFragilityMapAlgorithm(QgsProcessingAlgorithm):
 
         out_score = self.parameterAsOutputLayer(parameters, self.OUT_SCORE, context)
         out_class = self.parameterAsOutputLayer(parameters, self.OUT_CLASS, context)
+        out_score = smart_output_path(out_score, layers[0], "regret_fragility_score")
+        out_class = smart_output_path(out_class, layers[0], "regret_fragility_class")
         drv = gdal.GetDriverByName("GTiff")
         ds_score = drv.Create(out_score, xsize, ysize, 1, gdal.GDT_Float32, options=["TILED=YES", "COMPRESS=LZW"])
         ds_class = drv.Create(out_class, xsize, ysize, 1, gdal.GDT_Byte, options=["TILED=YES", "COMPRESS=LZW"])
@@ -203,4 +205,3 @@ class RegretFragilityMapAlgorithm(QgsProcessingAlgorithm):
         ds_score = None
         ds_class = None
         return {self.OUT_SCORE: out_score, self.OUT_CLASS: out_class}
-

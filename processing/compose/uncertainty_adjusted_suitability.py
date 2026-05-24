@@ -10,6 +10,7 @@ from qgis.core import (
     QgsProcessingParameterRasterDestination,
     QgsProcessingParameterRasterLayer,
 )
+from .._mcda_utils import smart_output_path
 
 
 class UncertaintyAdjustedSuitabilityAlgorithm(QgsProcessingAlgorithm):
@@ -69,6 +70,7 @@ class UncertaintyAdjustedSuitabilityAlgorithm(QgsProcessingAlgorithm):
         std_rl = self.parameterAsRasterLayer(parameters, self.STD, context)
         lam = float(self.parameterAsDouble(parameters, self.RISK, context))
         out = self.parameterAsOutputLayer(parameters, self.OUTPUT, context)
+        out = smart_output_path(out, mean_rl, "uncertainty_adjusted_suitability")
 
         ds_m = gdal.Open(mean_rl.source(), gdal.GA_ReadOnly)
         ds_s = gdal.Open(std_rl.source(), gdal.GA_ReadOnly)
@@ -100,4 +102,3 @@ class UncertaintyAdjustedSuitabilityAlgorithm(QgsProcessingAlgorithm):
         ds_m = None
         ds_s = None
         return {self.OUTPUT: out}
-

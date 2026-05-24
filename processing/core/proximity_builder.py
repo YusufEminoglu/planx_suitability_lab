@@ -10,6 +10,7 @@ from qgis.core import (
     QgsProcessingParameterRasterLayer,
     QgsProcessingParameterString,
 )
+from .._mcda_utils import smart_output_path
 
 
 class ProximityBuilderAlgorithm(QgsProcessingAlgorithm):
@@ -55,6 +56,7 @@ class ProximityBuilderAlgorithm(QgsProcessingAlgorithm):
         units = int(self.parameterAsEnum(parameters, self.UNITS, context))
         maxd = float(self.parameterAsDouble(parameters, self.MAX_DISTANCE, context))
         out = self.parameterAsOutputLayer(parameters, self.OUTPUT, context)
+        out = smart_output_path(out, rl, "proximity_builder")
         processing.run('gdal:proximity', {
             'INPUT': rl.source(),
             'BAND': 1,

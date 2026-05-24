@@ -11,6 +11,7 @@ from qgis.core import (
     QgsProcessingParameterRasterDestination,
     QgsProcessingParameterRasterLayer,
 )
+from .._mcda_utils import smart_output_path
 
 
 class ScenarioComparatorAlgorithm(QgsProcessingAlgorithm):
@@ -72,6 +73,7 @@ class ScenarioComparatorAlgorithm(QgsProcessingAlgorithm):
         b = self.parameterAsRasterLayer(parameters, self.B, context)
         block = int(self.parameterAsInt(parameters, self.BLOCK, context))
         out = self.parameterAsOutputLayer(parameters, self.OUTPUT, context)
+        out = smart_output_path(out, a, "scenario_comparator_delta")
 
         dsa = gdal.Open(a.source(), gdal.GA_ReadOnly)
         dsb = gdal.Open(b.source(), gdal.GA_ReadOnly)
@@ -145,4 +147,3 @@ class ScenarioComparatorAlgorithm(QgsProcessingAlgorithm):
         )
         feedback.pushInfo(msg)
         return {self.OUTPUT: out, self.STATS: msg}
-

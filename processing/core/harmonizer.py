@@ -19,7 +19,7 @@ from qgis.core import (
     QgsProcessingParameterRasterLayer,
 )
 
-from .._mcda_utils import ensure_list
+from .._mcda_utils import ensure_list, smart_output_path
 
 
 class DataHarmonizerAlgorithm(QgsProcessingAlgorithm):
@@ -95,6 +95,7 @@ class DataHarmonizerAlgorithm(QgsProcessingAlgorithm):
         resampling = int(self.parameterAsEnum(parameters, self.RESAMPLING, context))
         nodata = float(self.parameterAsDouble(parameters, self.NODATA, context))
         out_preview = self.parameterAsOutputLayer(parameters, self.OUTPUT_RASTER, context)
+        out_preview = smart_output_path(out_preview, rasters[0], "data_harmonizer_preview")
         out_dir = self.parameterAsString(parameters, self.OUTPUT_DIR, context)
         manifest = self.parameterAsFileOutput(parameters, self.OUTPUT_MANIFEST, context)
         os.makedirs(out_dir, exist_ok=True)
@@ -181,4 +182,3 @@ class DataHarmonizerAlgorithm(QgsProcessingAlgorithm):
             self.OUTPUT_DIR: out_dir,
             self.OUTPUT_MANIFEST: manifest,
         }
-

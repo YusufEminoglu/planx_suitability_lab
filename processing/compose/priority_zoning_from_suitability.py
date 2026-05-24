@@ -10,6 +10,7 @@ from qgis.core import (
     QgsProcessingParameterRasterDestination,
     QgsProcessingParameterRasterLayer,
 )
+from .._mcda_utils import smart_output_path
 
 
 class PriorityZoningFromSuitabilityAlgorithm(QgsProcessingAlgorithm):
@@ -136,6 +137,8 @@ class PriorityZoningFromSuitabilityAlgorithm(QgsProcessingAlgorithm):
         block = int(self.parameterAsInt(parameters, self.BLOCK, context))
         out_idx = self.parameterAsOutputLayer(parameters, self.OUT_INDEX, context)
         out_zone = self.parameterAsOutputLayer(parameters, self.OUT_ZONE, context)
+        out_idx = smart_output_path(out_idx, suit_rl, "priority_index")
+        out_zone = smart_output_path(out_zone, suit_rl, "priority_zone")
 
         ds_s = gdal.Open(suit_rl.source(), gdal.GA_ReadOnly)
         if ds_s is None:

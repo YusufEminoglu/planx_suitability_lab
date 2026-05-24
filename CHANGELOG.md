@@ -5,6 +5,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning: [S
 
 ## [Unreleased]
 
+- Added smart temporary output naming across core/compose/uncertainty/XAI raster modules: when users keep output as temporary, files are now auto-named as `<input>_<operation>_<timestamp>.tif` for traceable run artifacts.
 - Added `vikor_suitability` as a fourth major compose engine (WLC/OWA/TOPSIS/VIKOR) for compromise-based MCDA decision support.
 - Added `scenario_robustness_leaderboard` to fuse benchmark, dominance, minimax-regret and portfolio-diversity evidence into one elite robustness rank.
 - Added `scenario_governance_audit` to convert robustness/benchmark/minimax/selection evidence into scenario-level governance-risk flags and portfolio status.

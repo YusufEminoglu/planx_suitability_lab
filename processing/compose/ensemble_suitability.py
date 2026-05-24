@@ -14,7 +14,7 @@ from qgis.core import (
     QgsProcessingParameterString,
 )
 
-from .._mcda_utils import ensure_list, parse_weights_csv
+from .._mcda_utils import ensure_list, parse_weights_csv, smart_output_path
 
 
 class EnsembleSuitabilityAlgorithm(QgsProcessingAlgorithm):
@@ -107,6 +107,11 @@ class EnsembleSuitabilityAlgorithm(QgsProcessingAlgorithm):
         out_p10 = self.parameterAsOutputLayer(parameters, self.OUT_P10, context)
         out_p90 = self.parameterAsOutputLayer(parameters, self.OUT_P90, context)
         out_conf = self.parameterAsOutputLayer(parameters, self.OUT_CONF, context)
+        out_mean = smart_output_path(out_mean, layers[0], "ensemble_mean")
+        out_std = smart_output_path(out_std, layers[0], "ensemble_std")
+        out_p10 = smart_output_path(out_p10, layers[0], "ensemble_p10")
+        out_p90 = smart_output_path(out_p90, layers[0], "ensemble_p90")
+        out_conf = smart_output_path(out_conf, layers[0], "ensemble_confidence")
 
         datasets = []
         bands = []

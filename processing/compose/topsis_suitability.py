@@ -14,7 +14,7 @@ from qgis.core import (
     QgsProcessingParameterString,
 )
 
-from .._mcda_utils import ensure_list, parse_impacts_csv, parse_weights_csv
+from .._mcda_utils import ensure_list, parse_impacts_csv, parse_weights_csv, smart_output_path
 
 
 class TOPSISSuitabilityAlgorithm(QgsProcessingAlgorithm):
@@ -95,6 +95,7 @@ class TOPSISSuitabilityAlgorithm(QgsProcessingAlgorithm):
         impacts = np.array(parse_impacts_csv(self.parameterAsString(parameters, self.IMPACTS_CSV, context), n), dtype=np.int8)
         block = int(self.parameterAsInt(parameters, self.BLOCK, context))
         out = self.parameterAsOutputLayer(parameters, self.OUTPUT, context)
+        out = smart_output_path(out, layers[0], "topsis_suitability")
         constraint = self.parameterAsRasterLayer(parameters, self.CONSTRAINT, context)
 
         datasets = []

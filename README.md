@@ -101,5 +101,6 @@ PlanX Suitability Lab is a production-ready raster MCDA plugin for QGIS, designe
 
 - Use aligned 0-100 criteria rasters for best MCDA behavior.
 - Run `synthetic_pipeline_runner` first when validating new environments.
+- Smart output naming: when an algorithm output is left as temporary, PlanX auto-generates readable file names in the pattern `<input>_<operation>_<timestamp>.tif`.
 - Full command details are available in `docs/COMMAND_GUIDE.html`.
 - Competitive positioning snapshot is documented in `docs/COMPETITIVE_BENCHMARK_2026-05.md`.

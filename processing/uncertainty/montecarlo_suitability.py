@@ -10,6 +10,7 @@ from qgis.core import (
     QgsProcessingParameterRasterDestination,
     QgsProcessingParameterRasterLayer,
 )
+from .._mcda_utils import smart_output_path
 
 
 class MonteCarloSuitabilityAlgorithm(QgsProcessingAlgorithm):
@@ -106,6 +107,12 @@ class MonteCarloSuitabilityAlgorithm(QgsProcessingAlgorithm):
         out_p50 = self.parameterAsOutputLayer(parameters, self.OUT_P50, context)
         out_p95 = self.parameterAsOutputLayer(parameters, self.OUT_P95, context)
         out_stb = self.parameterAsOutputLayer(parameters, self.OUT_STAB, context)
+        out_mean = smart_output_path(out_mean, rl, "montecarlo_unc_mean")
+        out_std = smart_output_path(out_std, rl, "montecarlo_unc_std")
+        out_p05 = smart_output_path(out_p05, rl, "montecarlo_unc_p05")
+        out_p50 = smart_output_path(out_p50, rl, "montecarlo_unc_p50")
+        out_p95 = smart_output_path(out_p95, rl, "montecarlo_unc_p95")
+        out_stb = smart_output_path(out_stb, rl, "montecarlo_stability_index")
 
         ds = gdal.Open(rl.source(), gdal.GA_ReadOnly)
         if ds is None:

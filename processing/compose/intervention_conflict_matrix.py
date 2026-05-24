@@ -10,6 +10,7 @@ from qgis.core import (
     QgsProcessingParameterRasterDestination,
     QgsProcessingParameterRasterLayer,
 )
+from .._mcda_utils import smart_output_path
 
 
 class InterventionConflictMatrixAlgorithm(QgsProcessingAlgorithm):
@@ -68,6 +69,7 @@ class InterventionConflictMatrixAlgorithm(QgsProcessingAlgorithm):
             ndc = bc.GetNoDataValue()
 
         out_path = self.parameterAsOutputLayer(parameters, self.OUTPUT, context)
+        out_path = smart_output_path(out_path, p_rl, "intervention_conflict_matrix")
         drv = gdal.GetDriverByName("GTiff")
         out = drv.Create(
             out_path,

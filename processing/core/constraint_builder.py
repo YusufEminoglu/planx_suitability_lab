@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from qgis.core import QgsProcessingAlgorithm, QgsProcessingParameterRasterLayer, QgsProcessingParameterNumber, QgsProcessingParameterRasterDestination
 
-from .._mcda_utils import raster_calc
+from .._mcda_utils import raster_calc, smart_output_path
 
 
 class ConstraintBuilderAlgorithm(QgsProcessingAlgorithm):
@@ -35,5 +35,6 @@ class ConstraintBuilderAlgorithm(QgsProcessingAlgorithm):
         rl = self.parameterAsRasterLayer(parameters, self.INPUT, context)
         t = self.parameterAsDouble(parameters, self.THRESHOLD, context)
         out = self.parameterAsOutputLayer(parameters, self.OUTPUT, context)
+        out = smart_output_path(out, rl, "constraint_builder")
         raster_calc([rl.source()], f'(A>={t})', out)
         return {self.OUTPUT: out}

@@ -10,6 +10,7 @@ from qgis.core import (
     QgsProcessingParameterRasterDestination,
     QgsProcessingParameterRasterLayer,
 )
+from .._mcda_utils import smart_output_path
 
 
 class OpportunityLossMapAlgorithm(QgsProcessingAlgorithm):
@@ -99,6 +100,8 @@ class OpportunityLossMapAlgorithm(QgsProcessingAlgorithm):
         block = int(self.parameterAsInt(parameters, self.BLOCK, context))
         out_loss = self.parameterAsOutputLayer(parameters, self.OUT_LOSS, context)
         out_class = self.parameterAsOutputLayer(parameters, self.OUT_CLASS, context)
+        out_loss = smart_output_path(out_loss, suit, "opportunity_loss_score")
+        out_class = smart_output_path(out_class, suit, "opportunity_loss_class")
 
         ds_s = gdal.Open(suit.source(), gdal.GA_ReadOnly)
         ds_c = gdal.Open(con.source(), gdal.GA_ReadOnly)

@@ -13,7 +13,7 @@ from qgis.core import (
     QgsProcessingParameterRasterLayer,
 )
 
-from .._mcda_utils import ensure_list
+from .._mcda_utils import ensure_list, smart_output_path
 
 
 class ScenarioConsensusZoneAlgorithm(QgsProcessingAlgorithm):
@@ -129,6 +129,8 @@ class ScenarioConsensusZoneAlgorithm(QgsProcessingAlgorithm):
 
         out_count = self.parameterAsOutputLayer(parameters, self.OUT_COUNT, context)
         out_zone = self.parameterAsOutputLayer(parameters, self.OUT_ZONE, context)
+        out_count = smart_output_path(out_count, layers[0], "scenario_consensus_count")
+        out_zone = smart_output_path(out_zone, layers[0], "scenario_consensus_zone")
         drv = gdal.GetDriverByName("GTiff")
         o_count = drv.Create(out_count, xsize, ysize, 1, gdal.GDT_Byte, options=["TILED=YES", "COMPRESS=LZW"])
         o_zone = drv.Create(out_zone, xsize, ysize, 1, gdal.GDT_Byte, options=["TILED=YES", "COMPRESS=LZW"])

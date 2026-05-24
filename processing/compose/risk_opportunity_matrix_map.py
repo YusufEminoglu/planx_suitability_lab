@@ -11,6 +11,7 @@ from qgis.core import (
     QgsProcessingParameterRasterDestination,
     QgsProcessingParameterRasterLayer,
 )
+from .._mcda_utils import smart_output_path
 
 
 class RiskOpportunityMatrixMapAlgorithm(QgsProcessingAlgorithm):
@@ -105,6 +106,7 @@ class RiskOpportunityMatrixMapAlgorithm(QgsProcessingAlgorithm):
             c_nd = c_band.GetNoDataValue()
 
         out_path = self.parameterAsOutputLayer(parameters, self.OUTPUT, context)
+        out_path = smart_output_path(out_path, robust_rl, "risk_opportunity_matrix")
         drv = gdal.GetDriverByName("GTiff")
         out = drv.Create(
             out_path,
@@ -173,4 +175,3 @@ class RiskOpportunityMatrixMapAlgorithm(QgsProcessingAlgorithm):
         bo.FlushCache()
         out = None
         return {self.OUTPUT: out_path}
-

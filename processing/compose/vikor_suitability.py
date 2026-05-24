@@ -14,7 +14,7 @@ from qgis.core import (
     QgsProcessingParameterString,
 )
 
-from .._mcda_utils import ensure_list, parse_impacts_csv, parse_weights_csv
+from .._mcda_utils import ensure_list, parse_impacts_csv, parse_weights_csv, smart_output_path
 
 
 class VIKORSuitabilityAlgorithm(QgsProcessingAlgorithm):
@@ -107,6 +107,7 @@ class VIKORSuitabilityAlgorithm(QgsProcessingAlgorithm):
         v = float(self.parameterAsDouble(parameters, self.V, context))
         block = int(self.parameterAsInt(parameters, self.BLOCK, context))
         out = self.parameterAsOutputLayer(parameters, self.OUTPUT, context)
+        out = smart_output_path(out, layers[0], "vikor_suitability")
         constraint = self.parameterAsRasterLayer(parameters, self.CONSTRAINT, context)
 
         datasets = []
@@ -323,4 +324,3 @@ class VIKORSuitabilityAlgorithm(QgsProcessingAlgorithm):
             ds = None
         feedback.pushInfo(f"VIKOR completed with v={v:.2f}. Output range constrained to [0,100].")
         return {self.OUTPUT: out}
-

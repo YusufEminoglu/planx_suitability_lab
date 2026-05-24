@@ -13,7 +13,7 @@ from qgis.core import (
     QgsProcessingParameterRasterLayer,
 )
 
-from .._mcda_utils import ensure_list
+from .._mcda_utils import ensure_list, smart_output_path
 
 
 class ScenarioDisagreementAttentionAlgorithm(QgsProcessingAlgorithm):
@@ -127,6 +127,8 @@ class ScenarioDisagreementAttentionAlgorithm(QgsProcessingAlgorithm):
 
         out_score = self.parameterAsOutputLayer(parameters, self.OUT_SCORE, context)
         out_class = self.parameterAsOutputLayer(parameters, self.OUT_CLASS, context)
+        out_score = smart_output_path(out_score, layers[0], "scenario_disagreement_score")
+        out_class = smart_output_path(out_class, layers[0], "scenario_disagreement_class")
         drv = gdal.GetDriverByName("GTiff")
         o_score = drv.Create(out_score, xsize, ysize, 1, gdal.GDT_Float32, options=["TILED=YES", "COMPRESS=LZW"])
         o_class = drv.Create(out_class, xsize, ysize, 1, gdal.GDT_Byte, options=["TILED=YES", "COMPRESS=LZW"])

@@ -4,6 +4,8 @@ from __future__ import annotations
 import json
 import os
 import tempfile
+import unicodedata
+from datetime import datetime
 from typing import List, Sequence, Tuple
 
 import numpy as np
@@ -17,6 +19,72 @@ def ensure_list(value):
     if isinstance(value, (list, tuple)):
         return list(value)
     return [value]
+
+
+def infer_layer_label(layer_or_path, fallback: str = "layer") -> str:
+    """Best-effort label extraction for naming outputs."""
+    if layer_or_path is None:
+        return fallback
+    # QGIS layer-like object
+    try:
+        nm = layer_or_path.name()
+        if isinstance(nm, str) and nm.strip():
+            return nm.strip()
+    except Exception:
+        pass
+    # String/path
+    try:
+        s = str(layer_or_path).strip()
+        if not s:
+            return fallback
+        base = os.path.basename(s)
+        stem, _ = os.path.splitext(base)
+        return stem or fallback
+    except Exception:
+        return fallback
+
+
+def slugify_ascii(text: str, fallback: str = "layer", max_len: int = 64) -> str:
+    src = (text or "").strip()
+    if not src:
+        src = fallback
+    # Turkish and unicode friendly normalization to ascii-ish ids
+    src = unicodedata.normalize("NFKD", src)
+    src = src.encode("ascii", "ignore").decode("ascii")
+    out = []
+    prev_us = False
+    for ch in src:
+        if ch.isalnum():
+            out.append(ch.lower())
+            prev_us = False
+        else:
+            if not prev_us:
+                out.append("_")
+                prev_us = True
+    name = "".join(out).strip("_")
+    if not name:
+        name = fallback
+    if len(name) > max_len:
+        name = name[:max_len].rstrip("_")
+    return name or fallback
+
+
+def smart_output_path(raw_output: str, layer_or_path, operation_tag: str, ext: str = ".tif") -> str:
+    """
+    If user selected temporary output, create a deterministic readable name:
+      <input>_<operation>_<timestamp>.ext
+    Otherwise return user-provided output unchanged.
+    """
+    out = (raw_output or "").strip()
+    upper = out.upper()
+    is_temp = (not out) or (upper in ("TEMPORARY_OUTPUT", "CREATE TEMPORARY LAYER")) or out.startswith("memory:")
+    if not is_temp:
+        return out
+    label = slugify_ascii(infer_layer_label(layer_or_path, fallback="layer"), fallback="layer")
+    op = slugify_ascii(operation_tag or "result", fallback="result", max_len=48)
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    fname = f"{label}_{op}_{ts}{ext}"
+    return os.path.join(tempfile.gettempdir(), fname)
 
 
 def parse_weights_csv(text: str, count: int) -> List[float]:

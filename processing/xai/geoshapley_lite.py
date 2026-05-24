@@ -13,7 +13,7 @@ from qgis.core import (
     QgsProcessingParameterString,
 )
 
-from .._mcda_utils import ensure_list, parse_weights_csv
+from .._mcda_utils import ensure_list, parse_weights_csv, smart_output_path
 
 
 class GeoShapleyLiteAlgorithm(QgsProcessingAlgorithm):
@@ -82,6 +82,7 @@ class GeoShapleyLiteAlgorithm(QgsProcessingAlgorithm):
         weights = parse_weights_csv(self.parameterAsString(parameters, self.WEIGHTS_CSV, context), len(layers))
         sample_size = int(self.parameterAsInt(parameters, self.SAMPLE, context))
         out = self.parameterAsOutputLayer(parameters, self.OUTPUT, context)
+        out = smart_output_path(out, layers[0], "xai_geoshapley_lite")
 
         arrays = []
         nodata = None
