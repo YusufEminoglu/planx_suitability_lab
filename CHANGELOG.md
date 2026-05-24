@@ -64,6 +64,17 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning: [S
 - Reworked `Ctrl+N` flow into a persisted guided critical-run sequence instead of registry-missing checks.
 - Extended synthetic pipeline outputs and report chains with redundancy + constraint-impact diagnostics.
 
+## [1.3.1] - 2026-05-24
+
+- Fixed Hub scan quality blockers and warnings reported for `1.3.0`.
+- Resolved `E741` in dashboard list comprehensions by replacing ambiguous variable names.
+- Resolved `E226` arithmetic spacing warnings in diagnostics/readiness counters.
+- Removed unused imports (`F401`) in `main_plugin.py` and `decision_quadrant_map.py`.
+- Fixed `F841` in `_mcda_utils.py` by releasing dataset references without dead assignment.
+- Removed trailing blank-line issues (`W391`) in package init files.
+- Added `setup.cfg` flake8 policy to ignore `W503` and `E203` (Black-compatible style).
+- Removed hidden `icons/.gitkeep` to clear suspicious hidden-file warning.
+
 ## [1.2.3] - 2026-05-24
 
 - Added persistent module favorites (star pinning) in dashboard cards.

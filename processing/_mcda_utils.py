@@ -245,8 +245,8 @@ def _sample_matrix_from_rasters(rasters: Sequence[str], target_samples: int = 60
                 vals.append(v)
             if valid:
                 matrix.append(vals)
-    for ds in datasets:
-        ds = None
+    for idx in range(len(datasets)):
+        datasets[idx] = None
     if not matrix:
         return np.empty((0, len(rasters)), dtype=np.float64)
     return np.array(matrix, dtype=np.float64)

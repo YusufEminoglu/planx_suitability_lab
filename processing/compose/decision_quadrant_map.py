@@ -4,7 +4,6 @@ from __future__ import annotations
 import numpy as np
 from osgeo import gdal
 from qgis.core import (
-    QgsProcessing,
     QgsProcessingAlgorithm,
     QgsProcessingException,
     QgsProcessingParameterNumber,

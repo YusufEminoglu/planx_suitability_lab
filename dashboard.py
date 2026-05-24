@@ -728,8 +728,8 @@ class SuitabilityDashboard(QDialog):
 
     def _refresh(self):
         layers = list(QgsProject.instance().mapLayers().values())
-        vectors = [l for l in layers if hasattr(l, "featureCount")]
-        rasters = [l for l in layers if not hasattr(l, "featureCount")]
+        vectors = [layer for layer in layers if hasattr(layer, "featureCount")]
+        rasters = [layer for layer in layers if not hasattr(layer, "featureCount")]
         reg = QgsApplication.processingRegistry()
         missing = [aid for aid in REQUIRED_IDS if reg.algorithmById(aid) is None]
         gov_rows = []
@@ -793,7 +793,7 @@ class SuitabilityDashboard(QDialog):
 
         self.readiness.setHtml(
             "<h2>Release Checks</h2>"
-            f"<p><b>Required algorithms:</b> {len(REQUIRED_IDS)-len(missing)}/{len(REQUIRED_IDS)}</p>"
+            f"<p><b>Required algorithms:</b> {len(REQUIRED_IDS) - len(missing)}/{len(REQUIRED_IDS)}</p>"
             f"<p><b>Governance score:</b> {gov_score:.1f}% ({gov_ok}/{gov_total})</p>"
             f"<p><b>Missing:</b> {', '.join(missing) if missing else 'None'}</p>"
             "<h3>Governance Gates</h3>"
@@ -877,7 +877,7 @@ class SuitabilityDashboard(QDialog):
             "PlanX Suitability Lab Diagnostics\n"
             "================================\n"
             f"Loaded layers: {len(layers)}\n"
-            f"Required registry coverage: {len(REQUIRED_IDS)-len(missing)}/{len(REQUIRED_IDS)}\n"
+            f"Required registry coverage: {len(REQUIRED_IDS) - len(missing)}/{len(REQUIRED_IDS)}\n"
             f"Missing algorithms: {', '.join(missing) if missing else 'None'}\n"
             "Governance gates:\n"
             + "\n".join(gate_lines)

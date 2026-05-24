@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 from qgis.core import QgsApplication
-from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
 
 from .dashboard import SuitabilityDashboard
