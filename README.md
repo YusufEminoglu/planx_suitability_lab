@@ -10,7 +10,7 @@ PlanX Suitability Lab is a production-ready raster MCDA plugin for QGIS, designe
   - `proximity_builder` (target values, distance units, max distance)
   - `normalizer_reclassifier` (min-max and fuzzy linear/sigmoid/gaussian)
   - `constraint_builder` (hard 0/1 mask policy)
-  - `synthetic_sample_raster`, `synthetic_pipeline_runner` (smoke and QA automation)
+  - `synthetic_sample_raster`, `synthetic_pipeline_runner` (optional sample data/workflow for onboarding)
 - Weight engines:
   - `ahp_weights` (CR and CR acceptance flag)
   - `pca_derived_weights` (sampled covariance PCA-based weights)
@@ -74,17 +74,16 @@ PlanX Suitability Lab is a production-ready raster MCDA plugin for QGIS, designe
   - `action_playbook_generator`
   - `release_narrative_builder`
   - `numerical_qa_check`
-  - `beta_evidence_report` (release readiness evidence report)
+  - `beta_evidence_report` (project evidence summary)
 - Dashboard:
-  - studio-grade workflow pages and grouped algorithm catalog
+  - production workflow pages: Overview, Workflow, Guided Flow, Modules, Quick Actions, Recent Runs, System Health
   - module-card view with search/group filters
   - persistent favorite-module star pinning and favorites-only filter
-  - diagnostics and issue template helpers
-  - publication runbook copy helper and navigator tab
+  - workflow checklist and project-status copy helpers
   - command guide opener
   - command palette for fast module/action launch (`Ctrl+K`)
-  - one-click synthetic smoke pipeline runner
-  - live per-module `Ready/Missing` registry chips and critical-module tags
+  - optional sample workflow runner for onboarding
+  - live per-module `Ready/Missing` registry chips
   - bilingual EN/TR dashboard mode with quick toggle
   - recent-run log panel with timestamps
   - redesigned visual theme and layout
@@ -100,7 +99,6 @@ PlanX Suitability Lab is a production-ready raster MCDA plugin for QGIS, designe
 ## Notes
 
 - Use aligned 0-100 criteria rasters for best MCDA behavior.
-- Run `synthetic_pipeline_runner` first when validating new environments.
+- For real projects, start with `data_harmonizer` and continue from the dashboard `Guided Flow` tab.
 - Smart output naming: when an algorithm output is left as temporary, PlanX auto-generates readable file names in the pattern `<input>_<operation>_<timestamp>.tif`.
 - Full command details are available in `docs/COMMAND_GUIDE.html`.
-- Competitive positioning snapshot is documented in `docs/COMPETITIVE_BENCHMARK_2026-05.md`.

@@ -32,8 +32,8 @@ ALGO_GROUPS = [
         "Prepare",
         [
             ("Data Harmonizer", "planx_suitability_lab:data_harmonizer", "Align CRS/extent/resolution and export aligned stack."),
-            ("Synthetic Sample Pack", "planx_suitability_lab:synthetic_sample_raster", "Generate synthetic criteria + hard mask."),
-            ("Synthetic Pipeline", "planx_suitability_lab:synthetic_pipeline_runner", "One-click full smoke run."),
+            ("Sample Data Generator (Optional)", "planx_suitability_lab:synthetic_sample_raster", "Create optional sample criteria and hard mask for learning/demo."),
+            ("Sample Workflow Runner (Optional)", "planx_suitability_lab:synthetic_pipeline_runner", "Run optional sample workflow end-to-end on generated data."),
         ],
     ),
     (
@@ -88,7 +88,7 @@ ALGO_GROUPS = [
     (
         "Report",
         [
-            ("Numerical QA Check", "planx_suitability_lab:numerical_qa_check", "Bounds and percentile-order checks."),
+            ("Output Integrity Check", "planx_suitability_lab:numerical_qa_check", "Checks bounds, percentile ordering and basic raster validity."),
             ("Class Area Stats", "planx_suitability_lab:suitability_class_area_stats", "Coverage by suitability bands."),
             ("Suitability HTML Report", "planx_suitability_lab:suitability_html_report", "Executive report with QA section."),
             ("Scenario Markdown Brief", "planx_suitability_lab:scenario_markdown_brief", "Planner memo output."),
@@ -114,14 +114,14 @@ ALGO_GROUPS = [
             ("Intervention Conflict Area Stats", "planx_suitability_lab:intervention_conflict_area_stats", "Area distribution across intervention conflict classes."),
             ("Risk-Opportunity Area Stats", "planx_suitability_lab:risk_opportunity_area_stats", "Area distribution across invest/validate/defer strategy classes."),
             ("Regret Fragility Area Stats", "planx_suitability_lab:regret_fragility_area_stats", "Area distribution for stable/watch/fragile regret classes."),
-            ("Actionability Scorecard", "planx_suitability_lab:actionability_scorecard", "Single-table operational readiness score from KPI, budget and policy gate diagnostics."),
-            ("Scenario Selection Recommender", "planx_suitability_lab:scenario_selection_recommender", "Recommends primary/challenger scenario using benchmark, minimax regret, portfolio diversity and policy-readiness evidence."),
+            ("Actionability Scorecard", "planx_suitability_lab:actionability_scorecard", "Single-table implementation score from KPI, budget and policy diagnostics."),
+            ("Scenario Selection Recommender", "planx_suitability_lab:scenario_selection_recommender", "Recommends primary/challenger scenario using benchmark, minimax regret, portfolio diversity and policy evidence."),
             ("Implementation Wave Planner", "planx_suitability_lab:implementation_wave_planner", "Produces four-phase implementation wave plan from priority zones and risk-opportunity matrix."),
-            ("Deployment Readiness Gate", "planx_suitability_lab:deployment_readiness_gate", "Automated GO/CONDITIONAL/HOLD decision using scorecard, minimax, wave plan and fragility burden."),
+            ("Implementation Decision Gate", "planx_suitability_lab:deployment_readiness_gate", "Automated GO/CONDITIONAL/HOLD decision using scorecard, minimax, wave plan and fragility burden."),
             ("Intervention Budget Phasing", "planx_suitability_lab:intervention_budget_phasing", "Budget-step capture curve from priority zoning and index."),
             ("Action Playbook Generator", "planx_suitability_lab:action_playbook_generator", "Markdown playbook from priority zones and policy diagnostics."),
-            ("Release Narrative Builder", "planx_suitability_lab:release_narrative_builder", "Auto-builds EN/TR release paragraph from diagnostics tables."),
-            ("Release Evidence", "planx_suitability_lab:beta_evidence_report", "Registry-level readiness evidence."),
+            ("Planning Narrative Builder", "planx_suitability_lab:release_narrative_builder", "Auto-builds EN/TR planning narrative paragraphs from diagnostics tables."),
+            ("Project Evidence Summary", "planx_suitability_lab:beta_evidence_report", "Creates consolidated project evidence summary tables."),
         ],
     ),
 ]
@@ -314,7 +314,7 @@ class SuitabilityDashboard(QDialog):
         self.recent_runs = []
         self.card_widgets = []
         self.favorites = set(self.settings.value("planx_suitability_lab/favorites", [], type=list) or [])
-        self.setWindowTitle("PlanX Suitability Lab - Studio Console / Stüdyo Konsolu")
+        self.setWindowTitle("PlanX Suitability Lab - Production Console / Uretim Konsolu")
         self.resize(1320, 860)
         self._apply_style()
         self._build_ui()
@@ -422,15 +422,6 @@ class SuitabilityDashboard(QDialog):
                 font-size: 10px;
                 font-weight: 700;
             }
-            QLabel[classChip="critical"] {
-                color: #6a0b10;
-                background: #ffd6d9;
-                border: 1px solid #f2b6bb;
-                border-radius: 9px;
-                padding: 1px 7px;
-                font-size: 10px;
-                font-weight: 700;
-            }
             """
         )
 
@@ -446,14 +437,14 @@ class SuitabilityDashboard(QDialog):
         ttl_box = QVBoxLayout()
         title = QLabel("PlanX Suitability Lab")
         title.setObjectName("heroTitle")
-        subtitle = QLabel("Raster MCDA Studio: harmonize, model, stress-test, explain, report | Raster MCDA Stüdyo: hizala, modelle, test et, acikla, raporla")
+        subtitle = QLabel("Raster MCDA workflow: prepare, score, compare, explain, report | Raster MCDA akisi: hazirla, puanla, karsilastir, acikla, raporla")
         subtitle.setObjectName("heroSub")
         ttl_box.addWidget(title)
         ttl_box.addWidget(subtitle)
         hero_layout.addLayout(ttl_box, 1)
         status_col = QVBoxLayout()
         status_col.setSpacing(6)
-        self.status_chip = QLabel("Release Readiness: checking...")
+        self.status_chip = QLabel("System Status: checking...")
         self.status_chip.setObjectName("statusChip")
         status_col.addWidget(self.status_chip, 0, Qt.AlignRight)
         self.lang_combo = QComboBox()
@@ -496,10 +487,10 @@ class SuitabilityDashboard(QDialog):
         nl = QVBoxLayout(navigator_tab)
         nl.setContentsMargins(10, 10, 10, 10)
         nav_btns = QHBoxLayout()
-        run_next = QPushButton("Run Next Critical / Sonraki Kritik")
+        run_next = QPushButton("Run Next Suggested Step / Sonraki Onerilen Adim")
         run_next.clicked.connect(self._run_next_critical)
         nav_btns.addWidget(run_next)
-        copy_runbook = QPushButton("Copy Runbook / Calisma Plani")
+        copy_runbook = QPushButton("Copy Workflow Checklist / Akis Kontrol Listesi")
         copy_runbook.setObjectName("ghost")
         copy_runbook.clicked.connect(self._copy_runbook)
         nav_btns.addWidget(copy_runbook)
@@ -507,7 +498,7 @@ class SuitabilityDashboard(QDialog):
         nl.addLayout(nav_btns)
         self.navigator = QTextBrowser()
         nl.addWidget(self.navigator, 1)
-        self.tabs.addTab(navigator_tab, "Navigator / Yayin")
+        self.tabs.addTab(navigator_tab, "Guided Flow / Rehberli Akis")
 
         modules_tab = QWidget()
         ml = QVBoxLayout(modules_tab)
@@ -550,17 +541,15 @@ class SuitabilityDashboard(QDialog):
         ql.setHorizontalSpacing(10)
         ql.setVerticalSpacing(10)
         quick_buttons = [
-            ("Run Synthetic Pipeline / Duman Testi", self._run_synthetic_pipeline, False),
-            ("Generate Release Evidence / Kanit Uret", self._run_release_evidence, False),
+            ("Run Suggested Next Step / Onerilen Sonraki Adim", self._run_next_critical, False),
+            ("Generate Project Evidence / Proje Ozet Kaniti", self._run_release_evidence, False),
             ("Open Command Palette / Komut Paleti", self._open_command_palette, False),
             ("Open Command Guide", self._open_command_guide, True),
-            ("Open Benchmark Note", self._open_benchmark_note, True),
             ("Show Shortcut Help / Kisayol Yardimi", self._show_shortcuts, True),
-            ("Copy Diagnostics", self._copy_diagnostics, True),
-            ("Copy Issue Template", self._copy_issue, True),
+            ("Copy Project Status", self._copy_diagnostics, True),
             ("Copy Shortcuts", self._copy_shortcuts, True),
-            ("Copy Runbook", self._copy_runbook, True),
-            ("Copy Hub Changelog Draft", self._copy_hub, True),
+            ("Copy Workflow Checklist", self._copy_runbook, True),
+            ("Run Sample Workflow (Optional)", self._run_synthetic_pipeline, True),
         ]
         for i, (txt, fn, ghost) in enumerate(quick_buttons):
             b = QPushButton(txt)
@@ -582,13 +571,13 @@ class SuitabilityDashboard(QDialog):
         self.tabs.addTab(runlog_tab, "Recent Runs / Son Calismalar")
 
         self.readiness = QTextBrowser()
-        self.tabs.addTab(self.readiness, "Readiness / Hazirlik")
+        self.tabs.addTab(self.readiness, "System Health / Sistem Durumu")
 
         footer = QHBoxLayout()
         refresh = QPushButton("Refresh / Yenile")
         refresh.clicked.connect(self._refresh)
         footer.addWidget(refresh)
-        hint = QLabel("Shortcuts: Ctrl+K palette | Ctrl+R refresh | Ctrl+D diagnostics | Ctrl+I issue | Ctrl+H help | Ctrl+G guide | Ctrl+P synthetic | Ctrl+N next-critical | Ctrl+L EN/TR")
+        hint = QLabel("Shortcuts: Ctrl+K palette | Ctrl+R refresh | Ctrl+D status | Ctrl+H help | Ctrl+G guide | Ctrl+P sample(optional) | Ctrl+N next-step | Ctrl+L EN/TR")
         hint.setStyleSheet("color:#35545f;")
         footer.addWidget(hint, 1)
         root.addLayout(footer)
@@ -622,13 +611,6 @@ class SuitabilityDashboard(QDialog):
                 d.setWordWrap(True)
                 d.setStyleSheet("color:#294e58; font-size:12px;")
 
-                tags_row = QHBoxLayout()
-                if aid in REQUIRED_IDS:
-                    critical_lbl = QLabel("Critical")
-                    critical_lbl.setProperty("classChip", "critical")
-                    tags_row.addWidget(critical_lbl, 0, Qt.AlignLeft)
-                tags_row.addStretch(1)
-
                 fav = QPushButton("Fav")
                 fav.setObjectName("favBtn")
                 fav.setCheckable(True)
@@ -641,7 +623,6 @@ class SuitabilityDashboard(QDialog):
                 v.addLayout(header)
                 v.addWidget(m)
                 v.addWidget(d, 1)
-                v.addLayout(tags_row)
 
                 br = QHBoxLayout()
                 br.addWidget(fav, 0, Qt.AlignLeft)
@@ -752,8 +733,8 @@ class SuitabilityDashboard(QDialog):
             card.status_lbl.style().polish(card.status_lbl)
 
         ready = len(missing) == 0
-        status = "READY" if ready else "NOT READY"
-        self.status_chip.setText(f"Release Readiness: {status}")
+        status = "READY" if ready else "ATTENTION"
+        self.status_chip.setText(f"System Status: {status}")
         if ready:
             self.status_chip.setStyleSheet("color:#0f2d3a;background:#9fdfbf;border:1px solid #6fc995;border-radius:11px;padding:4px 10px;font-weight:700;")
         else:
@@ -762,18 +743,18 @@ class SuitabilityDashboard(QDialog):
         self.overview.setHtml(
             "<h2>Overview</h2>"
             + (
-                "<p><b>EN:</b> Production-ready raster MCDA with hard constraints, uncertainty, explainability, and reporting.</p>"
-                "<p><b>TR:</b> Ikincil dil destegi etkin. Turkce kisayollar ve aciklama metinleri Navigator/Help alanlarinda sunulur.</p>"
+                "<p><b>EN:</b> Production raster MCDA workflow with hard constraints, uncertainty, explainability, and reporting.</p>"
+                "<p><b>TR:</b> Ikincil dil destegi etkin. Turkce yardim ve kisayollar arayuzde gorunur.</p>"
                 if self.lang == "EN"
                 else "<p><b>TR:</b> Sert kisit, belirsizlik, aciklanabilirlik ve raporlama iceren uretim-hazir raster MCDA platformu.</p>"
                 "<p><b>EN:</b> Secondary English text remains visible for mixed-language teams.</p>"
             )
             + f"<p><b>{'Loaded layers' if self.lang == 'EN' else 'Yuklu katmanlar'}:</b> {len(layers)} (vector: {len(vectors)}, raster: {len(rasters)})</p>"
-            + f"<p><b>{'Governance readiness score' if self.lang == 'EN' else 'Yonetişim hazirlik skoru'}:</b> {gov_score:.1f}% ({gov_ok}/{gov_total} checks)</p>"
+            + f"<p><b>{'System health score' if self.lang == 'EN' else 'Sistem saglik skoru'}:</b> {gov_score:.1f}% ({gov_ok}/{gov_total} checks)</p>"
             + (
-                "<p><b>Tip:</b> Start with <code>Synthetic Pipeline</code> for smoke validation before real data runs.</p>"
+                "<p><b>Tip:</b> Start with <code>Data Harmonizer</code>, then continue from <code>Guided Flow</code>.</p>"
                 if self.lang == "EN"
-                else "<p><b>Ipucu:</b> Gercek veriye gecmeden once <code>Synthetic Pipeline</code> ile duman testi calistirin.</p>"
+                else "<p><b>Ipucu:</b> Once <code>Data Harmonizer</code> calistirin, sonra <code>Rehberli Akis</code> sekmesini takip edin.</p>"
             )
         )
         self.workflow_map.setHtml(self._build_workflow_html())
@@ -792,42 +773,41 @@ class SuitabilityDashboard(QDialog):
         gov_table.append("</table>")
 
         self.readiness.setHtml(
-            "<h2>Release Checks</h2>"
-            f"<p><b>Required algorithms:</b> {len(REQUIRED_IDS) - len(missing)}/{len(REQUIRED_IDS)}</p>"
-            f"<p><b>Governance score:</b> {gov_score:.1f}% ({gov_ok}/{gov_total})</p>"
-            f"<p><b>Missing:</b> {', '.join(missing) if missing else 'None'}</p>"
-            "<h3>Governance Gates</h3>"
+            "<h2>System Health</h2>"
+            f"<p><b>Available algorithms:</b> {len(REQUIRED_IDS) - len(missing)}/{len(REQUIRED_IDS)}</p>"
+            f"<p><b>Coverage score:</b> {gov_score:.1f}% ({gov_ok}/{gov_total})</p>"
+            f"<p><b>Missing modules:</b> {', '.join(missing) if missing else 'None'}</p>"
+            "<h3>Workflow Coverage</h3>"
             + "".join(gov_table)
-            + "<h3>Current Readiness Logic</h3>"
+            + "<h3>What this means</h3>"
             "<ul>"
-            "<li>Provider registry coverage for critical modules</li>"
-            "<li>Governance gates across engine, reliability, decision ops and reporting</li>"
-            "<li>Project layers present for interactive runs</li>"
-            "<li>Dedicated QA tools available in reporting group</li>"
+            "<li>Prepare/Criteria/Weights/Compose/Report pipeline modules are registered.</li>"
+            "<li>You can run modules from Workflow, Modules, or Command Palette.</li>"
+            "<li>If modules are missing, restart QGIS and refresh this panel.</li>"
             "</ul>"
         )
         self.navigator.setHtml(self._build_navigator_html(gov_rows, missing))
 
     def _build_navigator_html(self, gov_rows, missing):
         if self.lang == "TR":
-            title = "Yayin Navigasyonu"
-            lead = "Asagidaki akis, yayina hazirlik icin onerilen operasyon sirasidir."
-            missing_label = "Eksik kritik moduller"
+            title = "Rehberli Proje Akisi"
+            lead = "Asagidaki sira, yerlesilebilirlik calismasini sistemli ve tekrar edilebilir sekilde yurutur."
+            missing_label = "Eksik moduller"
             next_step = "Sonraki adim"
-            all_good = "Tum kritik moduller kayitli. Gercek proje duman testine gecilebilir."
+            all_good = "Tum temel moduller aktif. Rehberli akisla devam edebilirsiniz."
         else:
-            title = "Release Navigator"
-            lead = "Follow this execution order to move from setup to publication-grade evidence."
-            missing_label = "Missing critical modules"
+            title = "Guided Project Flow"
+            lead = "Follow this sequence to run a complete, production suitability workflow in a consistent way."
+            missing_label = "Missing modules"
             next_step = "Next best action"
-            all_good = "All critical modules are registered. Proceed with project-level smoke validation."
+            all_good = "Core modules are active. Continue with the guided flow."
 
         flow = [
-            "1) Prepare: Data Harmonizer + Alignment Audit + Synthetic Pipeline baseline.",
-            "2) Compose: WLC / OWA / TOPSIS / VIKOR + Ensemble + Consensus + Disagreement + Decision Quadrant + Intervention Matrix + Priority Zoning.",
-            "3) Reliability: Monte Carlo + Weight Consensus + Redundancy + Constraint Impact + Robustness Leaderboard.",
-            "4) Policy Ops: Frontier + Budget Phasing + Scenario Governance Audit + Action Playbook.",
-            "5) Release: QA Check + HTML Report + Narrative + Beta Evidence.",
+            "1) Prepare: Data Harmonizer + Alignment Audit to standardize all criteria rasters.",
+            "2) Criteria: Rasterize vectors, build proximity layers, normalize scores, and create hard constraints.",
+            "3) Weights: Run AHP/PCA/Entropy/CRITIC and review consensus before selecting scenarios.",
+            "4) Compose: Build WLC/OWA/TOPSIS/VIKOR, then inspect consensus, disagreement, and priority zoning.",
+            "5) Explain + Report: Monte Carlo, sensitivity, KPI tables, HTML report, and planning narrative.",
         ]
 
         gates = [
@@ -843,7 +823,7 @@ class SuitabilityDashboard(QDialog):
         next_action = all_good if not missing else f"{next_step}: <code>{missing[0]}</code>"
         miss_text = ", ".join(missing) if missing else "None"
         seq_id = CRITICAL_RUN_SEQUENCE[self.run_cursor % len(CRITICAL_RUN_SEQUENCE)]
-        seq_hint = f"Guided next run: <code>{seq_id}</code>"
+        seq_hint = f"Suggested next run: <code>{seq_id}</code>"
 
         html = (
             f"<h2>{title}</h2>"
@@ -854,7 +834,7 @@ class SuitabilityDashboard(QDialog):
             f"<p><b>{missing_label}:</b> {miss_text}</p>"
             f"<p><b>{next_action}</b></p>"
             f"<p><b>{seq_hint}</b></p>"
-            "<h3>Gate Coverage</h3>"
+            "<h3>Module Coverage</h3>"
             + "".join(gates)
         )
         return html
@@ -874,22 +854,14 @@ class SuitabilityDashboard(QDialog):
             found = len([aid for aid in ids if reg.algorithmById(aid) is not None])
             gate_lines.append(f"- {gname}: {found}/{len(ids)}")
         txt = (
-            "PlanX Suitability Lab Diagnostics\n"
-            "================================\n"
+            "PlanX Suitability Lab - Project Status\n"
+            "=====================================\n"
             f"Loaded layers: {len(layers)}\n"
             f"Required registry coverage: {len(REQUIRED_IDS) - len(missing)}/{len(REQUIRED_IDS)}\n"
             f"Missing algorithms: {', '.join(missing) if missing else 'None'}\n"
-            "Governance gates:\n"
+            "Module coverage by workflow group:\n"
             + "\n".join(gate_lines)
             + "\n"
-        )
-        QApplication.clipboard().setText(txt)
-
-    def _copy_issue(self):
-        txt = (
-            "PlanX Suitability Lab Issue Template\n"
-            "====================================\n\n"
-            "Summary:\n-\n\nExpected:\n-\n\nActual:\n-\n\nReproduction:\n1.\n2.\n3.\n"
         )
         QApplication.clipboard().setText(txt)
 
@@ -899,35 +871,26 @@ class SuitabilityDashboard(QDialog):
             "===============================\n"
             "Ctrl+K : Open command palette\n"
             "Ctrl+R : Refresh dashboard checks\n"
-            "Ctrl+D : Copy diagnostics\n"
-            "Ctrl+I : Copy issue template\n"
+            "Ctrl+D : Copy project status\n"
+            "Ctrl+I : Copy workflow checklist\n"
             "Ctrl+H : Show shortcut help\n"
             "Ctrl+G : Open command guide\n"
-            "Ctrl+P : Run synthetic pipeline\n"
-            "Ctrl+N : Run next guided critical step\n"
+            "Ctrl+P : Run sample workflow (optional)\n"
+            "Ctrl+N : Run next suggested step\n"
             "Ctrl+L : Toggle language EN/TR\n"
         )
         QApplication.clipboard().setText(txt)
 
     def _copy_runbook(self):
         txt = (
-            "PlanX Suitability Lab - Publication Runbook\n"
-            "===========================================\n"
-            "1. Data Harmonizer and Synthetic Pipeline (smoke baseline).\n"
-            "2. Compose scenarios: WLC, OWA, TOPSIS, VIKOR, Ensemble, Risk-Opportunity Matrix, Regret Fragility, Priority Zoning.\n"
-            "3. Reliability diagnostics: Monte Carlo, Weight Consensus, Scenario Benchmark, Scenario Robustness, Portfolio Diversity, Minimax Regret, Criterion Redundancy, Constraint Impact.\n"
-            "4. Decision operations: Policy Gate, Actionability Scorecard, Scenario Selection, Scenario Governance Audit, Implementation Wave Plan, Deployment Readiness Gate.\n"
-            "5. Policy and delivery: Sensitivity Frontier, Budget Phasing, Action Playbook.\n"
-            "6. Final evidence: Numerical QA, HTML Report, Release Narrative, Beta Evidence.\n"
-        )
-        QApplication.clipboard().setText(txt)
-
-    def _copy_hub(self):
-        txt = (
-            "PlanX Suitability Lab - advanced MCDA governance and decision-ops expansion.\n"
-            "- Added VIKOR suitability as a compromise MCDA engine alongside WLC/OWA/TOPSIS for stronger scenario triangulation.\n"
-            "- Added Scenario Robustness Leaderboard fusing benchmark, dominance, minimax regret and diversity into one elite ranking layer.\n"
-            "- Upgraded synthetic pipeline and dashboard governance chain to include robustness-led recommendation plus governance-risk audit evidence."
+            "PlanX Suitability Lab - Workflow Checklist\n"
+            "==========================================\n"
+            "1. Prepare: Harmonize all rasters and run alignment audit.\n"
+            "2. Criteria: Rasterize vectors, create proximity rasters, normalize criteria, build hard constraints.\n"
+            "3. Weights: Compute AHP/PCA/Entropy/CRITIC and review consensus table.\n"
+            "4. Compose: Generate WLC/OWA/TOPSIS/VIKOR and compare scenarios.\n"
+            "5. Explain: Run Monte Carlo and sensitivity/contribution modules.\n"
+            "6. Report: Produce class stats, KPI snapshot, HTML report, and planning narrative.\n"
         )
         QApplication.clipboard().setText(txt)
 
@@ -935,11 +898,6 @@ class SuitabilityDashboard(QDialog):
         guide_path = os.path.join(os.path.dirname(__file__), "docs", "COMMAND_GUIDE.html")
         if os.path.exists(guide_path):
             QDesktopServices.openUrl(QUrl.fromLocalFile(guide_path))
-
-    def _open_benchmark_note(self):
-        note_path = os.path.join(os.path.dirname(__file__), "docs", "COMPETITIVE_BENCHMARK_2026-05.md")
-        if os.path.exists(note_path):
-            QDesktopServices.openUrl(QUrl.fromLocalFile(note_path))
 
     def _show_shortcuts(self):
         popup = QDialog(self)
@@ -953,12 +911,12 @@ class SuitabilityDashboard(QDialog):
                 "<ul>"
                 "<li><b>Ctrl+K</b> - Komut paletini ac</li>"
                 "<li><b>Ctrl+R</b> - Panel kontrollerini yenile</li>"
-                "<li><b>Ctrl+D</b> - Diagnostik metnini kopyala</li>"
-                "<li><b>Ctrl+I</b> - Issue sablonunu kopyala</li>"
+                "<li><b>Ctrl+D</b> - Proje durumunu kopyala</li>"
+                "<li><b>Ctrl+I</b> - Akis kontrol listesini kopyala</li>"
                 "<li><b>Ctrl+H</b> - Bu yardimi ac</li>"
                 "<li><b>Ctrl+G</b> - Komut rehberini ac</li>"
-                "<li><b>Ctrl+P</b> - Synthetic pipeline calistir</li>"
-                "<li><b>Ctrl+N</b> - Yonlendirilmis kritik adimi calistir</li>"
+                "<li><b>Ctrl+P</b> - Ornek akis (opsiyonel) calistir</li>"
+                "<li><b>Ctrl+N</b> - Sonraki onerilen adimi calistir</li>"
                 "<li><b>Ctrl+L</b> - EN/TR dil degistir</li>"
                 "</ul>"
             )
@@ -968,12 +926,12 @@ class SuitabilityDashboard(QDialog):
                 "<ul>"
                 "<li><b>Ctrl+K</b> - Open command palette</li>"
                 "<li><b>Ctrl+R</b> - Refresh dashboard checks</li>"
-                "<li><b>Ctrl+D</b> - Copy diagnostics</li>"
-                "<li><b>Ctrl+I</b> - Copy issue template</li>"
+                "<li><b>Ctrl+D</b> - Copy project status</li>"
+                "<li><b>Ctrl+I</b> - Copy workflow checklist</li>"
                 "<li><b>Ctrl+H</b> - Show this shortcut help</li>"
                 "<li><b>Ctrl+G</b> - Open full command guide</li>"
-                "<li><b>Ctrl+P</b> - Run synthetic pipeline</li>"
-                "<li><b>Ctrl+N</b> - Run next guided critical step</li>"
+                "<li><b>Ctrl+P</b> - Run sample workflow (optional)</li>"
+                "<li><b>Ctrl+N</b> - Run next suggested step</li>"
                 "<li><b>Ctrl+L</b> - Toggle EN/TR language</li>"
                 "</ul>"
             )
@@ -997,13 +955,13 @@ class SuitabilityDashboard(QDialog):
         layout.addWidget(listing, 1)
 
         commands = [
-            ("Run Synthetic Pipeline", "__action__:run_synthetic", "Quick run of full smoke pipeline", self._run_synthetic_pipeline),
-            ("Run Next Critical Step", "__action__:next_critical", "Guided critical sequence execution", self._run_next_critical),
-            ("Generate Release Evidence", "__action__:release_evidence", "Open release evidence algorithm dialog", self._run_release_evidence),
+            ("Run Sample Workflow (Optional)", "__action__:run_synthetic", "Optional end-to-end run on sample data", self._run_synthetic_pipeline),
+            ("Run Next Suggested Step", "__action__:next_critical", "Guided project workflow execution", self._run_next_critical),
+            ("Generate Project Evidence", "__action__:release_evidence", "Open consolidated project evidence dialog", self._run_release_evidence),
             ("Open Command Guide", "__action__:command_guide", "Open detailed command usage guide", self._open_command_guide),
             ("Show Shortcut Help", "__action__:shortcut_help", "Open shortcuts quick help", self._show_shortcuts),
-            ("Copy Diagnostics", "__action__:copy_diag", "Copy registry and governance diagnostics", self._copy_diagnostics),
-            ("Copy Runbook", "__action__:copy_runbook", "Copy publication runbook steps", self._copy_runbook),
+            ("Copy Project Status", "__action__:copy_diag", "Copy layer and module coverage status", self._copy_diagnostics),
+            ("Copy Workflow Checklist", "__action__:copy_runbook", "Copy step-by-step production workflow checklist", self._copy_runbook),
         ]
         for group, items in ALGO_GROUPS:
             for title_txt, aid, desc in items:
@@ -1059,10 +1017,10 @@ class SuitabilityDashboard(QDialog):
         popup.exec_()
 
     def _run_synthetic_pipeline(self):
-        self._run_algorithm("planx_suitability_lab:synthetic_pipeline_runner", "Synthetic Pipeline")
+        self._run_algorithm("planx_suitability_lab:synthetic_pipeline_runner", "Sample Workflow Runner")
 
     def _run_release_evidence(self):
-        self._run_algorithm("planx_suitability_lab:beta_evidence_report", "Release Evidence")
+        self._run_algorithm("planx_suitability_lab:beta_evidence_report", "Project Evidence Summary")
 
     def _run_next_critical(self):
         reg = QgsApplication.processingRegistry()
@@ -1091,7 +1049,7 @@ class SuitabilityDashboard(QDialog):
             self._copy_diagnostics()
             return
         if event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_I:
-            self._copy_issue()
+            self._copy_runbook()
             return
         if event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_H:
             self._show_shortcuts()

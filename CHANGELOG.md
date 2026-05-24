@@ -5,6 +5,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning: [S
 
 ## [Unreleased]
 
+- Dashboard UX was streamlined for production use: removed beta/release/issue-oriented wording, simplified quick actions, and centered the interface on guided project execution.
+- Reworked user guidance into a clean `Guided Flow` and `System Health` model with actionable next-step suggestions.
+- Updated module and report labels to user-facing planning terminology (for example, `Output Integrity Check`, `Planning Narrative Builder`, `Project Evidence Summary`).
+- Removed non-essential benchmark/issue helpers from primary UX surface while keeping optional sample workflow tools for onboarding.
 - Added smart temporary output naming across core/compose/uncertainty/XAI raster modules: when users keep output as temporary, files are now auto-named as `<input>_<operation>_<timestamp>.tif` for traceable run artifacts.
 - Added `vikor_suitability` as a fourth major compose engine (WLC/OWA/TOPSIS/VIKOR) for compromise-based MCDA decision support.
 - Added `scenario_robustness_leaderboard` to fuse benchmark, dominance, minimax-regret and portfolio-diversity evidence into one elite robustness rank.
