@@ -5,7 +5,7 @@ import os
 from datetime import datetime
 
 import processing
-from qgis.PyQt.QtCore import Qt, QUrl
+from qgis.PyQt.QtCore import QSettings, Qt, QUrl
 from qgis.PyQt.QtGui import QDesktopServices
 from qgis.PyQt.QtWidgets import (
     QApplication,
@@ -102,8 +102,10 @@ class SuitabilityDashboard(QDialog):
     def __init__(self, iface, parent=None):
         super().__init__(parent)
         self.iface = iface
+        self.settings = QSettings()
         self.recent_runs = []
         self.card_widgets = []
+        self.favorites = set(self.settings.value("planx_suitability_lab/favorites", [], type=list) or [])
         self.setWindowTitle("PlanX Suitability Lab - Studio Console")
         self.resize(1320, 860)
         self._apply_style()
@@ -166,6 +168,19 @@ class SuitabilityDashboard(QDialog):
                 border: 1px solid #b8cdd4;
             }
             QPushButton#ghost:hover { background: #f2f8f9; }
+            QPushButton#favBtn {
+                background: #ffffff;
+                color: #b07b00;
+                border: 1px solid #d5c17a;
+                border-radius: 7px;
+                padding: 2px 6px;
+                font-weight: 700;
+            }
+            QPushButton#favBtn:checked {
+                background: #ffe8a6;
+                color: #8c5a00;
+                border: 1px solid #cfa140;
+            }
             QComboBox, QLineEdit {
                 background: #ffffff;
                 border: 1px solid #c9d9de;
@@ -246,6 +261,11 @@ class SuitabilityDashboard(QDialog):
             self.group_filter.addItem(g, g)
         self.group_filter.currentIndexChanged.connect(self._filter_cards)
         filter_row.addWidget(self.group_filter)
+        self.fav_only = QPushButton("Favorites Only")
+        self.fav_only.setObjectName("ghost")
+        self.fav_only.setCheckable(True)
+        self.fav_only.toggled.connect(self._filter_cards)
+        filter_row.addWidget(self.fav_only)
         ml.addLayout(filter_row)
 
         self.cards_scroll = QScrollArea()
@@ -323,13 +343,23 @@ class SuitabilityDashboard(QDialog):
                 d = QLabel(desc)
                 d.setWordWrap(True)
                 d.setStyleSheet("color:#294e58; font-size:12px;")
+                fav = QPushButton("★")
+                fav.setObjectName("favBtn")
+                fav.setCheckable(True)
+                fav.setChecked(aid in self.favorites)
+                fav.clicked.connect(lambda checked, x=aid: self._toggle_favorite(x, checked))
                 run = QPushButton("Run")
                 run.clicked.connect(lambda _, x=aid, n=title_txt: self._run_algorithm(x, n))
                 v.addWidget(t)
                 v.addWidget(m)
                 v.addWidget(d, 1)
-                v.addWidget(run, 0, Qt.AlignRight)
+                br = QHBoxLayout()
+                br.addWidget(fav, 0, Qt.AlignLeft)
+                br.addStretch(1)
+                br.addWidget(run, 0, Qt.AlignRight)
+                v.addLayout(br)
                 card.meta = (group.lower(), title_txt.lower(), aid.lower(), desc.lower())
+                card.algo_id = aid
                 r = idx // 3
                 c = idx % 3
                 self.cards_grid.addWidget(card, r, c)
@@ -340,11 +370,21 @@ class SuitabilityDashboard(QDialog):
         q = (self.search.text() or "").strip().lower()
         group = self.group_filter.currentData() or ""
         g = group.lower().strip()
+        fav_only = self.fav_only.isChecked()
         for card in self.card_widgets:
             mg, mt, ma, md = card.meta
             ok_q = (q in mg) or (q in mt) or (q in ma) or (q in md) if q else True
             ok_g = (mg == g) if g else True
-            card.setVisible(ok_q and ok_g)
+            ok_f = (card.algo_id in self.favorites) if fav_only else True
+            card.setVisible(ok_q and ok_g and ok_f)
+
+    def _toggle_favorite(self, algo_id, checked):
+        if checked:
+            self.favorites.add(algo_id)
+        else:
+            self.favorites.discard(algo_id)
+        self.settings.setValue("planx_suitability_lab/favorites", sorted(self.favorites))
+        self._filter_cards()
 
     def _build_workflow_html(self):
         parts = ["<h2>Operational Map</h2>"]
@@ -452,10 +492,10 @@ class SuitabilityDashboard(QDialog):
 
     def _copy_hub(self):
         txt = (
-            "PlanX Suitability Lab 1.2.1 - production MCDA release.\n"
+            "PlanX Suitability Lab 1.2.3 - production MCDA release.\n"
             "- Added TOPSIS, robust suitability, and class-area stats for decision-grade analysis.\n"
             "- Strengthened chunk-aware raster engines and geometry-free analytics tables.\n"
-            "- Introduced redesigned studio dashboard and unique custom icon."
+            "- Introduced redesigned studio dashboard with persistent favorites and custom icon."
         )
         QApplication.clipboard().setText(txt)
 
@@ -484,4 +524,3 @@ class SuitabilityDashboard(QDialog):
             self._run_synthetic_pipeline()
             return
         super().keyPressEvent(event)
-

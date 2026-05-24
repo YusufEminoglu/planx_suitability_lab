@@ -3,6 +3,12 @@
 All notable changes to **PlanX Suitability Lab** are documented here.  
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning: [SemVer](https://semver.org/).
 
+## [1.2.3] - 2026-05-24
+
+- Added persistent module favorites (star pinning) in dashboard cards.
+- Added `Favorites Only` filter for faster access to preferred workflows.
+- Stored favorites with QSettings so user preferences persist across sessions.
+
 ## [1.2.2] - 2026-05-23
 
 - Reworked dashboard into a studio console with module cards and grouped catalog browsing.
