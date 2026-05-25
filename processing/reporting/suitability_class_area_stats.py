@@ -118,7 +118,7 @@ class SuitabilityClassAreaStatsAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField("cell_count", QVariant.LongLong))
         fields.append(QgsField("pct_valid", QVariant.Double))
         fields.append(QgsField("area_units2", QVariant.Double))
-        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, None)
+        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         top_id = 1
         top_count = -1

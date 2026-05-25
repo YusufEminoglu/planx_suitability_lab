@@ -99,7 +99,7 @@ class PolicySensitivityFrontierAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField("area_ge_80_pct", QVariant.Double))
         fields.append(QgsField("area_ge_60_pct", QVariant.Double))
         fields.append(QgsField("delta_vs_prev", QVariant.Double))
-        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, None)
+        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         prev_mean = None
         for lam in lambdas:

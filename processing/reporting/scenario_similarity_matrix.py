@@ -179,7 +179,7 @@ class ScenarioSimilarityMatrixAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField("mae", QVariant.Double))
         fields.append(QgsField("rmse", QVariant.Double))
         fields.append(QgsField("agreement", QVariant.String))
-        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, None)
+        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         for idx, (i, j) in enumerate(pairs):
             n = count[idx]

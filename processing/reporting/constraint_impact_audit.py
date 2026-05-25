@@ -163,7 +163,7 @@ class ConstraintImpactAuditAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField("excluded_high_cells", QVariant.LongLong))
         fields.append(QgsField("excluded_high_pct", QVariant.Double))
         fields.append(QgsField("priority_risk", QVariant.String))
-        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, None)
+        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         def _risk_tag(ex_pct: float, high_pct: float) -> str:
             if ex_pct >= 25.0 or high_pct >= 25.0:

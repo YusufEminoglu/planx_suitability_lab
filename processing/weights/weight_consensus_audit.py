@@ -74,7 +74,7 @@ class WeightConsensusAuditAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField("w_std", QVariant.Double))
         fields.append(QgsField("cv_pct", QVariant.Double))
         fields.append(QgsField("agreement", QVariant.String))
-        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, None)
+        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         for cid in sorted(by_criterion.keys()):
             vals = by_criterion[cid]

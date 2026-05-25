@@ -97,7 +97,7 @@ class ImplementationWavePlannerAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField("cells", QVariant.LongLong))
         fields.append(QgsField("pct", QVariant.Double))
         fields.append(QgsField("area", QVariant.Double))
-        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, None)
+        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         labels = {
             1: ("WAVE_1", "RAPID_DELIVERY"),

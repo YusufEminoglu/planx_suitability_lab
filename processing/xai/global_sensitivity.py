@@ -89,7 +89,7 @@ class GlobalSensitivityAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField("std", QVariant.Double))
         fields.append(QgsField("weighted_std", QVariant.Double))
         fields.append(QgsField("importance", QVariant.Double))
-        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, None)
+        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
         for row in stats:
             f = QgsFeature(fields)
             f["criterion"] = row[0]

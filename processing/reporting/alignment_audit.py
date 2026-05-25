@@ -95,7 +95,7 @@ class AlignmentAuditAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField("aligned_extent", QVariant.Int))
         fields.append(QgsField("aligned_shape", QVariant.Int))
         fields.append(QgsField("aligned_all", QVariant.Int))
-        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, None)
+        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         aligned_all_count = 0
         total = len(rasters)

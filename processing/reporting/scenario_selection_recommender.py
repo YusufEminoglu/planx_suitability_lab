@@ -223,7 +223,7 @@ class ScenarioSelectionRecommenderAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField("diversity_idx", QVariant.Double))
         fields.append(QgsField("portfolio_hlth", QVariant.Double))
         fields.append(QgsField("note", QVariant.String))
-        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, None)
+        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         out = QgsFeature(fields)
         out["primary_scn"] = primary[0]

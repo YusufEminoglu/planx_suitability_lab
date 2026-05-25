@@ -195,7 +195,7 @@ class ScenarioDominanceMatrixAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField("mean_diff", QVariant.Double))
         fields.append(QgsField("net_dom", QVariant.Double))
         fields.append(QgsField("rank", QVariant.Int))
-        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, None)
+        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         # Pairwise rows
         for i, j in pairs:

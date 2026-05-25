@@ -63,7 +63,7 @@ class CriticWeightsAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField("std_dev", QVariant.Double))
         fields.append(QgsField("contrast", QVariant.Double))
         fields.append(QgsField("critic_score", QVariant.Double))
-        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, None)
+        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         for i, wi in enumerate(weights, start=1):
             sc = float(sigma[i - 1] * contrast[i - 1]) if i - 1 < len(sigma) else 0.0

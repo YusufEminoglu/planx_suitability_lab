@@ -95,7 +95,7 @@ class PriorityTransitionMatrixAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField("pct_from", QVariant.Double))
         fields.append(QgsField("area", QVariant.Double))
         fields.append(QgsField("transition", QVariant.String))
-        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, None)
+        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         from_counts = np.bincount(a_i, minlength=5).astype(np.float64)
         mat = np.zeros((5, 5), dtype=np.float64)

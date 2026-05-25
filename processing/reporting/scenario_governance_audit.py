@@ -165,7 +165,7 @@ class ScenarioGovernanceAuditAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField("notes", QVariant.String))
         fields.append(QgsField("strategy", QVariant.String))
         fields.append(QgsField("deploy_dec", QVariant.String))
-        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, None)
+        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         scenario_risks = []
         for s in scenarios:

@@ -167,7 +167,7 @@ class InterventionBudgetPhasingAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField("impact_cum", QVariant.Double))
         fields.append(QgsField("impact_capture_pct", QVariant.Double))
         fields.append(QgsField("avg_index_selected", QVariant.Double))
-        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, None)
+        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         checkpoints = list(range(step, 101, step))
         if checkpoints[-1] != 100:

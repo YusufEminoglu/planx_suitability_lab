@@ -126,7 +126,7 @@ class ExecutiveKpiSnapshotAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField("high_conflict_pct", QVariant.Double))
         fields.append(QgsField("critical_conflict_pct", QVariant.Double))
         fields.append(QgsField("confidence_gap", QVariant.Double))
-        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, None)
+        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         feat = QgsFeature(fields)
         feat["cells_total"] = int(n)

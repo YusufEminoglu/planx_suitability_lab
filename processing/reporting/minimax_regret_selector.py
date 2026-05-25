@@ -198,7 +198,7 @@ class MinimaxRegretSelectorAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField("mean_regret", QVariant.Double))
         fields.append(QgsField("p90_regret", QVariant.Double))
         fields.append(QgsField("minimax_score", QVariant.Double))
-        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, None)
+        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         for r in rows_out:
             f = QgsFeature(fields)

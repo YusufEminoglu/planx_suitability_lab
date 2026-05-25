@@ -198,7 +198,7 @@ class CriterionRedundancyDiagnosticsAlgorithm(QgsProcessingAlgorithm):
         pair_fields.append(QgsField("abs_corr", QVariant.Double))
         pair_fields.append(QgsField("redundancy", QVariant.String))
         pair_fields.append(QgsField("samples", QVariant.LongLong))
-        pair_sink, pair_dest = self.parameterAsSink(parameters, self.OUTPUT_PAIRS, context, pair_fields, Qgis.WkbType.NoGeometry, None)
+        pair_sink, pair_dest = self.parameterAsSink(parameters, self.OUTPUT_PAIRS, context, pair_fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         for i in range(k):
             for j in range(i + 1, k):
@@ -219,7 +219,7 @@ class CriterionRedundancyDiagnosticsAlgorithm(QgsProcessingAlgorithm):
         crit_fields.append(QgsField("max_abs_corr", QVariant.Double))
         crit_fields.append(QgsField("vif", QVariant.Double))
         crit_fields.append(QgsField("redundancy_flag", QVariant.String))
-        crit_sink, crit_dest = self.parameterAsSink(parameters, self.OUTPUT_CRITERIA, context, crit_fields, Qgis.WkbType.NoGeometry, None)
+        crit_sink, crit_dest = self.parameterAsSink(parameters, self.OUTPUT_CRITERIA, context, crit_fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         abs_corr = np.abs(corr)
         for i in range(k):

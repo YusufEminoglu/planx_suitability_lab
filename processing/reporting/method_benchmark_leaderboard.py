@@ -224,7 +224,7 @@ class MethodBenchmarkLeaderboardAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField("stability", QVariant.Double))
         fields.append(QgsField("composite", QVariant.Double))
         fields.append(QgsField("grade", QVariant.String))
-        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, None)
+        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         for r in rows_out:
             f = QgsFeature(fields)

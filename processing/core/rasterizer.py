@@ -5,6 +5,7 @@ import processing
 from qgis.core import (
     QgsProcessing,
     QgsProcessingAlgorithm,
+    QgsProcessingException,
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterField,
     QgsProcessingParameterNumber,
@@ -50,21 +51,25 @@ class RasterizerAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterRasterDestination(self.OUTPUT, 'Rasterized output'))
 
     def processAlgorithm(self, parameters, context, feedback):
-        src = self.parameterAsSource(parameters, self.INPUT, context)
+        vlayer = self.parameterAsVectorLayer(parameters, self.INPUT, context)
+        if vlayer is None:
+            raise QgsProcessingException(
+                "Could not load source layer for INPUT. Please select a valid vector layer."
+            )
         field = self.parameterAsString(parameters, self.FIELD, context).strip()
         burn = self.parameterAsDouble(parameters, self.BURN, context)
         pix = self.parameterAsDouble(parameters, self.PIXEL, context)
         out = self.parameterAsOutputLayer(parameters, self.OUTPUT, context)
-        out = smart_output_path(out, src, "vector_rasterizer")
+        out = smart_output_path(out, vlayer, "vector_rasterizer")
         processing.run('gdal:rasterize', {
-            'INPUT': src,
+            'INPUT': vlayer,
             'FIELD': field if field else None,
             'BURN': burn,
             'USE_Z': False,
             'UNITS': 1,
             'WIDTH': pix,
             'HEIGHT': pix,
-            'EXTENT': src.sourceExtent(),
+            'EXTENT': vlayer.extent(),
             'NODATA': 0,
             'OPTIONS': '',
             'DATA_TYPE': 5,

@@ -189,7 +189,7 @@ class DeploymentReadinessGateAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField("flag_count", QVariant.Int))
         fields.append(QgsField("flags", QVariant.String))
         fields.append(QgsField("note", QVariant.String))
-        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, None)
+        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         out = QgsFeature(fields)
         out["decision"] = decision

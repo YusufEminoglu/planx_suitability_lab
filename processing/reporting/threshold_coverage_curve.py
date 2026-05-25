@@ -79,7 +79,7 @@ class ThresholdCoverageCurveAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField("pct_ge", QVariant.Double))
         fields.append(QgsField("area_ge", QVariant.Double))
         fields.append(QgsField("delta_pct_prev", QVariant.Double))
-        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, None)
+        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         prev_pct = None
         thresholds = list(range(0, 101, step))

@@ -199,7 +199,7 @@ class ScenarioRobustnessLeaderboardAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField("score_dom", QVariant.Double))
         fields.append(QgsField("score_reg", QVariant.Double))
         fields.append(QgsField("score_div", QVariant.Double))
-        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, None)
+        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         for row in rows:
             feat = QgsFeature(fields)

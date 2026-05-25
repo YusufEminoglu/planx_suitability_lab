@@ -165,7 +165,7 @@ class SpatialFragmentationAuditAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField("high_area", QVariant.Double))
         fields.append(QgsField("mean_patch_area", QVariant.Double))
         fields.append(QgsField("fragmentation", QVariant.String))
-        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, None)
+        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         feat = QgsFeature(fields)
         feat["threshold"] = float(thr)

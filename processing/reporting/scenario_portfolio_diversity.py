@@ -242,7 +242,7 @@ class ScenarioPortfolioDiversityAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField("health_score", QVariant.Double))
         fields.append(QgsField("div_class", QVariant.String))
         fields.append(QgsField("spread_class", QVariant.String))
-        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, None)
+        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         summary = QgsFeature(fields)
         summary["row_type"] = "SUMMARY"

@@ -153,7 +153,7 @@ class ActionabilityScorecardAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField("policy_mode", QVariant.String))
         fields.append(QgsField("budget_ref", QVariant.Double))
         fields.append(QgsField("capture_ref", QVariant.Double))
-        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, None)
+        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         feat = QgsFeature(fields)
         feat["overall"] = overall

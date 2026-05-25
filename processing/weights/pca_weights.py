@@ -36,7 +36,7 @@ class PCAWeightsAlgorithm(QgsProcessingAlgorithm):
         fields = QgsFields()
         fields.append(QgsField('criterion_id', QVariant.Int))
         fields.append(QgsField('weight', QVariant.Double))
-        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, None)
+        sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
         for i, wi in enumerate(weights, start=1):
             f = QgsFeature(fields)
             f['criterion_id'] = i
