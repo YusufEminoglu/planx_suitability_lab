@@ -446,13 +446,13 @@ class SuitabilityDashboard(QDialog):
         status_col.setSpacing(6)
         self.status_chip = QLabel("System Status: checking...")
         self.status_chip.setObjectName("statusChip")
-        status_col.addWidget(self.status_chip, 0, Qt.AlignRight)
+        status_col.addWidget(self.status_chip, 0, Qt.AlignmentFlag.AlignRight)
         self.lang_combo = QComboBox()
         self.lang_combo.addItem("English (Primary)", "EN")
         self.lang_combo.addItem("Turkce (Secondary)", "TR")
         self.lang_combo.setCurrentIndex(0 if self.lang == "EN" else 1)
         self.lang_combo.currentIndexChanged.connect(self._set_language)
-        status_col.addWidget(self.lang_combo, 0, Qt.AlignRight)
+        status_col.addWidget(self.lang_combo, 0, Qt.AlignmentFlag.AlignRight)
         hero_layout.addLayout(status_col, 0)
         root.addWidget(hero)
 
@@ -521,7 +521,7 @@ class SuitabilityDashboard(QDialog):
         filter_row.addWidget(self.fav_only)
         self.card_count = QLabel("Visible: 0/0")
         self.card_count.setObjectName("cardCount")
-        filter_row.addWidget(self.card_count, 0, Qt.AlignRight)
+        filter_row.addWidget(self.card_count, 0, Qt.AlignmentFlag.AlignRight)
         ml.addLayout(filter_row)
 
         self.cards_scroll = QScrollArea()
@@ -567,7 +567,7 @@ class SuitabilityDashboard(QDialog):
         clear_log = QPushButton("Clear Run Log / Gunlugu Temizle")
         clear_log.setObjectName("ghost")
         clear_log.clicked.connect(self._clear_runlog)
-        rl.addWidget(clear_log, 0, Qt.AlignRight)
+        rl.addWidget(clear_log, 0, Qt.AlignmentFlag.AlignRight)
         self.tabs.addTab(runlog_tab, "Recent Runs / Son Calismalar")
 
         self.readiness = QTextBrowser()
@@ -603,7 +603,7 @@ class SuitabilityDashboard(QDialog):
                 header.addWidget(t, 1)
                 status_lbl = QLabel("Checking")
                 status_lbl.setProperty("classChip", "warn")
-                header.addWidget(status_lbl, 0, Qt.AlignRight)
+                header.addWidget(status_lbl, 0, Qt.AlignmentFlag.AlignRight)
 
                 m = QLabel(f"{group} | {aid}")
                 m.setProperty("classMeta", "true")
@@ -627,7 +627,7 @@ class SuitabilityDashboard(QDialog):
                 br = QHBoxLayout()
                 br.addWidget(fav, 0, Qt.AlignLeft)
                 br.addStretch(1)
-                br.addWidget(run, 0, Qt.AlignRight)
+                br.addWidget(run, 0, Qt.AlignmentFlag.AlignRight)
                 v.addLayout(br)
 
                 card.meta = (group.lower(), title_txt.lower(), aid.lower(), desc.lower())
@@ -938,8 +938,8 @@ class SuitabilityDashboard(QDialog):
         layout.addWidget(browser, 1)
         close_btn = QPushButton("Close")
         close_btn.clicked.connect(popup.accept)
-        layout.addWidget(close_btn, 0, Qt.AlignRight)
-        popup.exec_()
+        layout.addWidget(close_btn, 0, Qt.AlignmentFlag.AlignRight)
+        popup.exec()
 
     def _open_command_palette(self):
         popup = QDialog(self)
@@ -1014,7 +1014,7 @@ class SuitabilityDashboard(QDialog):
         if listing.count() > 0:
             listing.setCurrentRow(0)
         query.setFocus()
-        popup.exec_()
+        popup.exec()
 
     def _run_synthetic_pipeline(self):
         self._run_algorithm("planx_suitability_lab:synthetic_pipeline_runner", "Sample Workflow Runner")
@@ -1039,31 +1039,31 @@ class SuitabilityDashboard(QDialog):
         self._run_synthetic_pipeline()
 
     def keyPressEvent(self, event):
-        if event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_K:
+        if event.modifiers() == Qt.KeyboardModifier.ControlModifier and event.key() == Qt.Key.Key_K:
             self._open_command_palette()
             return
-        if event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_R:
+        if event.modifiers() == Qt.KeyboardModifier.ControlModifier and event.key() == Qt.Key.Key_R:
             self._refresh()
             return
-        if event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_D:
+        if event.modifiers() == Qt.KeyboardModifier.ControlModifier and event.key() == Qt.Key.Key_D:
             self._copy_diagnostics()
             return
-        if event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_I:
+        if event.modifiers() == Qt.KeyboardModifier.ControlModifier and event.key() == Qt.Key.Key_I:
             self._copy_runbook()
             return
-        if event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_H:
+        if event.modifiers() == Qt.KeyboardModifier.ControlModifier and event.key() == Qt.Key.Key_H:
             self._show_shortcuts()
             return
-        if event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_G:
+        if event.modifiers() == Qt.KeyboardModifier.ControlModifier and event.key() == Qt.Key.Key_G:
             self._open_command_guide()
             return
-        if event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_P:
+        if event.modifiers() == Qt.KeyboardModifier.ControlModifier and event.key() == Qt.Key.Key_P:
             self._run_synthetic_pipeline()
             return
-        if event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_N:
+        if event.modifiers() == Qt.KeyboardModifier.ControlModifier and event.key() == Qt.Key.Key_N:
             self._run_next_critical()
             return
-        if event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_L:
+        if event.modifiers() == Qt.KeyboardModifier.ControlModifier and event.key() == Qt.Key.Key_L:
             self.lang_combo.setCurrentIndex(1 if self.lang_combo.currentIndex() == 0 else 0)
             return
         super().keyPressEvent(event)
