@@ -6,6 +6,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning: [S
 ## [Unreleased]
 
 - Fixed QGIS 3.40 compatibility for table-producing algorithms by replacing `parameterAsSink(..., None)` with explicit `QgsCoordinateReferenceSystem()` across Weights/Reporting/XAI modules.
+- Fixed missing `QgsCoordinateReferenceSystem` imports in table-producing modules (`weights`, `reporting`, `xai`) that caused runtime `NameError` in QGIS 3.40.
 - Fixed `Core: Vector Rasterizer` input handling to use validated vector layer objects, preventing `Could not load source layer for INPUT: invalid value` failures on GeoPackage layers.
 - Dashboard UX was streamlined for production use: removed beta/release/issue-oriented wording, simplified quick actions, and centered the interface on guided project execution.
 - Reworked user guidance into a clean `Guided Flow` and `System Health` model with actionable next-step suggestions.

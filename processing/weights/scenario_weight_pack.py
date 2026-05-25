@@ -13,6 +13,7 @@ from qgis.core import (
     QgsProcessingAlgorithm,
     QgsProcessingParameterFeatureSink,
     QgsProcessingParameterFeatureSource,
+    QgsCoordinateReferenceSystem,
 )
 
 

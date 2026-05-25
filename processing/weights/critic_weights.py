@@ -13,6 +13,7 @@ from qgis.core import (
     QgsProcessingParameterFeatureSink,
     QgsProcessingParameterMultipleLayers,
     QgsProcessingParameterString,
+    QgsCoordinateReferenceSystem,
 )
 
 from .._mcda_utils import critic_weights_from_rasters, ensure_list, parse_impacts_csv

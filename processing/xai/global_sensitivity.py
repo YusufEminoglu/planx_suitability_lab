@@ -15,6 +15,7 @@ from qgis.core import (
     QgsProcessingParameterMultipleLayers,
     QgsProcessingParameterNumber,
     QgsProcessingParameterString,
+    QgsCoordinateReferenceSystem,
 )
 
 from .._mcda_utils import ensure_list, parse_weights_csv

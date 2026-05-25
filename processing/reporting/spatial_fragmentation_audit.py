@@ -17,6 +17,7 @@ from qgis.core import (
     QgsProcessingParameterFeatureSink,
     QgsProcessingParameterNumber,
     QgsProcessingParameterRasterLayer,
+    QgsCoordinateReferenceSystem,
 )
 
 

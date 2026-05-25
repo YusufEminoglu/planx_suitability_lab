@@ -14,6 +14,7 @@ from qgis.core import (
     QgsProcessingParameterFeatureSink,
     QgsProcessingParameterMultipleLayers,
     QgsProcessingParameterRasterLayer,
+    QgsCoordinateReferenceSystem,
 )
 
 from .._mcda_utils import ensure_list

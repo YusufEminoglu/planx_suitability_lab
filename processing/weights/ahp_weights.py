@@ -10,6 +10,7 @@ from qgis.core import (
     QgsProcessingAlgorithm,
     QgsProcessingParameterString,
     QgsProcessingParameterFeatureSink,
+    QgsCoordinateReferenceSystem,
 )
 from qgis.PyQt.QtCore import QVariant
 

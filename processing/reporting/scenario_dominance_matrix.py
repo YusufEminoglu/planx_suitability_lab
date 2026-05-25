@@ -18,6 +18,7 @@ from qgis.core import (
     QgsProcessingParameterMultipleLayers,
     QgsProcessingParameterNumber,
     QgsProcessingParameterRasterLayer,
+    QgsCoordinateReferenceSystem,
 )
 
 from .._mcda_utils import ensure_list

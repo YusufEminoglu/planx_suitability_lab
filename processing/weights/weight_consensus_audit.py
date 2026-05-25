@@ -15,6 +15,7 @@ from qgis.core import (
     QgsProcessingException,
     QgsProcessingParameterFeatureSink,
     QgsProcessingParameterFeatureSource,
+    QgsCoordinateReferenceSystem,
 )
 
 

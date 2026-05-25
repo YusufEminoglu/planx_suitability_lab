@@ -14,6 +14,7 @@ from qgis.core import (
     QgsProcessingParameterFeatureSink,
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterNumber,
+    QgsCoordinateReferenceSystem,
 )
 
 
