@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.5] - 2026-05-26
+
+- Keep QGIS 4 dashboard panel-only by hiding the Processing provider.
+
+## [1.3.4] - 2026-05-26
+
+- Fix QGIS 4 / Qt6 dashboard alignment enum compatibility.
+
 All notable changes to **PlanX Suitability Lab** are documented here.  
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning: [SemVer](https://semver.org/).
 

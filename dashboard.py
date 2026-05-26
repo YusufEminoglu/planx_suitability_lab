@@ -18,13 +18,14 @@ from qgis.PyQt.QtWidgets import (
     QLineEdit,
     QPushButton,
     QListWidget,
+    QMessageBox,
     QScrollArea,
     QTabWidget,
     QTextBrowser,
     QVBoxLayout,
     QWidget,
 )
-from qgis.core import QgsApplication, QgsProject
+from qgis.core import Qgis, QgsApplication, QgsProject
 
 
 ALGO_GROUPS = [
@@ -302,6 +303,10 @@ CRITICAL_RUN_SEQUENCE = [
     "planx_suitability_lab:release_narrative_builder",
     "planx_suitability_lab:beta_evidence_report",
 ]
+
+
+def _processing_provider_enabled() -> bool:
+    return int(getattr(Qgis, "QGIS_VERSION_INT", 0)) < 40000
 
 
 class SuitabilityDashboard(QDialog):
@@ -625,7 +630,7 @@ class SuitabilityDashboard(QDialog):
                 v.addWidget(d, 1)
 
                 br = QHBoxLayout()
-                br.addWidget(fav, 0, Qt.AlignLeft)
+                br.addWidget(fav, 0, Qt.AlignmentFlag.AlignLeft)
                 br.addStretch(1)
                 br.addWidget(run, 0, Qt.AlignmentFlag.AlignRight)
                 v.addLayout(br)
@@ -696,6 +701,13 @@ class SuitabilityDashboard(QDialog):
         self._refresh_runlog()
 
     def _run_algorithm(self, algo_id, label):
+        if not _processing_provider_enabled():
+            QMessageBox.information(
+                self,
+                "PlanX Suitability Lab",
+                "Processing tools are hidden in QGIS 4. Use this dashboard as a panel-only overview.",
+            )
+            return
         processing.execAlgorithmDialog(algo_id)
         self._track_run(algo_id, label)
 
