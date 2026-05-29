@@ -1,25 +1,6 @@
 # Changelog
 
-## [1.3.7] - 2026-05-26
-
-- Qt5/Qt6 compatibility maintenance, dashboard runtime hardening, and QGIS 4 processing-provider gate behavior.
-
-## [1.3.6] - 2026-05-26
-
-- Maintenance release: refreshed Plugin Hub package with QGIS 4 panel-only dashboard mode.
-
-## [1.3.5] - 2026-05-26
-
-- Keep QGIS 4 dashboard panel-only by hiding the Processing provider.
-
-## [1.3.4] - 2026-05-26
-
-- Fix QGIS 4 / Qt6 dashboard alignment enum compatibility.
-
-All notable changes to **PlanX Suitability Lab** are documented here.  
-Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning: [SemVer](https://semver.org/).
-
-## [Unreleased]
+## [1.4.0] - 2026-05-29
 
 - Fixed QGIS 3.40 compatibility for table-producing algorithms by replacing `parameterAsSink(..., None)` with explicit `QgsCoordinateReferenceSystem()` across Weights/Reporting/XAI modules.
 - Fixed missing `QgsCoordinateReferenceSystem` imports in table-producing modules (`weights`, `reporting`, `xai`) that caused runtime `NameError` in QGIS 3.40.
@@ -146,3 +127,23 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning: [S
 - Expanded synthetic pipeline runner to execute WLC, OWA, TOPSIS, deltas, uncertainty, QA and HTML reporting.
 - Upgraded release evidence reporting and dashboard release-readiness UX.
 - Documentation refreshed for release usage and operator guidance.
+
+## [1.3.7] - 2026-05-26
+
+- Qt5/Qt6 compatibility maintenance, dashboard runtime hardening, and QGIS 4 processing-provider gate behavior.
+
+## [1.3.6] - 2026-05-26
+
+- Maintenance release: refreshed Plugin Hub package with QGIS 4 panel-only dashboard mode.
+
+## [1.3.5] - 2026-05-26
+
+- Keep QGIS 4 dashboard panel-only by hiding the Processing provider.
+
+## [1.3.4] - 2026-05-26
+
+- Fix QGIS 4 / Qt6 dashboard alignment enum compatibility.
+
+All notable changes to **PlanX Suitability Lab** are documented here.  
+Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning: [SemVer](https://semver.org/).
+

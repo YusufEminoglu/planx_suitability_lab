@@ -309,6 +309,11 @@ def _processing_provider_enabled() -> bool:
     return int(getattr(Qgis, "QGIS_VERSION_INT", 0)) < 40000
 
 
+IS_QGIS4 = int(getattr(Qgis, "QGIS_VERSION_INT", 0)) >= 40000
+DASHBOARD_SIZE = (1240, 820) if IS_QGIS4 else (1320, 860)
+DEFAULT_CARD_COLUMNS = 2 if IS_QGIS4 else 3
+
+
 class SuitabilityDashboard(QDialog):
     def __init__(self, iface, parent=None):
         super().__init__(parent)
@@ -318,29 +323,36 @@ class SuitabilityDashboard(QDialog):
         self.run_cursor = int(self.settings.value("planx_suitability_lab/run_cursor", 0, type=int) or 0)
         self.recent_runs = []
         self.card_widgets = []
+        self._current_card_columns = DEFAULT_CARD_COLUMNS
         self.favorites = set(self.settings.value("planx_suitability_lab/favorites", [], type=list) or [])
         self.setWindowTitle("PlanX Suitability Lab - Production Console / Uretim Konsolu")
-        self.resize(1320, 860)
+        self.resize(*DASHBOARD_SIZE)
         self._apply_style()
         self._build_ui()
         self._refresh()
 
     def _apply_style(self):
+        hero_radius = 12 if IS_QGIS4 else 16
+        pane_radius = 10 if IS_QGIS4 else 12
+        tab_radius = 7 if IS_QGIS4 else 8
+        card_radius = 10 if IS_QGIS4 else 13
+        button_radius = 8 if IS_QGIS4 else 9
+        title_size = 24 if IS_QGIS4 else 26
         self.setStyleSheet(
             """
             QDialog { background: #ecf3f4; font-family: "Segoe UI"; }
             QFrame#heroCard {
                 background: qlineargradient(x1:0,y1:0,x2:1,y2:1, stop:0 #10384a, stop:0.45 #1b5f77, stop:1 #2d7f8f);
-                border-radius: 16px;
+                border-radius: %(hero_radius)dpx;
                 border: 1px solid #285f73;
             }
-            QLabel#heroTitle { color: #ffffff; font-family: "Segoe UI Semibold"; font-size: 26px; font-weight: 700; letter-spacing: 0.2px; }
+            QLabel#heroTitle { color: #ffffff; font-family: "Segoe UI Semibold"; font-size: %(title_size)dpx; font-weight: 700; letter-spacing: 0.2px; }
             QLabel#heroSub { color: #d8edf5; font-size: 13px; }
             QLabel#statusChip {
                 color: #0f2d3a;
                 background: #f8d37a;
                 border: 1px solid #e8bf58;
-                border-radius: 11px;
+                border-radius: %(tab_radius)dpx;
                 padding: 4px 10px;
                 font-weight: 700;
             }
@@ -349,21 +361,21 @@ class SuitabilityDashboard(QDialog):
                 font-size: 11px;
                 padding: 0 4px;
             }
-            QTabWidget::pane { border: 1px solid #cfdee2; border-radius: 12px; background: #ffffff; top: -1px; }
+            QTabWidget::pane { border: 1px solid #cfdee2; border-radius: %(pane_radius)dpx; background: #ffffff; top: -1px; }
             QTabBar::tab {
                 background: #dce9ec;
                 color: #183844;
                 border: 1px solid #c4d6dc;
                 padding: 8px 13px;
-                border-top-left-radius: 8px;
-                border-top-right-radius: 8px;
+                border-top-left-radius: %(tab_radius)dpx;
+                border-top-right-radius: %(tab_radius)dpx;
                 margin-right: 3px;
             }
             QTabBar::tab:selected { background: #ffffff; font-weight: 700; border-color: #9bbac4; }
             QTextBrowser {
                 background: #ffffff;
                 border: 1px solid #d4e1e5;
-                border-radius: 11px;
+                border-radius: %(pane_radius)dpx;
                 padding: 9px;
                 color: #17313a;
             }
@@ -371,7 +383,7 @@ class SuitabilityDashboard(QDialog):
                 background: #236e83;
                 color: #ffffff;
                 border: 1px solid #1b5c6e;
-                border-radius: 9px;
+                border-radius: %(button_radius)dpx;
                 padding: 7px 12px;
                 font-weight: 600;
             }
@@ -386,7 +398,7 @@ class SuitabilityDashboard(QDialog):
                 background: #ffffff;
                 color: #1f6f88;
                 border: 1px solid #a2c4cf;
-                border-radius: 7px;
+                border-radius: %(tab_radius)dpx;
                 padding: 2px 7px;
                 font-weight: 700;
             }
@@ -398,11 +410,11 @@ class SuitabilityDashboard(QDialog):
             QComboBox, QLineEdit {
                 background: #ffffff;
                 border: 1px solid #c9d9de;
-                border-radius: 7px;
+                border-radius: %(tab_radius)dpx;
                 padding: 6px;
                 color: #17323a;
             }
-            QFrame[classCard="true"] { background: #fbfefe; border: 1px solid #d3e3e7; border-radius: 13px; }
+            QFrame[classCard="true"] { background: #fbfefe; border: 1px solid #d3e3e7; border-radius: %(card_radius)dpx; }
             QFrame[classCard="true"]:hover {
                 background: #f2fafc;
                 border: 1px solid #a8cfdb;
@@ -413,7 +425,7 @@ class SuitabilityDashboard(QDialog):
                 color: #0d4430;
                 background: #b8e9cf;
                 border: 1px solid #92d8b1;
-                border-radius: 9px;
+                border-radius: %(tab_radius)dpx;
                 padding: 1px 7px;
                 font-size: 10px;
                 font-weight: 700;
@@ -422,23 +434,35 @@ class SuitabilityDashboard(QDialog):
                 color: #734700;
                 background: #ffe2ab;
                 border: 1px solid #f0cb86;
-                border-radius: 9px;
+                border-radius: %(tab_radius)dpx;
                 padding: 1px 7px;
                 font-size: 10px;
                 font-weight: 700;
             }
             """
+            % {
+                "button_radius": button_radius,
+                "card_radius": card_radius,
+                "hero_radius": hero_radius,
+                "pane_radius": pane_radius,
+                "tab_radius": tab_radius,
+                "title_size": title_size,
+            }
         )
 
     def _build_ui(self):
+        root_margin = 10 if IS_QGIS4 else 14
+        root_spacing = 10 if IS_QGIS4 else 12
+        section_margin = 8 if IS_QGIS4 else 10
+        grid_spacing = 8 if IS_QGIS4 else 10
         root = QVBoxLayout(self)
-        root.setContentsMargins(14, 14, 14, 14)
-        root.setSpacing(12)
+        root.setContentsMargins(root_margin, root_margin, root_margin, root_margin)
+        root.setSpacing(root_spacing)
 
         hero = QFrame()
         hero.setObjectName("heroCard")
         hero_layout = QHBoxLayout(hero)
-        hero_layout.setContentsMargins(16, 14, 16, 14)
+        hero_layout.setContentsMargins(14, 12, 14, 12)
         ttl_box = QVBoxLayout()
         title = QLabel("PlanX Suitability Lab")
         title.setObjectName("heroTitle")
@@ -448,7 +472,7 @@ class SuitabilityDashboard(QDialog):
         ttl_box.addWidget(subtitle)
         hero_layout.addLayout(ttl_box, 1)
         status_col = QVBoxLayout()
-        status_col.setSpacing(6)
+        status_col.setSpacing(4 if IS_QGIS4 else 6)
         self.status_chip = QLabel("System Status: checking...")
         self.status_chip.setObjectName("statusChip")
         status_col.addWidget(self.status_chip, 0, Qt.AlignmentFlag.AlignRight)
@@ -469,7 +493,7 @@ class SuitabilityDashboard(QDialog):
 
         workflow_tab = QWidget()
         wf = QVBoxLayout(workflow_tab)
-        wf.setContentsMargins(10, 10, 10, 10)
+        wf.setContentsMargins(section_margin, section_margin, section_margin, section_margin)
         top = QHBoxLayout()
         self.workflow_combo = QComboBox()
         for group, items in ALGO_GROUPS:
@@ -490,7 +514,7 @@ class SuitabilityDashboard(QDialog):
 
         navigator_tab = QWidget()
         nl = QVBoxLayout(navigator_tab)
-        nl.setContentsMargins(10, 10, 10, 10)
+        nl.setContentsMargins(section_margin, section_margin, section_margin, section_margin)
         nav_btns = QHBoxLayout()
         run_next = QPushButton("Run Next Suggested Step / Sonraki Onerilen Adim")
         run_next.clicked.connect(self._run_next_critical)
@@ -507,7 +531,7 @@ class SuitabilityDashboard(QDialog):
 
         modules_tab = QWidget()
         ml = QVBoxLayout(modules_tab)
-        ml.setContentsMargins(10, 10, 10, 10)
+        ml.setContentsMargins(section_margin, section_margin, section_margin, section_margin)
         filter_row = QHBoxLayout()
         self.search = QLineEdit()
         self.search.setPlaceholderText("Filter modules / Modulleri filtrele (name, group, id)...")
@@ -534,8 +558,8 @@ class SuitabilityDashboard(QDialog):
         cards_host = QWidget()
         self.cards_grid = QGridLayout(cards_host)
         self.cards_grid.setContentsMargins(4, 4, 4, 4)
-        self.cards_grid.setHorizontalSpacing(10)
-        self.cards_grid.setVerticalSpacing(10)
+        self.cards_grid.setHorizontalSpacing(grid_spacing)
+        self.cards_grid.setVerticalSpacing(grid_spacing)
         self.cards_scroll.setWidget(cards_host)
         ml.addWidget(self.cards_scroll, 1)
         self.tabs.addTab(modules_tab, "Modules / Moduller")
@@ -543,8 +567,8 @@ class SuitabilityDashboard(QDialog):
         quick_tab = QWidget()
         ql = QGridLayout(quick_tab)
         ql.setContentsMargins(12, 12, 12, 12)
-        ql.setHorizontalSpacing(10)
-        ql.setVerticalSpacing(10)
+        ql.setHorizontalSpacing(grid_spacing)
+        ql.setVerticalSpacing(grid_spacing)
         quick_buttons = [
             ("Run Suggested Next Step / Onerilen Sonraki Adim", self._run_next_critical, False),
             ("Generate Project Evidence / Proje Ozet Kaniti", self._run_release_evidence, False),
@@ -566,7 +590,7 @@ class SuitabilityDashboard(QDialog):
 
         runlog_tab = QWidget()
         rl = QVBoxLayout(runlog_tab)
-        rl.setContentsMargins(10, 10, 10, 10)
+        rl.setContentsMargins(section_margin, section_margin, section_margin, section_margin)
         self.runlog = QTextBrowser()
         rl.addWidget(self.runlog, 1)
         clear_log = QPushButton("Clear Run Log / Gunlugu Temizle")
@@ -593,6 +617,8 @@ class SuitabilityDashboard(QDialog):
         for w in self.card_widgets:
             w.setParent(None)
         self.card_widgets = []
+        columns = self._cards_column_count()
+        self._current_card_columns = columns
         idx = 0
         for group, items in ALGO_GROUPS:
             for title_txt, aid, desc in items:
@@ -638,11 +664,23 @@ class SuitabilityDashboard(QDialog):
                 card.meta = (group.lower(), title_txt.lower(), aid.lower(), desc.lower())
                 card.algo_id = aid
                 card.status_lbl = status_lbl
-                r = idx // 3
-                c = idx % 3
+                r = idx // columns
+                c = idx % columns
                 self.cards_grid.addWidget(card, r, c)
                 self.card_widgets.append(card)
                 idx += 1
+
+    def _cards_column_count(self):
+        if not hasattr(self, "cards_scroll"):
+            return DEFAULT_CARD_COLUMNS
+        viewport = self.cards_scroll.viewport()
+        width = viewport.width() if viewport is not None else 0
+        if width <= 0:
+            width = max(1, self.width() - 120)
+        target_card_width = 420 if IS_QGIS4 else 360
+        max_columns = 2 if IS_QGIS4 else 3
+        columns = max(1, min(max_columns, width // target_card_width))
+        return columns or 1
 
     def _filter_cards(self):
         q = (self.search.text() or "").strip().lower()
@@ -1049,6 +1087,16 @@ class SuitabilityDashboard(QDialog):
                 self._refresh()
                 return
         self._run_synthetic_pipeline()
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        if not hasattr(self, "cards_grid"):
+            return
+        desired_columns = self._cards_column_count()
+        if desired_columns == self._current_card_columns:
+            return
+        self._build_cards()
+        self._refresh()
 
     def keyPressEvent(self, event):
         if event.modifiers() == Qt.KeyboardModifier.ControlModifier and event.key() == Qt.Key.Key_K:

@@ -3,7 +3,7 @@ name=PlanX Suitability Lab
 qgisMinimumVersion=3.28
 qgisMaximumVersion=4.99
 description=Raster-based MCDA land suitability workflows with explainable analytics and uncertainty.
-version=1.3.7
+version=1.4.0
 author=Yusuf Eminoglu
 email=yusuf.eminoglu@deu.edu.tr
 
@@ -23,4 +23,5 @@ deprecated=False
 license=GPL-3
 
 changelog=
-    PlanX Suitability Lab 1.3.1 - Hub scan hygiene patch: flake8-critical issues cleaned, hidden icon .gitkeep removed, and style configuration aligned for W503/E203.
+    PlanX Suitability Lab 1.4.0 - Product release including CRITIC objective weights, Savage minimax regret selection, priority transition dynamics, spatial fragmentation, ensemble suitability, risk-opportunity zoning, Savage minimax, deployment gates, bilingual dashboard studio UI, command palette (Ctrl+K), and complete QGIS 3.40 and QGIS 4 compatibility.
+
