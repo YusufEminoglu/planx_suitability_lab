@@ -3,7 +3,7 @@ name=PlanX Suitability Lab
 qgisMinimumVersion=3.28
 qgisMaximumVersion=4.99
 description=Raster-based MCDA land suitability workflows with explainable analytics and uncertainty.
-version=1.4.0
+version=1.4.1
 author=Yusuf Eminoglu
 email=yusuf.eminoglu@deu.edu.tr
 
@@ -16,7 +16,7 @@ homepage=https://github.com/YusufEminoglu/planx_suitability_lab
 category=Processing
 hasProcessingProvider=yes
 tags=planx,qgis,processing,mcda,suitability,raster,ahp,pca,entropy,topsis,xai,montecarlo
-icon=icons/icon.png
+icon=icons/icon.svg
 
 experimental=False
 deprecated=False

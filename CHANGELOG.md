@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.4.1] - 2026-05-30
+
+- Revised plugin icon to SVG
+
 ## [1.4.0] - 2026-05-29
 
 - Fixed QGIS 3.40 compatibility for table-producing algorithms by replacing `parameterAsSink(..., None)` with explicit `QgsCoordinateReferenceSystem()` across Weights/Reporting/XAI modules.
