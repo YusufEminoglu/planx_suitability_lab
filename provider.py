@@ -89,8 +89,12 @@ class PlanXSuitabilityLabProvider(QgsProcessingProvider):
         return self.PROVIDER_NAME
 
     def icon(self):
-        path = os.path.join(os.path.dirname(__file__), 'icons', 'icon.png')
-        return QIcon(path) if os.path.exists(path) else super().icon()
+        base = os.path.join(os.path.dirname(__file__), 'icons')
+        for name in ('icon.png', 'icon.svg'):
+            path = os.path.join(base, name)
+            if os.path.exists(path):
+                return QIcon(path)
+        return super().icon()
 
     def loadAlgorithms(self):
         self.addAlgorithm(DataHarmonizerAlgorithm())

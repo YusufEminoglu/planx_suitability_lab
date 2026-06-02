@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import os
 
-from qgis.core import Qgis, QgsApplication
+from qgis.core import QgsApplication
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
 
@@ -11,8 +11,13 @@ from .dashboard import SuitabilityDashboard
 from .provider import PlanXSuitabilityLabProvider
 
 
-def _processing_provider_enabled() -> bool:
-    return int(getattr(Qgis, "QGIS_VERSION_INT", 0)) < 40000
+def _icon_path() -> str:
+    base = os.path.join(os.path.dirname(__file__), "icons")
+    for name in ("icon.png", "icon.svg"):
+        path = os.path.join(base, name)
+        if os.path.exists(path):
+            return path
+    return ""
 
 
 class PlanXSuitabilityLabPlugin:
@@ -23,9 +28,6 @@ class PlanXSuitabilityLabPlugin:
         self.dialog = None
 
     def initProcessing(self):
-        if not _processing_provider_enabled():
-            self.provider = None
-            return
         if self.provider is not None:
             return
         self.provider = PlanXSuitabilityLabProvider()
@@ -34,9 +36,7 @@ class PlanXSuitabilityLabPlugin:
     def initGui(self):
         self.initProcessing()
         if self.iface:
-            icon = self.provider.icon() if self.provider else QIcon(
-                os.path.join(os.path.dirname(__file__), "icons", "icon.png")
-            )
+            icon = self.provider.icon() if self.provider else QIcon(_icon_path())
             self.action = QAction(icon, 'PlanX Suitability Lab', self.iface.mainWindow())
             self.action.triggered.connect(self.open_dashboard)
             self.iface.addToolBarIcon(self.action)

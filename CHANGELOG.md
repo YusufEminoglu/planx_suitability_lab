@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.4.2] - 2026-06-02
+
+- Restore QGIS 4 Processing provider and PNG icon packaging
+
+## [Unreleased]
+
+- Restored QGIS 4 Processing provider registration so the dashboard and toolbox expose the full Suitability Lab algorithm catalog in QGIS 4.
+- Restored Plugin Hub-safe `icons/icon.png` metadata wiring while keeping SVG fallback support for local Qt rendering.
+
 ## [1.4.1] - 2026-05-30
 
 - Revised plugin icon to SVG
@@ -150,4 +159,3 @@
 
 All notable changes to **PlanX Suitability Lab** are documented here.  
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versioning: [SemVer](https://semver.org/).
-

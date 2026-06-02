@@ -306,7 +306,7 @@ CRITICAL_RUN_SEQUENCE = [
 
 
 def _processing_provider_enabled() -> bool:
-    return int(getattr(Qgis, "QGIS_VERSION_INT", 0)) < 40000
+    return QgsApplication.processingRegistry().providerById("planx_suitability_lab") is not None
 
 
 IS_QGIS4 = int(getattr(Qgis, "QGIS_VERSION_INT", 0)) >= 40000
@@ -739,11 +739,12 @@ class SuitabilityDashboard(QDialog):
         self._refresh_runlog()
 
     def _run_algorithm(self, algo_id, label):
-        if not _processing_provider_enabled():
+        reg = QgsApplication.processingRegistry()
+        if not _processing_provider_enabled() or reg.algorithmById(algo_id) is None:
             QMessageBox.information(
                 self,
                 "PlanX Suitability Lab",
-                "Processing tools are hidden in QGIS 4. Use this dashboard as a panel-only overview.",
+                "Processing provider is not registered yet. Reload the plugin or refresh the Processing toolbox, then try again.",
             )
             return
         processing.execAlgorithmDialog(algo_id)
