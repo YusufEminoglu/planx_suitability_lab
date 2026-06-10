@@ -1,0 +1,4 @@
+# Dev-only files excluded from the QGIS Hub zip (read by packaging/zip_hub.py)
+docs/COMPETITIVE_BENCHMARK_2026-05.md
+setup.cfg
+.gitattributes

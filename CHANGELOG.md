@@ -1,10 +1,10 @@
 # Changelog
 
+## [1.5.0] - 2026-06-10
+
+- Add Compose: Candidate Site Extractor (ranked candidate site polygons from contiguous high-suitability patches); package diet (optimized icon, dev files excluded from Hub zip); new pure-logic + end-to-end headless QGIS tests
+
 ## [1.4.2] - 2026-06-02
-
-- Restore QGIS 4 Processing provider and PNG icon packaging
-
-## [Unreleased]
 
 - Restored QGIS 4 Processing provider registration so the dashboard and toolbox expose the full Suitability Lab algorithm catalog in QGIS 4.
 - Restored Plugin Hub-safe `icons/icon.png` metadata wiring while keeping SVG fallback support for local Qt rendering.

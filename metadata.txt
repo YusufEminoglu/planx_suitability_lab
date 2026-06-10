@@ -3,7 +3,7 @@ name=PlanX Suitability Lab
 qgisMinimumVersion=3.28
 qgisMaximumVersion=4.99
 description=Raster-based MCDA land suitability workflows with explainable analytics and uncertainty.
-version=1.4.2
+version=1.5.0
 author=Yusuf Eminoglu
 email=yusuf.eminoglu@deu.edu.tr
 
@@ -23,5 +23,5 @@ deprecated=False
 license=GPL-3
 
 changelog=
-    PlanX Suitability Lab 1.4.1 - QGIS 4 runtime maintenance with active Processing provider registration, dashboard-run safeguards, and Plugin Hub-safe PNG icon metadata with SVG fallback.
+    PlanX Suitability Lab 1.5.0 - New Compose: Candidate Site Extractor turns contiguous high-suitability patches into ranked candidate site polygons (site_id, rank, area_ha, mean/max suitability, compactness) with threshold, minimum-area and top-N controls. Package diet: optimized plugin icon and dev-only files excluded from the Hub zip. Verified by new pure-logic tests plus an end-to-end headless QGIS run.
 

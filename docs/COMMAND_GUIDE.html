@@ -60,6 +60,7 @@
     <p><code>regret_fragility_map</code>: computes scenario-spread regret fragility score and classes (stable/watch/fragile) for contested-zone detection.</p>
     <p><code>opportunity_loss_map</code>: maps suitability forfeited by hard constraints, with loss class (0=None, 1=Low, 2=Medium, 3=High).</p>
     <p><code>priority_zoning_from_suitability</code>: action zoning from suitability, confidence and opportunity-loss (0 low, 1 longlist, 2 feasibility, 3 immediate, 4 constraint revisit).</p>
+    <p><code>candidate_site_extractor</code>: extracts ranked candidate site polygons (site_id, rank, area_ha, mean/max suitability, compactness) from contiguous high-suitability patches with threshold, minimum-area and top-N controls.</p>
     <p><code>uncertainty_adjusted_suitability</code>: robust score from <code>unc_mean - lambda * unc_std</code> (clipped to 0-100).</p>
     <p><code>scenario_comparator</code>: delta map across two suitability scenarios.</p>
   </div>

@@ -46,6 +46,7 @@ PlanX Suitability Lab is a production-ready raster MCDA plugin for QGIS, designe
   - `regret_fragility_map` (cross-scenario regret spread score and fragility classes)
   - `opportunity_loss_map` (detects high-suitability zones excluded by hard constraints)
   - `priority_zoning_from_suitability` (action zoning from suitability/confidence/opportunity-loss)
+  - `candidate_site_extractor` (ranked candidate site polygons from contiguous high-suitability patches)
   - `uncertainty_adjusted_suitability` (robust score from mean-std with risk aversion factor)
   - `scenario_comparator` (delta raster + stats summary)
 - Uncertainty:

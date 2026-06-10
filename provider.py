@@ -26,6 +26,7 @@ from .processing.compose.topsis_suitability import TOPSISSuitabilityAlgorithm
 from .processing.compose.vikor_suitability import VIKORSuitabilityAlgorithm
 from .processing.compose.ensemble_suitability import EnsembleSuitabilityAlgorithm
 from .processing.compose.opportunity_loss_map import OpportunityLossMapAlgorithm
+from .processing.compose.candidate_site_extractor import CandidateSiteExtractorAlgorithm
 from .processing.compose.priority_zoning_from_suitability import PriorityZoningFromSuitabilityAlgorithm
 from .processing.compose.scenario_consensus_zone import ScenarioConsensusZoneAlgorithm
 from .processing.compose.scenario_disagreement_attention import ScenarioDisagreementAttentionAlgorithm
@@ -118,6 +119,7 @@ class PlanXSuitabilityLabProvider(QgsProcessingProvider):
         self.addAlgorithm(EnsembleSuitabilityAlgorithm())
         self.addAlgorithm(OpportunityLossMapAlgorithm())
         self.addAlgorithm(PriorityZoningFromSuitabilityAlgorithm())
+        self.addAlgorithm(CandidateSiteExtractorAlgorithm())
         self.addAlgorithm(ScenarioConsensusZoneAlgorithm())
         self.addAlgorithm(ScenarioDisagreementAttentionAlgorithm())
         self.addAlgorithm(DecisionQuadrantMapAlgorithm())
