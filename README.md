@@ -1,8 +1,23 @@
+<div align="center">
+
+<img src="icons/icon.png" width="96" alt="PlanX Suitability Lab icon"/>
+
 # PlanX Suitability Lab
+
+**Raster MCDA suitability lab for QGIS — AHP/PCA/Entropy weighting, WLC/OWA composition, Monte Carlo uncertainty, explainable analytics.**
+
+[![QGIS](https://img.shields.io/badge/QGIS-3.28%2B-93b023?logo=qgis&logoColor=white)](https://plugins.qgis.org/plugins/planx_suitability_lab/)
+[![Version](https://img.shields.io/github/v/tag/YusufEminoglu/planx_suitability_lab?label=version&color=blue)](https://github.com/YusufEminoglu/planx_suitability_lab/releases)
+[![License](https://img.shields.io/badge/license-GPL--3.0-orange)](LICENSE)
+[![QGIS Plugin Hub](https://img.shields.io/badge/QGIS%20Hub-install-589632?logo=qgis&logoColor=white)](https://plugins.qgis.org/plugins/planx_suitability_lab/)
+
+</div>
+
+---
 
 PlanX Suitability Lab is a production-ready raster MCDA plugin for QGIS, designed for land suitability studies with strong reproducibility, uncertainty tracking, and explainability.
 
-## Release Scope (v1.0.0)
+## Module catalog
 
 - Core preparation:
   - `data_harmonizer` (batch CRS/extent/resolution alignment to output stack + manifest)
@@ -102,3 +117,19 @@ PlanX Suitability Lab is a production-ready raster MCDA plugin for QGIS, designe
 - For real projects, start with `data_harmonizer` and continue from the dashboard `Guided Flow` tab.
 - Smart output naming: when an algorithm output is left as temporary, PlanX auto-generates readable file names in the pattern `<input>_<operation>_<timestamp>.tif`.
 - Full command details are available in `docs/COMMAND_GUIDE.html`.
+
+## 🧩 Part of the PlanX ecosystem
+
+This plugin is one of 15 open-source QGIS plugins for urban planning by the same author:
+
+| Planning & analysis | CAD & production | 3D & visualization |
+|---|---|---|
+| [PlanX](https://github.com/YusufEminoglu/PlanX) — spatial-planning suite | [PlanX CAD Toolset](https://github.com/YusufEminoglu/PlanX-CAD) — drafting-grade CAD | [PlanX 3D City](https://github.com/YusufEminoglu/planx_3d_city) — Three.js city viewer |
+| [GeoStats Lab](https://github.com/YusufEminoglu/planx_geostats) — spatial statistics | [EasyFillet](https://github.com/YusufEminoglu/EasyFillet) — tangent-arc fillet | [3D OSM Model](https://github.com/YusufEminoglu/osm_3d_model) — OSM → 3D city in browser |
+| [Suitability Lab](https://github.com/YusufEminoglu/planx_suitability_lab) — raster MCDA | [Settlement Toolset](https://github.com/YusufEminoglu/PlanX-Settlement) — 9-stage settlement plans | [OSM Quick 3D](https://github.com/YusufEminoglu/osm_quick_3d) — OSM → native QGIS 3D |
+| [DataCube Lab](https://github.com/YusufEminoglu/planx_datacube) — spatiotemporal cubes | [UIP Toolset](https://github.com/YusufEminoglu/PlanX-UIP) — Turkish master-plan automation | [Urban Procedural 3D](https://github.com/YusufEminoglu/planx_urban_procedural_3d) — parametric zoning lab |
+| [Urban Resilience](https://github.com/YusufEminoglu/planx_urban_resilience) — 28 resilience tools | [ParcelFlux](https://github.com/YusufEminoglu/parcelflux) — parcel subdivision | [CartoLab](https://github.com/YusufEminoglu/planx_cartolab) — publication cartography |
+
+## 📜 License & author
+
+GPL-3.0 © [Yusuf Eminoğlu](https://github.com/YusufEminoglu) — bug reports and feature requests welcome in [Issues](https://github.com/YusufEminoglu/planx_suitability_lab/issues).
