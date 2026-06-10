@@ -2,7 +2,11 @@
 
 ## [1.5.0] - 2026-06-10
 
-- Add Compose: Candidate Site Extractor (ranked candidate site polygons from contiguous high-suitability patches); package diet (optimized icon, dev files excluded from Hub zip); new pure-logic + end-to-end headless QGIS tests
+- Added `candidate_site_extractor` (Compose) — the missing "last mile" from raster to action: extracts contiguous high-suitability patches as ranked candidate site polygons with `site_id`, `rank`, `cells`, `area_ha`, `mean_suit`, `max_suit` and `compactness` attributes. Threshold, minimum-area (ha) and top-N controls; 4/8 connectivity; deterministic ranking (mean suitability, area tie-break).
+- Package diet: plugin icon optimized 46.5 KB -> 9 KB (visually identical 256-color quantization); dev-only files (`setup.cfg`, `.gitattributes`, internal benchmark doc) excluded from the Hub zip via `.zipignore`. Zip size 216 KB -> 189 KB.
+- Tests: new `tests/test_site_logic.py` pure-logic harness (15 checks: labeling 4/8-connectivity, area filter, ranking, tie-breaks, determinism, empty-mask) plus a first end-to-end headless QGIS run validating the full algorithm against a synthetic raster (9 checks).
+- Cleaned a stale duplicated `[Unreleased]` section in the changelog and refreshed the `metadata.txt` changelog summary.
+- Registered the new module in the dashboard Compose group and Decision Ops governance set, README module catalog and the EN/TR command guide.
 
 ## [1.4.2] - 2026-06-02
 
