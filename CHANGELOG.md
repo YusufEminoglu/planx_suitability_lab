@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.5.1] - 2026-06-18
+
+- docs: add CITATION.cff for Zenodo DOI integration
+
 ## [1.5.0] - 2026-06-10
 
 - Added `candidate_site_extractor` (Compose) — the missing "last mile" from raster to action: extracts contiguous high-suitability patches as ranked candidate site polygons with `site_id`, `rank`, `cells`, `area_ha`, `mean_suit`, `max_suit` and `compactness` attributes. Threshold, minimum-area (ha) and top-N controls; 4/8 connectivity; deterministic ranking (mean suitability, area tie-break).
