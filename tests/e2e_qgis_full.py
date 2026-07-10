@@ -128,7 +128,7 @@ if criterion_files:
     # Step 2e: Run WLC with equal weights
     wlc_res = run_algo(
         "planx_suitability_lab:wlc_suitability",
-        {"INPUTS": [str(p) for p in criterion_files[:3]], "WEIGHTS_CSV": "", "CONSTRAINT_MASK": str(mask_files[0]) if mask_files else None, "OUTPUT": "TEMPORARY_OUTPUT"},
+        {"INPUT_RASTERS": [str(p) for p in criterion_files[:3]], "WEIGHTS_CSV": "0.4,0.3,0.3", "CONSTRAINT": str(mask_files[0]) if mask_files else None, "OUTPUT": "TEMPORARY_OUTPUT"},
         "wlc_suitability",
     )
 
@@ -141,21 +141,21 @@ if criterion_files:
     # Step 2f: Run OWA
     run_algo(
         "planx_suitability_lab:owa_suitability",
-        {"INPUTS": [str(p) for p in criterion_files[:3]], "WEIGHTS_CSV": "", "ORDER_WEIGHTS_CSV": "0.6, 0.3, 0.1", "ORDERING": 0, "CONSTRAINT_MASK": str(mask_files[0]) if mask_files else None, "OUTPUT": "TEMPORARY_OUTPUT"},
+        {"INPUT_RASTERS": [str(p) for p in criterion_files[:3]], "CRITERIA_WEIGHTS": "", "ORDER_WEIGHTS": "0.6, 0.3, 0.1", "SORT_MODE": 0, "CONSTRAINT": str(mask_files[0]) if mask_files else None, "OUTPUT": "TEMPORARY_OUTPUT"},
         "owa_suitability",
     )
 
     # Step 2g: Run TOPSIS
     run_algo(
         "planx_suitability_lab:topsis_suitability",
-        {"INPUTS": [str(p) for p in criterion_files[:3]], "WEIGHTS_CSV": "", "IMPACTS_CSV": "B, B, B", "CONSTRAINT_MASK": str(mask_files[0]) if mask_files else None, "OUTPUT": "TEMPORARY_OUTPUT"},
+        {"INPUT_RASTERS": [str(p) for p in criterion_files[:3]], "WEIGHTS_CSV": "", "IMPACTS_CSV": "B, B, B", "CONSTRAINT": str(mask_files[0]) if mask_files else None, "OUTPUT": "TEMPORARY_OUTPUT"},
         "topsis_suitability",
     )
 
     # Step 2h: Run VIKOR
     run_algo(
         "planx_suitability_lab:vikor_suitability",
-        {"INPUTS": [str(p) for p in criterion_files[:3]], "WEIGHTS_CSV": "", "IMPACTS_CSV": "B, B, B", "V": 0.5, "CONSTRAINT_MASK": str(mask_files[0]) if mask_files else None, "OUTPUT": "TEMPORARY_OUTPUT"},
+        {"INPUT_RASTERS": [str(p) for p in criterion_files[:3]], "WEIGHTS_CSV": "", "IMPACTS_CSV": "B, B, B", "V": 0.5, "CONSTRAINT": str(mask_files[0]) if mask_files else None, "OUTPUT": "TEMPORARY_OUTPUT"},
         "vikor_suitability",
     )
 
@@ -168,19 +168,19 @@ if criterion_files:
 
     run_algo(
         "planx_suitability_lab:entropy_weights",
-        {"INPUTS": [str(p) for p in criterion_files[:3]], "OUTPUT": "TEMPORARY_OUTPUT"},
+        {"INPUT_RASTERS": [str(p) for p in criterion_files[:3]], "OUTPUT": "TEMPORARY_OUTPUT"},
         "entropy_weights",
     )
 
     run_algo(
         "planx_suitability_lab:pca_derived_weights",
-        {"INPUTS": [str(p) for p in criterion_files[:3]], "OUTPUT": "TEMPORARY_OUTPUT"},
+        {"INPUT_RASTERS": [str(p) for p in criterion_files[:3]], "OUTPUT": "TEMPORARY_OUTPUT"},
         "pca_weights",
     )
 
     run_algo(
         "planx_suitability_lab:critic_weights",
-        {"INPUTS": [str(p) for p in criterion_files[:3]], "IMPACTS_CSV": "B, B, B", "OUTPUT": "TEMPORARY_OUTPUT"},
+        {"INPUT_RASTERS": [str(p) for p in criterion_files[:3]], "IMPACTS_CSV": "B, B, B", "OUTPUT": "TEMPORARY_OUTPUT"},
         "critic_weights",
     )
 
@@ -191,28 +191,29 @@ if criterion_files:
     if wlc_tif and os.path.exists(wlc_tif):
         run_algo(
             "planx_suitability_lab:montecarlo_suitability",
-            {"SUIT": wlc_tif, "ITERATIONS": 30, "SIGMA": 0.08, "BLOCK_SIZE": 256,
-             "MEAN": "TEMPORARY_OUTPUT", "STD": "TEMPORARY_OUTPUT", "P05": "TEMPORARY_OUTPUT",
-             "P50": "TEMPORARY_OUTPUT", "P95": "TEMPORARY_OUTPUT", "STABILITY": "TEMPORARY_OUTPUT"},
+            {"INPUT": wlc_tif, "ITER": 30, "SIGMA": 0.08, "BLOCK": 256,
+             "OUT_MEAN": "TEMPORARY_OUTPUT", "OUT_STD": "TEMPORARY_OUTPUT", "OUT_P05": "TEMPORARY_OUTPUT",
+             "OUT_P50": "TEMPORARY_OUTPUT", "OUT_P95": "TEMPORARY_OUTPUT", "OUT_STAB": "TEMPORARY_OUTPUT"},
             "montecarlo_suitability",
         )
 
     # Step 2l: XAI algorithms on criterion rasters
     run_algo(
         "planx_suitability_lab:xai_global_sensitivity",
-        {"INPUTS": [str(p) for p in criterion_files[:3]], "WEIGHTS_CSV": "0.4, 0.35, 0.25", "STRIDE": 2, "OUTPUT": "TEMPORARY_OUTPUT"},
+        {"INPUT_RASTERS": [str(p) for p in criterion_files[:3]], "WEIGHTS_CSV": "0.4, 0.35, 0.25", "SAMPLE": 2, "OUTPUT": "TEMPORARY_OUTPUT"},
         "xai_global_sensitivity",
     )
 
+    os.makedirs(os.path.join(out_dir, "xai_local"), exist_ok=True)
     run_algo(
         "planx_suitability_lab:xai_local_contribution",
-        {"INPUTS": [str(p) for p in criterion_files[:3]], "WEIGHTS_CSV": "0.4, 0.35, 0.25", "OUTPUT_DIR": os.path.join(out_dir, "xai_local")},
+        {"INPUT_RASTERS": [str(p) for p in criterion_files[:3]], "WEIGHTS_CSV": "0.4, 0.35, 0.25", "OUTPUT_DIR": os.path.join(out_dir, "xai_local")},
         "xai_local_contribution",
     )
 
     run_algo(
         "planx_suitability_lab:xai_geoshapley_lite",
-        {"INPUTS": [str(p) for p in criterion_files[:3]], "WEIGHTS_CSV": "0.4, 0.35, 0.25", "BASELINE_SAMPLES": 500, "OUTPUT": "TEMPORARY_OUTPUT"},
+        {"INPUT_RASTERS": [str(p) for p in criterion_files[:3]], "WEIGHTS_CSV": "0.4, 0.35, 0.25", "SAMPLE": 200, "OUTPUT": "TEMPORARY_OUTPUT"},
         "xai_geoshapley_lite",
     )
 
@@ -268,21 +269,21 @@ if wlc_tif and os.path.exists(wlc_tif):
     # 3c: Suitability class area stats
     run_algo(
         "planx_suitability_lab:suitability_class_area_stats",
-        {"SUIT": wlc_tif, "CLAS_BREAKS_CSV": "20, 40, 60, 80", "BLOCK_SIZE": 256, "OUTPUT": "TEMPORARY_OUTPUT"},
+        {"INPUT": wlc_tif, "BREAKS": "20,40,60,80", "BLOCK": 256, "OUTPUT": "TEMPORARY_OUTPUT"},
         "suitability_class_area_stats",
     )
 
     # 3d: Threshold coverage curve
     run_algo(
         "planx_suitability_lab:threshold_coverage_curve",
-        {"SUIT": wlc_tif, "STEP": 10, "OUTPUT": "TEMPORARY_OUTPUT"},
+        {"INPUT": wlc_tif, "STEP": 10, "OUTPUT": "TEMPORARY_OUTPUT"},
         "threshold_coverage_curve",
     )
 
     # 3e: Spatial fragmentation audit
     run_algo(
         "planx_suitability_lab:spatial_fragmentation_audit",
-        {"SUIT": wlc_tif, "THRESHOLD": 50.0, "CONNECTIVITY": 8, "OUTPUT": "TEMPORARY_OUTPUT"},
+        {"INPUT": wlc_tif, "THRESHOLD": 50.0, "CONNECTIVITY": 8, "OUTPUT": "TEMPORARY_OUTPUT"},
         "spatial_fragmentation_audit",
     )
 
@@ -294,27 +295,27 @@ if wlc_tif and os.path.exists(wlc_tif):
     # Priority transition matrix
     run_algo(
         "planx_suitability_lab:priority_transition_matrix",
-        {"BASELINE_ZONE": zone_path, "SCENARIO_ZONE": zone_path, "OUTPUT": "TEMPORARY_OUTPUT"},
+        {"FROM_ZONE": zone_path, "TO_ZONE": zone_path, "OUTPUT": "TEMPORARY_OUTPUT"},
         "priority_transition_matrix",
     )
 
     # Intervention budget phasing
     run_algo(
         "planx_suitability_lab:intervention_budget_phasing",
-        {"PRIORITY_ZONE": zone_path, "FALLBACK_COST_CSV": "0, 10, 20, 30, 40", "BUDGET_STEP_PCT": 20, "OUTPUT": "TEMPORARY_OUTPUT"},
+        {"PRIORITY_ZONE": zone_path, "COST_BY_ZONE": "0.6,0.9,1.2,1.5,1.8", "STEP": 20, "OUTPUT": "TEMPORARY_OUTPUT"},
         "intervention_budget_phasing",
     )
 
 # 3g: Markdown brief and HTML report (no raster inputs needed, just strings)
 run_algo(
     "planx_suitability_lab:scenario_markdown_brief",
-    {"PROJECT_NAME": "E2E Test", "BASELINE_LABEL": "Baseline", "SCENARIO_LABEL": "Scenario A", "QA_SUM": "All checks pass.", "NOTES": "Test notes.", "OUTPUT": "TEMPORARY_OUTPUT"},
+    {"PROJECT": "E2E Test", "BASELINE": "Baseline", "SCENARIO": "Scenario A", "QA": "All checks pass.", "NOTES": "Test notes.", "OUTPUT": "TEMPORARY_OUTPUT"},
     "scenario_markdown_brief",
 )
 
 run_algo(
     "planx_suitability_lab:suitability_html_report",
-    {"PROJECT": "E2E Test Project", "SUM_NOTES": "Test run.", "WEIGHT_METHOD": "AHP", "QA_SUM": "", "OUTPUT": "TEMPORARY_OUTPUT"},
+    {"PROJECT": "E2E Test Project", "SUMMARY": "Test run.", "WEIGHT_METHOD": "AHP", "QA_SUMMARY": "", "OUTPUT": "TEMPORARY_OUTPUT"},
     "suitability_html_report",
 )
 
@@ -358,58 +359,58 @@ if wlc_tif and os.path.exists(wlc_tif):
     # Ensemble suitability
     run_algo(
         "planx_suitability_lab:ensemble_suitability",
-        {"SCENARIOS": scenario_rasters, "WEIGHTS_CSV": "0.4, 0.3, 0.3",
-         "MEAN": "TEMPORARY_OUTPUT", "STD": "TEMPORARY_OUTPUT", "P10": "TEMPORARY_OUTPUT",
-         "P90": "TEMPORARY_OUTPUT", "CONFIDENCE": "TEMPORARY_OUTPUT"},
+        {"INPUT_RASTERS": scenario_rasters, "WEIGHTS_CSV": "0.4,0.3,0.3",
+         "OUT_MEAN": "TEMPORARY_OUTPUT", "OUT_STD": "TEMPORARY_OUTPUT", "OUT_P10": "TEMPORARY_OUTPUT",
+         "OUT_P90": "TEMPORARY_OUTPUT", "OUT_CONF": "TEMPORARY_OUTPUT"},
         "ensemble_suitability",
     )
 
     # Scenario consensus zone
     run_algo(
         "planx_suitability_lab:scenario_consensus_zone",
-        {"SCENARIOS": scenario_rasters, "THRESHOLD": 50.0, "COUNT": "TEMPORARY_OUTPUT", "ZONE": "TEMPORARY_OUTPUT"},
+        {"INPUT_RASTERS": scenario_rasters, "OUT_COUNT": "TEMPORARY_OUTPUT", "OUT_ZONE": "TEMPORARY_OUTPUT"},
         "scenario_consensus_zone",
     )
 
     # Scenario disagreement attention
     run_algo(
         "planx_suitability_lab:scenario_disagreement_attention",
-        {"SCENARIOS": scenario_rasters, "ATTENTION": "TEMPORARY_OUTPUT"},
+        {"INPUT_RASTERS": scenario_rasters, "OUT_SCORE": "TEMPORARY_OUTPUT", "OUT_CLASS": "TEMPORARY_OUTPUT"},
         "scenario_disagreement_attention",
     )
 
     # Scenario similarity matrix
     run_algo(
         "planx_suitability_lab:scenario_similarity_matrix",
-        {"SCENARIOS": scenario_rasters, "BLOCK_SIZE": 256, "OUTPUT": "TEMPORARY_OUTPUT"},
+        {"INPUT_RASTERS": scenario_rasters, "BLOCK": 256, "OUTPUT": "TEMPORARY_OUTPUT"},
         "scenario_similarity_matrix",
     )
 
     # Scenario dominance matrix
     run_algo(
         "planx_suitability_lab:scenario_dominance_matrix",
-        {"SCENARIOS": scenario_rasters, "EPS": 0.5, "BLOCK_SIZE": 256, "OUTPUT": "TEMPORARY_OUTPUT"},
+        {"INPUT_RASTERS": scenario_rasters, "EPS": 0.5, "BLOCK": 256, "OUTPUT": "TEMPORARY_OUTPUT"},
         "scenario_dominance_matrix",
     )
 
     # Method benchmark leaderboard
     run_algo(
         "planx_suitability_lab:method_benchmark_leaderboard",
-        {"SCENARIOS": scenario_rasters, "THRESHOLD": 70.0, "BLOCK_SIZE": 256, "OUTPUT": "TEMPORARY_OUTPUT"},
+        {"INPUT_RASTERS": scenario_rasters, "HIGH_THRESHOLD": 70.0, "BLOCK": 256, "OUTPUT": "TEMPORARY_OUTPUT"},
         "method_benchmark_leaderboard",
     )
 
     # Minimax regret selector
     run_algo(
         "planx_suitability_lab:minimax_regret_selector",
-        {"SCENARIOS": scenario_rasters, "BLOCK_SIZE": 256, "OUTPUT": "TEMPORARY_OUTPUT"},
+        {"INPUT_RASTERS": scenario_rasters, "BLOCK": 256, "OUTPUT": "TEMPORARY_OUTPUT"},
         "minimax_regret_selector",
     )
 
     # Scenario portfolio diversity
     run_algo(
         "planx_suitability_lab:scenario_portfolio_diversity",
-        {"SCENARIOS": scenario_rasters, "BLOCK_SIZE": 256, "OUTPUT": "TEMPORARY_OUTPUT"},
+        {"INPUT_RASTERS": scenario_rasters, "BLOCK": 256, "OUTPUT": "TEMPORARY_OUTPUT"},
         "scenario_portfolio_diversity",
     )
 
@@ -419,7 +420,7 @@ if wlc_tif and os.path.exists(wlc_tif):
     _write_tif(z2_path, np.clip(np.abs(arr_wlc - 50.0), 0, 100))
     run_algo(
         "planx_suitability_lab:decision_quadrant_map",
-        {"SUIT": wlc_tif, "CONFLICT": z2_path, "QUADRANT": "TEMPORARY_OUTPUT"},
+        {"SUITABILITY": wlc_tif, "DISAGREEMENT": z2_path, "OUTPUT": "TEMPORARY_OUTPUT"},
         "decision_quadrant_map",
     )
 
@@ -428,14 +429,14 @@ if wlc_tif and os.path.exists(wlc_tif):
     _write_tif(z3_path, np.full_like(arr_wlc, 15.0))
     run_algo(
         "planx_suitability_lab:risk_opportunity_matrix_map",
-        {"ROBUST_SUIT": wlc_tif, "UNCERTAINTY": z3_path, "CLASS": "TEMPORARY_OUTPUT"},
+        {"ROBUST": wlc_tif, "UNC_STD": z3_path, "OUTPUT": "TEMPORARY_OUTPUT"},
         "risk_opportunity_matrix_map",
     )
 
     # Regret fragility map
     run_algo(
         "planx_suitability_lab:regret_fragility_map",
-        {"SCENARIOS": scenario_rasters, "FRAGILITY": "TEMPORARY_OUTPUT"},
+        {"INPUT_RASTERS": scenario_rasters, "OUT_SCORE": "TEMPORARY_OUTPUT", "OUT_CLASS": "TEMPORARY_OUTPUT"},
         "regret_fragility_map",
     )
 
@@ -443,43 +444,43 @@ if wlc_tif and os.path.exists(wlc_tif):
     if mask_files:
         run_algo(
             "planx_suitability_lab:opportunity_loss_map",
-            {"SUIT": wlc_tif, "CONSTRAINT": str(mask_files[0]), "LOSS_MAP": "TEMPORARY_OUTPUT"},
+            {"SUIT": wlc_tif, "CONSTRAINT": str(mask_files[0]), "OUT_LOSS": "TEMPORARY_OUTPUT", "OUT_CLASS": "TEMPORARY_OUTPUT"},
             "opportunity_loss_map",
         )
 
     # Priority zoning from suitability
     run_algo(
         "planx_suitability_lab:priority_zoning_from_suitability",
-        {"SUIT": wlc_tif, "CONFIDENCE": z3_path, "OPP_LOSS": z2_path, "ZONE": "TEMPORARY_OUTPUT"},
+        {"SUIT": wlc_tif, "CONF": z3_path, "OPP": z2_path, "OUT_INDEX": "TEMPORARY_OUTPUT", "OUT_ZONE": "TEMPORARY_OUTPUT"},
         "priority_zoning_from_suitability",
     )
 
     # Uncertainty adjusted suitability
     run_algo(
         "planx_suitability_lab:uncertainty_adjusted_suitability",
-        {"MEAN": wlc_tif, "STD": z3_path, "LAMBDA": 1.0, "ROBUST": "TEMPORARY_OUTPUT"},
+        {"MEAN": wlc_tif, "STD": z3_path, "RISK": 1.0, "OUTPUT": "TEMPORARY_OUTPUT"},
         "uncertainty_adjusted_suitability",
     )
 
     # Scenario comparator
     run_algo(
         "planx_suitability_lab:scenario_comparator",
-        {"BASELINE": wlc_tif, "SCENARIO": s2_path, "DELTA": "TEMPORARY_OUTPUT"},
+        {"A": wlc_tif, "B": s2_path, "OUTPUT": "TEMPORARY_OUTPUT", "STATS": "TEMPORARY_OUTPUT"},
         "scenario_comparator",
     )
 
     # Policy sensitivity frontier
     run_algo(
         "planx_suitability_lab:policy_sensitivity_frontier",
-        {"MEAN": wlc_tif, "STD": z3_path, "LAMBDAS_CSV": "0, 0.5, 1.0, 2.0", "OUTPUT": "TEMPORARY_OUTPUT"},
+        {"MEAN": wlc_tif, "STD": z3_path, "LAMBDAS": "0,0.5,1.0,2.0", "OUTPUT": "TEMPORARY_OUTPUT"},
         "policy_sensitivity_frontier",
     )
 
     # Criterion redundancy diagnostics
     run_algo(
         "planx_suitability_lab:criterion_redundancy_diagnostics",
-        {"INPUTS": [str(p) for p in criterion_files[:3]], "MAX_SAMPLES": 10000, "BLOCK_SIZE": 256,
-         "PAIRS": "TEMPORARY_OUTPUT", "DIAGNOSTICS": "TEMPORARY_OUTPUT"},
+        {"INPUT_RASTERS": [str(p) for p in criterion_files[:3]], "MAX_SAMPLES": 10000, "BLOCK": 256,
+         "OUTPUT_PAIRS": "TEMPORARY_OUTPUT", "OUTPUT_CRITERIA": "TEMPORARY_OUTPUT"},
         "criterion_redundancy_diagnostics",
     )
 
@@ -496,21 +497,21 @@ if wlc_tif and os.path.exists(wlc_tif):
     # Consensus zone area stats
     run_algo(
         "planx_suitability_lab:consensus_zone_area_stats",
-        {"ZONE": cls_path, "OUTPUT": "TEMPORARY_OUTPUT"},
+        {"INPUT": cls_path, "OUTPUT": "TEMPORARY_OUTPUT"},
         "consensus_zone_area_stats",
     )
 
     # Attention class area stats
     run_algo(
         "planx_suitability_lab:attention_class_area_stats",
-        {"ATTENTION": cls_path, "OUTPUT": "TEMPORARY_OUTPUT"},
+        {"INPUT": cls_path, "OUTPUT": "TEMPORARY_OUTPUT"},
         "attention_class_area_stats",
     )
 
     # Decision quadrant area stats
     run_algo(
         "planx_suitability_lab:decision_quadrant_area_stats",
-        {"QUADRANT": cls_path, "OUTPUT": "TEMPORARY_OUTPUT"},
+        {"INPUT": cls_path, "OUTPUT": "TEMPORARY_OUTPUT"},
         "decision_quadrant_area_stats",
     )
 
@@ -520,14 +521,14 @@ if wlc_tif and os.path.exists(wlc_tif):
     _write_tif(cls6_path, cls6_arr)
     run_algo(
         "planx_suitability_lab:intervention_conflict_area_stats",
-        {"CONFLICT_CLASS": cls6_path, "OUTPUT": "TEMPORARY_OUTPUT"},
+        {"INPUT": cls6_path, "OUTPUT": "TEMPORARY_OUTPUT"},
         "intervention_conflict_area_stats",
     )
 
     # Risk opportunity area stats
     run_algo(
         "planx_suitability_lab:risk_opportunity_area_stats",
-        {"RISK_OPP_CLASS": cls_path, "OUTPUT": "TEMPORARY_OUTPUT"},
+        {"INPUT": cls_path, "OUTPUT": "TEMPORARY_OUTPUT"},
         "risk_opportunity_area_stats",
     )
 
@@ -537,14 +538,14 @@ if wlc_tif and os.path.exists(wlc_tif):
     _write_tif(cls2_path, cls2_arr)
     run_algo(
         "planx_suitability_lab:regret_fragility_area_stats",
-        {"FRAGILITY_CLASS": cls2_path, "OUTPUT": "TEMPORARY_OUTPUT"},
+        {"INPUT": cls2_path, "OUTPUT": "TEMPORARY_OUTPUT"},
         "regret_fragility_area_stats",
     )
 
     # Executive KPI snapshot
     run_algo(
         "planx_suitability_lab:executive_kpi_snapshot",
-        {"SUIT": wlc_tif, "ROBUST_SUIT": wlc_tif, "CONSTRAINT_MASK": str(mask_files[0]) if mask_files else wlc_tif,
+        {"SUITABILITY": wlc_tif, "ROBUST": wlc_tif, "CONSTRAINT": str(mask_files[0]) if mask_files else wlc_tif,
          "CONSENSUS_ZONE": cls_path, "ATTENTION_CLASS": cls_path, "OUTPUT": "TEMPORARY_OUTPUT"},
         "executive_kpi_snapshot",
     )
