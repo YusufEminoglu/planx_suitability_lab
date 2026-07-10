@@ -30,6 +30,24 @@ class ScenarioMarkdownBriefAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "reporting"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Produces a planning-memo markdown brief for a single scenario versus baseline.</b></p>"
+            "<p><b>Inputs:</b> Project name, Baseline label, Scenario label, "
+            "QA summary (optional multiline), Planner notes (optional multiline).<br>"
+            "<b>Output:</b> Markdown file with interpretation checklist, QA summary, planner notes, "
+            "and a recommendation template (priority zones, high-uncertainty zones, data improvements).<br>"
+            "<b>Method:</b> Assembles a structured markdown document with timestamp, scenario labels, "
+            "and a pre-written interpretation checklist covering suitability mean, robust suitability, "
+            "uncertainty spread, local contributions, and hard-constraint behavior. "
+            "Appends user-supplied QA text and planner notes. "
+            "Includes a numbered recommendation template for manual completion.<br>"
+            "<b>Typical use:</b> Create a standardized planning memo to accompany each scenario result set.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return ScenarioMarkdownBriefAlgorithm()
 

@@ -35,6 +35,26 @@ class ReleaseNarrativeBuilderAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "reporting"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Builds an English narrative paragraph describing a release version from diagnostic tables.</b></p>"
+            "<p><b>Inputs:</b> Project name, Release version label, Optional manual highlights (multiline), "
+            "Optional policy sensitivity frontier table, Optional budget phasing table, "
+            "Optional scenario similarity matrix table.<br>"
+            "<b>Output:</b> Markdown file with release title, timestamp, one-paragraph English description, "
+            "and optional manual highlights section.<br>"
+            "<b>Method:</b> Constructs a base sentence about the suite upgrade. "
+            "If similarity data provided, appends cross-scenario reliability stats (mean/min/max Pearson r). "
+            "If frontier data provided, appends policy signal (best lambda from 0.7*mean + 0.3*area>=80 utility). "
+            "If budget data provided, appends impact-capture figures at ~30%, ~50%, and ~80% budget. "
+            "All clauses are joined into a single flowing paragraph in English.<br>"
+            "<b>Typical use:</b> Automatically generate a release announcement paragraph "
+            "for stakeholder communication.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return ReleaseNarrativeBuilderAlgorithm()
 

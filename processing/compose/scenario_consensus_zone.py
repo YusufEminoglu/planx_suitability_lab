@@ -40,6 +40,29 @@ class ScenarioConsensusZoneAlgorithm(QgsProcessingAlgorithm):
     def createInstance(self):
         return ScenarioConsensusZoneAlgorithm()
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Maps per-cell scenario agreement counts and classifies "
+            "consensus zones.</b></p>\n"
+            "<p><b>Inputs:</b> 2–10 scenario suitability rasters (0–100); "
+            "optional constraint mask (0/1); "
+            "medium suitability threshold (default 60); "
+            "high suitability threshold (default 75); block size 64–2048.<br>\n"
+            "<b>Output:</b> Consensus count raster (Byte, 0..N scenarios); "
+            "consensus zone raster (Byte, 0–4). "
+            "Nodata=255 where inputs are invalid.<br>\n"
+            "<b>Method:</b> Per cell, count scenarios meeting medium (≥med) "
+            "and high (≥high) thresholds. Zone classes by agreement ratio: "
+            "0=none, 1=≥50% medium, 2=≥75% medium, 3=≥60% high, "
+            "4=≥85% near-unanimous high. "
+            "Chunk-aware block processing.<br>\n"
+            "<b>Typical use:</b> Identify robust planning zones where multiple "
+            "scenarios agree on suitability, vs. contested areas.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def initAlgorithm(self, config=None):
         self.addParameter(
             QgsProcessingParameterMultipleLayers(

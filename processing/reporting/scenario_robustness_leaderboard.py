@@ -36,6 +36,25 @@ class ScenarioRobustnessLeaderboardAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "reporting"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Fuses benchmark, dominance, minimax-regret, and diversity scores into a single robustness ranking.</b></p>"
+            "<p><b>Inputs:</b> Method benchmark leaderboard table, Scenario dominance matrix table, "
+            "Minimax regret selector table, Scenario portfolio diversity table.<br>"
+            "<b>Output:</b> Feature sink with scenario, rank, tier (HIGH >=80, STRONG >=67, WATCH >=54, WEAK), "
+            "robustness score, composite, stability, net_dom, max_regret, minimax_rk, uniq_score, "
+            "and per-dimension normalized scores.<br>"
+            "<b>Method:</b> Reads all four input tables and intersects scenarios by name. "
+            "Normalizes each dimension to [0,100] via min-max (regret inverted so lower is better). "
+            "Robustness = 0.34*composite + 0.24*dominance + 0.26*regret_avoidance + 0.16*diversity. "
+            "Ranks by descending robustness, breaking ties on regret, composite, dominance, uniqueness.<br>"
+            "<b>Typical use:</b> Final scenario comparison for decision-makers: "
+            "which scenario is most robust across all criteria?</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return ScenarioRobustnessLeaderboardAlgorithm()
 

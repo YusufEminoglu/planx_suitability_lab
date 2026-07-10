@@ -40,6 +40,24 @@ class SuitabilityClassAreaStatsAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "reporting"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Computes area statistics for suitability classes defined by configurable breaks.</b></p>"
+            "<p><b>Inputs:</b> Suitability raster (0-100), "
+            "Class breaks CSV (e.g. 20,40,60,80), Block size in pixels (64-4096).<br>"
+            "<b>Output:</b> Feature sink table with class_id, label (min-max), cell_count, pct_valid, area_units2; "
+            "summary string with top class.<br>"
+            "<b>Method:</b> Parses break values, sorts and deduplicates, prepends 0 and appends 100. "
+            "Processes the raster in blocks, digitizing each valid cell into the class bins. "
+            "Reports cell counts, percentage, and area (from geotransform) per class. "
+            "Identifies the largest class by cell count.<br>"
+            "<b>Typical use:</b> Understand the spatial distribution of suitability: "
+            "how much land falls in low/medium/high bands.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return SuitabilityClassAreaStatsAlgorithm()
 

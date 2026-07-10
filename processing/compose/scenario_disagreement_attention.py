@@ -40,6 +40,30 @@ class ScenarioDisagreementAttentionAlgorithm(QgsProcessingAlgorithm):
     def createInstance(self):
         return ScenarioDisagreementAttentionAlgorithm()
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Quantifies cross-scenario conflict per cell and assigns "
+            "attention classes for planning review.</b></p>\n"
+            "<p><b>Inputs:</b> 2–10 scenario suitability rasters (0–100); "
+            "optional constraint mask (0/1); "
+            "reference std for full disagreement (default 18); "
+            "high-mean threshold for critical conflict (default 70); "
+            "block size 64–2048.<br>\n"
+            "<b>Output:</b> Disagreement score raster (Float32, 0–100); "
+            "attention class raster (Byte, 0–4). "
+            "Score nodata = −9999, class nodata = 255.<br>\n"
+            "<b>Method:</b> Per cell, std across scenarios normalised by "
+            "reference std: score = (std/ref_std)×100 clipped 0–100. "
+            "Classes: 0=low (<20), 1=watch (≥20), 2=review (≥40), "
+            "3=high conflict (≥60), 4=critical (≥75 with high mean). "
+            "High mean + high conflict flags areas needing urgent attention.<br>\n"
+            "<b>Typical use:</b> Pinpoint locations where scenarios diverge "
+            "most, prioritising field validation or stakeholder deliberation.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def initAlgorithm(self, config=None):
         self.addParameter(
             QgsProcessingParameterMultipleLayers(

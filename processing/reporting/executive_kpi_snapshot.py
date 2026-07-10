@@ -38,6 +38,27 @@ class ExecutiveKpiSnapshotAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "reporting"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Produces a one-row management KPI table from five key rasters for executive dashboards.</b></p>"
+            "<p><b>Inputs:</b> Suitability raster (0-100), Robust suitability raster (0-100), "
+            "Constraint mask raster (0/1), Consensus zone raster (0-4), Disagreement attention class raster (0-4).<br>"
+            "<b>Output:</b> Feature sink with one row: cells_total, area_total, mean_suit, mean_robust, "
+            "top80_suit_pct, top80_robust_pct, eligible_pct (constraint-passing), excluded_pct, "
+            "consensus_high_pct (zone>=3), consensus_unanim_pct (zone>=4), "
+            "high_conflict_pct (attention>=3), critical_conflict_pct (attention>=4), "
+            "confidence_gap (mean_suit - mean_robust).<br>"
+            "<b>Method:</b> Reads all five rasters, validates dimensional consistency, intersects valid cells. "
+            "Computes summary statistics: mean suitability, robust suitability, top-80% area shares, "
+            "constraint eligibility, consensus strength, conflict severity, and the confidence gap. "
+            "All percentages are relative to the valid overlapping domain.<br>"
+            "<b>Typical use:</b> Single-page dashboard summary for senior decision-makers: "
+            "how good is the land, how confident are we, and where are the conflicts?</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return ExecutiveKpiSnapshotAlgorithm()
 

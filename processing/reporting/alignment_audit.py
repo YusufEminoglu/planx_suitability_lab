@@ -37,6 +37,23 @@ class AlignmentAuditAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "reporting"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Checks pixel size, extent, and shape consistency across a set of input rasters.</b></p>"
+            "<p><b>Inputs:</b> Input rasters to audit (2-20), Optional snap raster (reference for alignment).<br>"
+            "<b>Output:</b> Feature sink with one row per raster: width, height, pixel_x, pixel_y, crs_authid, "
+            "aligned_px (0/1), aligned_extent (0/1), aligned_shape (0/1), aligned_all (0/1). "
+            "Summary row with reference raster info and overall alignment status.<br>"
+            "<b>Method:</b> Uses the first raster (or optional snap raster) as reference. "
+            "For each subsequent raster, compares pixel size (tolerance 1e-9), extent key (rounded to 8 decimals), "
+            "and shape (width/height). Reports alignment per dimension and an overall flag. "
+            "First raster always serves as reference unless snap is provided.<br>"
+            "<b>Typical use:</b> Pre-flight check before any multi-raster analysis to prevent misalignment errors.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return AlignmentAuditAlgorithm()
 

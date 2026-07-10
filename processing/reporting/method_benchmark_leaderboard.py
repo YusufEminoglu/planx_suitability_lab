@@ -43,6 +43,24 @@ class MethodBenchmarkLeaderboardAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "reporting"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Ranks scenario methods by a composite score: mean suitability, high-coverage share, p90, and stability.</b></p>"
+            "<p><b>Inputs:</b> Scenario rasters (2-12), Optional mask raster (0/1), "
+            "High suitability threshold (0-100, default 70), Block size (64-2048).<br>"
+            "<b>Output:</b> Feature sink ranked by composite score: scenario, rank, n_cells, mean_score, "
+            "std_score, p90_score, high_pct, stability (=100-std), composite (0.35*mean + 0.30*high_pct + 0.20*p90 + 0.15*stability), "
+            "grade A-D.<br>"
+            "<b>Method:</b> For each scenario raster, computes mean, std, p90 (from cumulative histogram), "
+            "and percentage of cells at or above the high threshold. Stability is clipped 100-std. "
+            "Composite score weights favour high mean and high-area coverage. "
+            "Grades: A>=80, B>=70, C>=60, D<60.<br>"
+            "<b>Typical use:</b> Compare weighting or MCDA methods to select the best-performing approach for a given study area.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return MethodBenchmarkLeaderboardAlgorithm()
 

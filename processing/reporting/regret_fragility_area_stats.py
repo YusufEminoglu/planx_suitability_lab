@@ -34,6 +34,23 @@ class RegretFragilityAreaStatsAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "reporting"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Computes area per regret fragility class (stable, watch, fragile).</b></p>"
+            "<p><b>Inputs:</b> Regret fragility class raster (0-2).<br>"
+            "<b>Output:</b> Feature sink with 3 rows: class_id (0-2), label (STABLE_LOW_REGRET, "
+            "WATCH_MEDIUM_REGRET, FRAGILE_HIGH_REGRET), cells, pct, area.<br>"
+            "<b>Method:</b> Reads the raster, rounds to integers clipped [0,2], bins counts per class. "
+            "Computes percentage and area. "
+            "STABLE_LOW_REGRET zones are resilient to scenario changes; FRAGILE_HIGH_REGRET zones are sensitive "
+            "and could trigger large opportunity losses if the wrong scenario is chosen.<br>"
+            "<b>Typical use:</b> Identify where planning decisions are most sensitive to scenario choice, "
+            "helping focus robustness-improvement efforts on fragile areas.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return RegretFragilityAreaStatsAlgorithm()
 

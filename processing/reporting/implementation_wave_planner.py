@@ -35,6 +35,25 @@ class ImplementationWavePlannerAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "reporting"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Produces a four-phase implementation wave plan from priority zones and risk-opportunity data.</b></p>"
+            "<p><b>Inputs:</b> Priority zone raster (0-4), Risk-opportunity matrix raster (0-4).<br>"
+            "<b>Output:</b> Feature sink with 4 rows: wave_id (1-4), wave_label (WAVE_1 to WAVE_4), "
+            "strategy (RAPID_DELIVERY, TARGETED_VALIDATION, STRUCTURED_UPLIFT, DEFER_MONITOR), "
+            "cells, pct, area.<br>"
+            "<b>Method:</b> Wave 1 (RAPID_DELIVERY): high priority (zone>=3) + invest-now (risk=1). "
+            "Wave 2 (TARGETED_VALIDATION): high priority + validation-needed (risk=2). "
+            "Wave 3 (STRUCTURED_UPLIFT): medium priority (zone=2) + invest/validate risk. "
+            "Wave 4 (DEFER_MONITOR): all remaining valid cells. "
+            "Uses numpy where-chaining with priority order.<br>"
+            "<b>Typical use:</b> Generate phased delivery timelines for spatial planning, "
+            "ensuring quick wins are captured first while contested zones undergo due diligence.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return ImplementationWavePlannerAlgorithm()
 

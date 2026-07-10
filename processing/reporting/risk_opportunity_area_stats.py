@@ -34,6 +34,23 @@ class RiskOpportunityAreaStatsAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "reporting"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Computes area per risk-opportunity class from an investment-matrix raster.</b></p>"
+            "<p><b>Inputs:</b> Risk-opportunity class raster (0-4).<br>"
+            "<b>Output:</b> Feature sink with 5 rows: class_id (0-4), label (UNCLASSIFIED, INVEST_NOW, "
+            "VALIDATE_THEN_INVEST, LOW_STRATEGIC_VALUE, DEFER_AND_MONITOR), cells, pct, area.<br>"
+            "<b>Method:</b> Reads the raster, rounds to integers clipped [0,4], bins counts per class. "
+            "Computes percentage and area per investment strategy class. "
+            "Classes combine suitability potential with uncertainty/risk to guide investment decisions: "
+            "immediate action (INVEST_NOW), due-diligence (VALIDATE_THEN_INVEST), low priority, or deferral.<br>"
+            "<b>Typical use:</b> Prioritize budget allocation by identifying zones ready for investment versus "
+            "zones requiring further validation or monitoring.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return RiskOpportunityAreaStatsAlgorithm()
 

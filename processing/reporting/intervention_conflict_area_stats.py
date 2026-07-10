@@ -34,6 +34,22 @@ class InterventionConflictAreaStatsAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "reporting"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Computes area per intervention conflict class from a multi-dimensional conflict raster.</b></p>"
+            "<p><b>Inputs:</b> Intervention conflict class raster (0-6).<br>"
+            "<b>Output:</b> Feature sink with 7 rows: class_id (0-6), label (HOLD, QUICK_WIN, DELIBERATE_DESIGN, "
+            "RESOLVE_FIRST, MONITOR, CO_DESIGN, RE_SCREEN), cells, pct, area.<br>"
+            "<b>Method:</b> Reads the raster, rounds to integers clipped [0,6], bins counts per class. "
+            "Computes percentage and area per intervention conflict type. "
+            "Classes range from immediate action (QUICK_WIN) through deliberative processes to re-screening, "
+            "encoding both suitability potential and implementation feasibility.<br>"
+            "<b>Typical use:</b> Categorize the study area into intervention strategies for phased implementation planning.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return InterventionConflictAreaStatsAlgorithm()
 

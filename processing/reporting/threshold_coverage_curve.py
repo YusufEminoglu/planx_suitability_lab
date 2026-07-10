@@ -36,6 +36,23 @@ class ThresholdCoverageCurveAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "reporting"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Computes area-above-threshold for a sweep of suitability cutoffs, producing a coverage curve.</b></p>"
+            "<p><b>Inputs:</b> Suitability raster (0-100), Threshold step (1-25, default 5).<br>"
+            "<b>Output:</b> Feature sink with one row per threshold: threshold, cells_ge, pct_ge, area_ge, "
+            "delta_pct_prev (change from previous threshold).<br>"
+            "<b>Method:</b> Sweeps thresholds from 0 to 100 at the given step interval. "
+            "At each threshold, counts cells with suitability >= threshold and computes percentage of all valid cells. "
+            "Also reports the incremental loss between consecutive thresholds via delta_pct_prev. "
+            "Always includes threshold 100 as the final row.<br>"
+            "<b>Typical use:</b> Determine how much land is available at different suitability cutoffs, "
+            "supporting target-setting for minimum suitability thresholds in zoning policy.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return ThresholdCoverageCurveAlgorithm()
 

@@ -35,6 +35,28 @@ class WeightConsensusAuditAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "weights"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Audit cross-method agreement by computing the coefficient of variation (CV) "
+            "for each criterion's weight across all weighting methods.</b></p>"
+            "<p><b>Inputs:</b> Scenario weights table - from scenario_weight_pack, containing criterion_id "
+            "and weight_norm (or weight) columns with multiple methods per criterion.<br>"
+            "<b>Output:</b> A table with criterion_id, method_count, w_mean, w_median, w_min, w_max, "
+            "w_range, w_std, cv_pct, and agreement. Agreement is HIGH (CV <= 10%), MEDIUM (CV <= 25%), "
+            "or LOW (CV > 25%).<br>"
+            "<b>Method:</b> Groups weights by criterion_id across all methods and computes descriptive statistics "
+            "(mean, median, min, max, range, population standard deviation) and the coefficient of variation "
+            "(CV = std / mean * 100%). The CV-based agreement label classifies whether the weighting methods "
+            "converge or diverge: low CV means the weight is stable regardless of method choice; "
+            "high CV flags criteria where the weight is method-dependent.<br>"
+            "<b>Typical use:</b> Identify robust criteria (consistent weight across AHP, PCA, Entropy, CRITIC) "
+            "versus contested criteria (weight varies by method), guiding stakeholder discussion "
+            "before finalising a suitability model.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return WeightConsensusAuditAlgorithm()
 

@@ -36,6 +36,28 @@ class ScenarioWeightPackAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "weights"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Merge AHP, PCA, Entropy, and CRITIC weight tables into a unified scenario pack "
+            "and add a blended-average ensemble scenario.</b></p>"
+            "<p><b>Inputs:</b> AHP, PCA, and Entropy weight tables (required); "
+            "CRITIC weight table (optional). Each must contain criterion_id and weight columns.<br>"
+            "<b>Output:</b> A combined table with columns method, criterion_id, weight_raw, and weight_norm. "
+            "Each method's weights are independently normalised to sum to 1. "
+            "An additional BLENDED_AVG method provides the per-criterion arithmetic mean "
+            "of the normalised weights across all supplied methods.<br>"
+            "<b>Method:</b> Collects all rows, grouping by method. Within each method weights are normalised "
+            "to sum to 1. The blended scenario computes the per-criterion mean of these normalised values, "
+            "creating a simple ensemble that balances subjective (AHP) and objective (PCA, Entropy, CRITIC) "
+            "approaches without requiring further user judgment.<br>"
+            "<b>Typical use:</b> Prepare a multi-scenario weight set for sensitivity analysis, "
+            "consensus auditing, or comparison of how different weighting philosophies affect "
+            "the final suitability ranking.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return ScenarioWeightPackAlgorithm()
 

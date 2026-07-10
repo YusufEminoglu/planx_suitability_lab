@@ -37,6 +37,25 @@ class PolicyGateRecommenderAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "reporting"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Recommends a suitability threshold and risk-aversion lambda based on coverage and frontier data.</b></p>"
+            "<p><b>Inputs:</b> Threshold coverage curve table, Policy sensitivity frontier table, "
+            "Target area coverage percent (1-95, default 25), "
+            "Max acceptable critical conflict percent (0-100, default 10).<br>"
+            "<b>Output:</b> Feature sink with one row: target_cov_pct, rec_threshold (closest to target coverage), "
+            "threshold_cov_pct, rec_lambda (optimized for mean-vs-coverage tradeoff), lambda_mean, lambda_area60_pct, "
+            "max_critical_conf, policy_mode (STRICT <=7.5, BALANCED <=15, PERMISSIVE), note.<br>"
+            "<b>Method:</b> From the coverage curve, selects the threshold whose pct_ge is closest to the target coverage. "
+            "From the frontier, selects the lambda maximizing mean_score - 0.35*|area60 - target_cov|. "
+            "Policy mode is derived from the max acceptable critical conflict guideline.<br>"
+            "<b>Typical use:</b> Automate initial threshold and lambda settings for a planning run, "
+            "reducing manual trial-and-error.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return PolicyGateRecommenderAlgorithm()
 

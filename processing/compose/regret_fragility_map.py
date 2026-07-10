@@ -40,6 +40,29 @@ class RegretFragilityMapAlgorithm(QgsProcessingAlgorithm):
     def createInstance(self):
         return RegretFragilityMapAlgorithm()
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Maps scenario-spread fragility to identify cells "
+            "sensitive to scenario choice.</b></p>\n"
+            "<p><b>Inputs:</b> 2–12 scenario suitability rasters (0–100); "
+            "optional analysis mask (0/1); "
+            "low fragility threshold (default 12); high fragility threshold "
+            "(default 25); block size 64–2048.<br>\n"
+            "<b>Output:</b> Fragility score raster (Float32, 0–100, "
+            "nodata=−9999); fragility class raster (Byte, nodata=255).<br>\n"
+            "<b>Method:</b> Per cell, spread = max − min across scenarios. "
+            "Score = spread (higher = more scenario-dependent). "
+            "Classes: 0=stable (spread < low), 1=watch (low ≤ spread < high), "
+            "2=fragile (spread ≥ high). "
+            "Chunk-aware block processing.<br>\n"
+            "<b>Typical use:</b> Screening for scenario-robust sites: "
+            "stable cells are reliable regardless of scenario; "
+            "fragile cells require scenario-specific contingency plans.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def initAlgorithm(self, config=None):
         self.addParameter(
             QgsProcessingParameterMultipleLayers(

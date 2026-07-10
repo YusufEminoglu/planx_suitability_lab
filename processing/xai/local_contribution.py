@@ -31,6 +31,27 @@ class LocalContributionAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "xai"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Decomposes final suitability into per-criterion absolute contribution "
+            "and percentage share rasters.</b></p>"
+            "<p><b>Inputs:</b> Up to 6 criterion rasters (normalized, aligned, same dimensions); "
+            "optional weights CSV (comma-separated, one per criterion; equal weights if blank).<br>"
+            "<b>Output:</b> Folder containing N absolute contribution rasters (xai_local_contribution_{i}.tif), "
+            "N percentage rasters (xai_local_contribution_pct_{i}.tif, range 0-100), "
+            "and one denominator raster (xai_local_contribution_total_abs.tif). "
+            "All rasters are Float32, full extent, pixel-wise computation.<br>"
+            "<b>Method:</b> For each criterion, the absolute weighted contribution is |value * weight|. "
+            "The per-cell denominator is the sum of all absolute contributions (clamped to >=1e-6 to avoid division by zero). "
+            "Each criterion's percentage share = (abs_contribution / denominator) * 100, "
+            "showing what fraction of the total weighted score originates from each input at every cell.<br>"
+            "<b>Typical use:</b> Inspect which criteria dominate suitability at any location. "
+            "A single criterion contributing over 50% may warrant closer data-quality scrutiny at that site.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return LocalContributionAlgorithm()
 

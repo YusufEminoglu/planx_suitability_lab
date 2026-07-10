@@ -41,6 +41,25 @@ class ConstraintImpactAuditAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "reporting"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Measures how much each hard constraint mask reduces available suitability and high-suitability area.</b></p>"
+            "<p><b>Inputs:</b> Suitability raster (0-100), Constraint mask rasters (0/1, 0=excluded), "
+            "High suitability threshold (0-100, default 70), Block size (64-2048).<br>"
+            "<b>Output:</b> Feature sink with per-constraint rows: excluded_cells, excluded_pct, excluded_area, "
+            "excluded_high_cells, excluded_high_pct, priority_risk (CRITICAL>=25%, HIGH>=12%, MEDIUM>=5%, LOW). "
+            "Union row __ALL_CONSTRAINTS_UNION__ with combined impact.<br>"
+            "<b>Method:</b> For each constraint mask, counts cells where mask <= 0.5 and suitability is valid. "
+            "Also counts high-suitability cells (>= threshold) excluded by each constraint. "
+            "Computes excluded percentage relative to total valid and total high cells. "
+            "The union row reports the combined exclusion of all constraints.<br>"
+            "<b>Typical use:</b> Evaluate whether hard constraints (protected areas, hazard zones) "
+            "excessively restrict development options, especially in high-suitability zones.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return ConstraintImpactAuditAlgorithm()
 

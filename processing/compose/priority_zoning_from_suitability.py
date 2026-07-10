@@ -41,6 +41,30 @@ class PriorityZoningFromSuitabilityAlgorithm(QgsProcessingAlgorithm):
     def createInstance(self):
         return PriorityZoningFromSuitabilityAlgorithm()
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Derives a priority index and action zones (0–4) "
+            "from suitability, confidence, and opportunity loss.</b></p>\n"
+            "<p><b>Inputs:</b> Suitability raster (0–100); "
+            "optional confidence raster (0–100, defaults 75); "
+            "optional opportunity-loss raster (0–100, defaults 0); "
+            "thresholds for suitability (med 50/high 75), "
+            "confidence (med 60/high 80), loss (high 70); "
+            "block size 64–2048.<br>\n"
+            "<b>Output:</b> Priority index raster (Float32, 0–100); "
+            "priority zone raster (Int16, 0–4).<br>\n"
+            "<b>Method:</b> Index = 0.60×S + 0.30×C − 0.20×O, clipped 0–100. "
+            "Zones: 4=constraint-revisit (high loss), "
+            "3=immediate priority (high suit+conf), "
+            "2=detailed feasibility (med suit+conf), "
+            "1=longlist (med suit), 0=low priority.<br>\n"
+            "<b>Typical use:</b> Tiered action planning fusing suitability "
+            "strength, cross-scenario confidence, and constraint trade-offs.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def initAlgorithm(self, config=None):
         self.addParameter(QgsProcessingParameterRasterLayer(self.SUIT, "Suitability raster (0-100)"))
         self.addParameter(QgsProcessingParameterRasterLayer(self.CONF, "Confidence raster (0-100, optional)", optional=True))

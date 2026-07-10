@@ -37,6 +37,31 @@ class MonteCarloSuitabilityAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "uncertainty"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Quantifies suitability uncertainty via chunk-based Monte Carlo simulation "
+            "with Gaussian perturbation of the composite score.</b></p>"
+            "<p><b>Inputs:</b> Input suitability raster (Float32, 0-100 scale); "
+            "iterations (>=20, default 300); "
+            "noise sigma (0.0-0.5 relative, default 0.08); "
+            "block size in pixels (64-2048, default 256).<br>"
+            "<b>Output:</b> Six Float32 rasters - unc_mean, unc_std, unc_p05 (5th percentile), "
+            "unc_p50 (median), unc_p95 (95th percentile), "
+            "stability_index (100 minus P95-P05 spread; 0-100, higher = more stable). "
+            "Nodata cells preserved across all outputs.<br>"
+            "<b>Method:</b> Each cell's base value is perturbed over N iterations: "
+            "sim = base * (1 + N(0, sigma)), clipped to 0-100. "
+            "A fixed random seed (42) ensures reproducibility. "
+            "Processing uses configurable pixel blocks for memory efficiency. "
+            "Per-cell summary statistics (mean, std, percentiles) are computed across all iterations; "
+            "stability_index captures the confidence-interval width (100 - (P95-P05)).<br>"
+            "<b>Typical use:</b> Identify areas where suitability scores are fragile under data or weight uncertainty. "
+            "Low stability flags locations needing further investigation before committing to land-use decisions.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return MonteCarloSuitabilityAlgorithm()
 

@@ -29,6 +29,25 @@ class BetaEvidenceReportAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "reporting"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Produces a release-readiness evidence report checking algorithm registry and output artifacts.</b></p>"
+            "<p><b>Inputs:</b> Execution summary notes (multiline), "
+            "Optional output directory for artifact existence checks.<br>"
+            "<b>Output:</b> HTML file with overall status (READY/NOT READY), algorithm registry checks "
+            "(PASS/FAIL for required algorithms), artifact file checks (PASS/MISSING for expected outputs), "
+            "and summary notes.<br>"
+            "<b>Method:</b> Iterates a hardcoded list of required algorithm IDs and checks each against the "
+            "QGIS processing registry. If an artifact directory is provided, checks expected output files "
+            "(TIFF, GPKG, HTML, MD) for existence. "
+            "Overall status is READY only if all registry checks pass AND all artifacts are found.<br>"
+            "<b>Typical use:</b> Pre-release quality gate: confirm the complete analysis pipeline is registered "
+            "and all expected deliverables were produced.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return BetaEvidenceReportAlgorithm()
 

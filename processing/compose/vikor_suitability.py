@@ -41,6 +41,29 @@ class VIKORSuitabilityAlgorithm(QgsProcessingAlgorithm):
     def createInstance(self):
         return VIKORSuitabilityAlgorithm()
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Multi-criteria suitability via VIKOR compromise ranking.</b></p>\n"
+            "<p><b>Inputs:</b> Up to 6 criterion rasters (normalized 0–100); "
+            "optional criteria weights CSV; optional impacts CSV "
+            "(B/C or +/-1, default all benefit); "
+            "compromise weight v (0–1, higher favours group utility S); "
+            "optional constraint mask (0/1); block size 64–2048.<br>\n"
+            "<b>Output:</b> Suitability raster (Float32, 0–100 = 100×(1−Q)); "
+            "constraint-failing cells set to 0.<br>\n"
+            "<b>Method:</b> Three-pass: (1) best/worst per criterion; "
+            "(2) compute group utility S (weighted sum of normalised gaps) "
+            "and individual regret R (max weighted gap), plus global S*,S-,R*,R-; "
+            "(3) Q = v·(S−S*)/(S-−S*) + (1−v)·(R−R*)/(R-−R*), "
+            "suitability = 100·(1−Q). "
+            "v balances group consensus vs. individual regret minimisation.<br>\n"
+            "<b>Typical use:</b> Ranking with conflicting criteria where both "
+            "overall performance and worst-criterion regret matter.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def initAlgorithm(self, config=None):
         self.addParameter(
             QgsProcessingParameterMultipleLayers(

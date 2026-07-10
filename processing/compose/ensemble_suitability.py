@@ -43,6 +43,29 @@ class EnsembleSuitabilityAlgorithm(QgsProcessingAlgorithm):
     def createInstance(self):
         return EnsembleSuitabilityAlgorithm()
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Synthesises multiple scenario suitability rasters into ensemble "
+            "statistics and confidence.</b></p>\n"
+            "<p><b>Inputs:</b> 2–8 suitability rasters (each 0–100); "
+            "optional scenario weights CSV (default equal); "
+            "optional constraint mask (0/1); block size 64–2048.<br>\n"
+            "<b>Output:</b> Five rasters (all Float32): "
+            "weighted mean (0–100), unweighted std (0–100 approx), "
+            "10th percentile, 90th percentile, "
+            "confidence index (100−std, higher = stronger agreement). "
+            "Constraint-failing cells set to 0.<br>\n"
+            "<b>Method:</b> Chunk-aware: per block, scenario rasters are stacked; "
+            "weighted mean via tensordot, std and percentiles via numpy. "
+            "Confidence = 100 − clip(std, 0, 100). "
+            "Provides a robust central estimate plus spread diagnostics.<br>\n"
+            "<b>Typical use:</b> Cross-scenario synthesis to identify "
+            "consistently suitable areas and quantify scenario-driven uncertainty.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def initAlgorithm(self, config=None):
         self.addParameter(
             QgsProcessingParameterMultipleLayers(

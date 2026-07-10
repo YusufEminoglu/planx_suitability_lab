@@ -45,6 +45,30 @@ class NormalizerAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "core"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Transforms a raw criterion raster to a 0-100 suitability scale using one of "
+            "seven fuzzy or linear normalisation functions.</b></p>"
+            "<p><b>Inputs:</b> Input raster (single-band); method: Min-Max Benefit (0), Min-Max Cost (1), "
+            "Fuzzy Linear Benefit (2), Fuzzy Linear Cost (3), Fuzzy Sigmoid Benefit (4), "
+            "Fuzzy Sigmoid Cost (5), Fuzzy Gaussian Benefit (6); low bound (min or lower breakpoint); "
+            "high bound (max or upper breakpoint, must be > low); midpoint for sigmoid/gaussian curves (default 50); "
+            "spread for sigmoid/gaussian steepness (>0, default 10).<br>"
+            "<b>Output:</b> Single-band Float32 LZW-compressed GeoTIFF, values clipped 0-100, "
+            "original nodata cells preserved unchanged.<br>"
+            "<b>Method:</b> Benefit min-max: (x-low)/(high-low)*100. Cost min-max: (high-x)/(high-low)*100. "
+            "Sigmoid benefit: 100/(1+e^-z) with z = (x-mid)/spread clamped to [-60,60]. "
+            "Sigmoid cost: 100 minus the sigmoid benefit. Gaussian benefit: 100*exp(-0.5*((x-mid)/spread)^2). "
+            "The entire raster is read into memory (NumPy) - very large rasters may exhaust RAM. "
+            "Nodata cells are detected from the input band's nodata value and excluded from computation.<br>"
+            "<b>Typical use:</b> Standardising heterogeneous criteria (slope, distance, land value, "
+            "population density) to a common 0-100 scale before weighted overlay. "
+            "Use benefit methods when higher raw values are desirable; cost when lower is better.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return NormalizerAlgorithm()
 

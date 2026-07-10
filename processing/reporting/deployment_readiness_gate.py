@@ -37,6 +37,26 @@ class DeploymentReadinessGateAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "reporting"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Produces a GO / CONDITIONAL_GO / HOLD deployment decision with evidence flags.</b></p>"
+            "<p><b>Inputs:</b> Actionability scorecard, Scenario selection recommender, Minimax regret selector, "
+            "Implementation wave planner, Regret fragility area stats.<br>"
+            "<b>Output:</b> Feature sink with one row: decision (GO_LIVE, CONDITIONAL_GO, HOLD), "
+            "confidence (HIGH/MEDIUM/LOW), action_grade, readiness, overall, primary_scn, minimax_scn, "
+            "primary_mm_rk, primary_mm_rg, top_max_regret, wave1_pct, wave2_pct, fragile_pct, "
+            "flag_count, flags (pipe-separated), note.<br>"
+            "<b>Method:</b> Evaluates four evidence flags: LOW_ACTIONABILITY (overall<75), "
+            "HIGH_WORST_CASE_REGRET (top max regret>35), HIGH_FRAGILITY_FOOTPRINT (fragile pct>22.5), "
+            "LOW_IMMEDIATE_DELIVERY_WINDOW (wave1<8%). "
+            "Decision logic: GO_LIVE if no flags AND overall>=82 AND regret<=28; "
+            "CONDITIONAL_GO if overall>=70 AND regret<=40; otherwise HOLD. Reports flag count and joined flag string.<br>"
+            "<b>Typical use:</b> Final deployment gate before publishing results to planning authorities.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return DeploymentReadinessGateAlgorithm()
 

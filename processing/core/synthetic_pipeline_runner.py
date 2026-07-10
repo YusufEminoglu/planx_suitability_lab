@@ -24,6 +24,29 @@ class SyntheticPipelineRunnerAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "core"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Runs the complete PlanX Suitability Lab pipeline end-to-end on synthetic data, "
+            "producing every raster, table, and report artifact for workflow verification.</b></p>"
+            "<p><b>Inputs:</b> Study extent (bounding box); pixel size in map units (>=1.0, default 30.0).<br>"
+            "<b>Output:</b> 70+ files in the output folder: suitability rasters (WLC, OWA, TOPSIS, VIKOR, ensemble), "
+            "scenario diagnostics (consensus zones, disagreement attention, decision quadrants, intervention matrix, "
+            "risk-opportunity matrix, regret-fragility map), opportunity loss maps, priority zoning, transition and "
+            "fragmentation audits, method benchmark and robustness leaderboards, portfolio diversity, minimax regret, "
+            "policy sensitivity frontier, budget phasing, governance audit, wave plan, deployment gate, "
+            "and three reports (HTML suitability report, scenario markdown brief, beta evidence HTML).<br>"
+            "<b>Method:</b> Chain-runs 35+ sub-algorithms in deterministic sequence: synthetic data generation, "
+            "four MCDA methods with equal weights, Monte Carlo uncertainty (120 iterations, sigma 0.08), "
+            "AHP/PCA/Entropy/CRITIC weight derivation, ensemble synthesis, scenario consensus and disagreement "
+            "mapping, priority zoning (baseline + refined), multi-scenario benchmarking and robustness ranking, "
+            "budget phasing, and deployment readiness gating.<br>"
+            "<b>Typical use:</b> One-click smoke-test verifying every algorithm executes correctly "
+            "after installation, environment changes, or dependency updates.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return SyntheticPipelineRunnerAlgorithm()
 

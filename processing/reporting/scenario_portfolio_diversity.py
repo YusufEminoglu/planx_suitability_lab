@@ -42,6 +42,26 @@ class ScenarioPortfolioDiversityAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "reporting"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Audits scenario portfolio for redundancy versus diversification using pairwise correlations "
+            "and spatial disagreement.</b></p>"
+            "<p><b>Inputs:</b> Scenario rasters (3-12), Optional mask raster (0/1), Block size (64-2048).<br>"
+            "<b>Output:</b> Feature sink with SUMMARY row (diversity_idx, effective_methods, disagree_std, "
+            "health_score, div_class STRONG/MODERATE/REDUNDANT, spread_class) "
+            "and SCENARIO rows (uniq_score, mean_abs_corr, role DIVERSIFIER/BALANCER/ANCHOR).<br>"
+            "<b>Method:</b> Computes pairwise Pearson correlations between all scenarios. "
+            "Diversity index = (1 - mean_abs_corr) * 100. "
+            "Effective methods = 1 + (n-1)*(1 - mean_abs_corr), estimating independent information sources. "
+            "Spatial disagreement measured as per-cell standard deviation across all scenarios. "
+            "Portfolio health = 0.65*diversity + 0.35*(100-disagreement_std).<br>"
+            "<b>Typical use:</b> Determine if the scenario set is sufficiently diverse or overly redundant, "
+            "guiding whether to add or prune scenarios.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return ScenarioPortfolioDiversityAlgorithm()
 

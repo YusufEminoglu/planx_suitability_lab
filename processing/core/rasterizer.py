@@ -33,6 +33,26 @@ class RasterizerAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return 'core'
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Converts vector features to a single-band raster, burning attribute values "
+            "or a fixed burn value into each cell.</b></p>"
+            "<p><b>Inputs:</b> Vector input (any geometry type); optional numeric value field "
+            "(when provided, cell value = feature attribute; otherwise the burn value is used); "
+            "burn value (default 1.0); pixel size in map units (>=0.01, default 10.0).<br>"
+            "<b>Output:</b> Single-band Float32 GeoTIFF covering the input layer extent at the specified pixel size, "
+            "nodata = 0 for cells not intersected by any feature.<br>"
+            "<b>Method:</b> Wraps GDAL Rasterize (gdal:rasterize) with pixel-sized units. "
+            "When a value field is selected, each cell receives the attribute value of the feature covering "
+            "its center. Otherwise, all cells intersecting any feature receive the burn value. "
+            "Output extent is derived from the input layer bounds; output data type is fixed to Float32.<br>"
+            "<b>Typical use:</b> Converting land-use polygons, zoning boundaries, building footprints, "
+            "or facility points into raster criteria for suitability analysis or constraint masking.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return RasterizerAlgorithm()
 

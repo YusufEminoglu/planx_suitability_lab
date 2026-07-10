@@ -34,6 +34,29 @@ class UncertaintyAdjustedSuitabilityAlgorithm(QgsProcessingAlgorithm):
     def createInstance(self):
         return UncertaintyAdjustedSuitabilityAlgorithm()
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Produces risk-adjusted suitability by penalising "
+            "uncertain cells (mean − lambda × std).</b></p>\n"
+            "<p><b>Inputs:</b> Uncertainty mean raster (unc_mean); "
+            "uncertainty std raster (unc_std); "
+            "risk aversion factor lambda (0–5, default 1.0).<br>\n"
+            "<b>Output:</b> Robust suitability raster (Float32, 0–100); "
+            "nodata where either input is invalid. "
+            "Reads full arrays in memory.<br>\n"
+            "<b>Method:</b> robust = clip(mean − lambda × std, 0, 100). "
+            "lambda=0 returns the mean unchanged; lambda=1 subtracts one "
+            "standard deviation (risk-averse); higher lambda increasingly "
+            "penalises cells with large scenario spread. "
+            "This is a simplified mean-variance decision rule.<br>\n"
+            "<b>Typical use:</b> Conservative site selection where "
+            "decision-makers prefer proven, low-variance locations "
+            "over potentially high-but-uncertain ones.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def initAlgorithm(self, config=None):
         self.addParameter(QgsProcessingParameterRasterLayer(self.MEAN, "Uncertainty mean raster (unc_mean)"))
         self.addParameter(QgsProcessingParameterRasterLayer(self.STD, "Uncertainty std raster (unc_std)"))

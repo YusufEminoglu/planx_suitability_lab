@@ -40,6 +40,29 @@ class TOPSISSuitabilityAlgorithm(QgsProcessingAlgorithm):
     def createInstance(self):
         return TOPSISSuitabilityAlgorithm()
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Multi-criteria suitability via Technique for Order Preference "
+            "by Similarity to Ideal Solution (TOPSIS).</b></p>\n"
+            "<p><b>Inputs:</b> Up to 6 criterion rasters (normalized 0–100); "
+            "optional criteria weights CSV; optional impacts CSV "
+            "(B/C or +/-1, default all benefit); optional constraint mask (0/1); "
+            "block size 64–2048.<br>\n"
+            "<b>Output:</b> Closeness coefficient raster (Float32, 0–100); "
+            "1.0 = ideal, 0.0 = anti-ideal; constraint-failing cells set to 0.<br>\n"
+            "<b>Method:</b> Three-pass: (1) vector normalisation denominators "
+            "across all valid cells; (2) identify ideal-positive and "
+            "ideal-negative points in weighted normalised space per criterion "
+            "(benefit: max=ideal; cost: min=ideal); "
+            "(3) per-cell Euclidean distances d+ and d-, "
+            "closeness = d-/(d+ + d-) scaled to 0–100.<br>\n"
+            "<b>Typical use:</b> Ranking alternatives when both benefit and cost "
+            "criteria matter and the best compromise close to the ideal is sought.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def initAlgorithm(self, config=None):
         self.addParameter(
             QgsProcessingParameterMultipleLayers(

@@ -34,6 +34,29 @@ class GeoShapleyLiteAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "xai"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Per-cell linear attribution of suitability deviation from a sampled global baseline, "
+            "approximating a first-order Shapley decomposition.</b></p>"
+            "<p><b>Inputs:</b> Up to 6 criterion rasters (normalized, aligned, same dimensions); "
+            "optional weights CSV (comma-separated, one per criterion; equal weights if blank); "
+            "sample size for baseline estimation (>=200, default 2000).<br>"
+            "<b>Output:</b> Single Float32 attribution raster in range [-100, 100]. "
+            "Positive values = local weighted criteria exceed the global baseline; "
+            "negative = they fall below it. Nodata where any criterion is nodata.<br>"
+            "<b>Method:</b> A global baseline (mean value) is estimated per criterion from a random sample "
+            "of valid overlapping cells drawn without replacement. "
+            "Each cell's attribution = sum_i(weight_i * (criterion_i - baseline_i)), "
+            "approximating a first-order Shapley decomposition around the sample mean. "
+            "This avoids the exponential cost (2^n) of exact Shapley computation "
+            "while preserving the marginal-contribution interpretation.<br>"
+            "<b>Typical use:</b> Map where local conditions pull suitability above or below the regional average. "
+            "Use alongside local contribution maps to distinguish single-criterion dominance from broad consensus.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return GeoShapleyLiteAlgorithm()
 

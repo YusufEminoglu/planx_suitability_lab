@@ -30,6 +30,24 @@ class NumericalQACheckAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "reporting"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Validates suitability raster bounds and uncertainty percentile ordering.</b></p>"
+            "<p><b>Inputs:</b> Suitability raster (0-100), Uncertainty p05 raster, "
+            "Uncertainty p50 raster, Uncertainty p95 raster.<br>"
+            "<b>Output:</b> QA summary string - suitability min/max, bounds PASS/FAIL (must be 0-100), "
+            "percentile order PASS/FAIL (p05 <= p50 <= p95).<br>"
+            "<b>Method:</b> Reads all four rasters, intersects valid (finite, non-nodata) cells. "
+            "Checks that suitability values fall within [0,100]. "
+            "Verifies the monotonic percentile ordering p05 <= p50 <= p95 across the overlapping domain. "
+            "Reports PASS/FAIL for each check.<br>"
+            "<b>Typical use:</b> Run before any downstream analysis to catch data pipeline errors. "
+            "A FAIL on percentile order indicates corrupt or misaligned uncertainty outputs.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return NumericalQACheckAlgorithm()
 

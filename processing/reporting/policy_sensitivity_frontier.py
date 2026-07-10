@@ -37,6 +37,24 @@ class PolicySensitivityFrontierAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "reporting"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Sweeps a risk-aversion parameter lambda and computes the policy sensitivity frontier.</b></p>"
+            "<p><b>Inputs:</b> Uncertainty mean raster, Uncertainty std raster, "
+            "Lambda list CSV (e.g. 0,0.5,1,1.5,2 - sorted, deduplicated).<br>"
+            "<b>Output:</b> Feature sink with lambda, mean_score, median_score, p90_score, "
+            "area_ge_80_pct, area_ge_60_pct, delta_vs_prev (mean change from previous lambda).<br>"
+            "<b>Method:</b> For each lambda, computes robust suitability = mean - lambda*std (clipped [0,100]). "
+            "Calculates mean, median, p90, and percentage of cells above thresholds 80 and 60. "
+            "The delta_vs_prev column shows how increasing risk aversion shifts the mean. "
+            "Higher lambda penalizes uncertainty more heavily.<br>"
+            "<b>Typical use:</b> Help planners choose an appropriate risk-aversion level by showing the trade-off "
+            "between mean suitability and uncertainty penalization.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return PolicySensitivityFrontierAlgorithm()
 

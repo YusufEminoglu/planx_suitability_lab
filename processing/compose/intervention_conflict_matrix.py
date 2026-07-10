@@ -34,6 +34,28 @@ class InterventionConflictMatrixAlgorithm(QgsProcessingAlgorithm):
     def createInstance(self):
         return InterventionConflictMatrixAlgorithm()
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Fuses priority zoning and disagreement attention into "
+            "actionable intervention classes.</b></p>\n"
+            "<p><b>Inputs:</b> Priority zone raster (0–4); "
+            "attention class raster (0–4); optional constraint mask (0/1).<br>\n"
+            "<b>Output:</b> Intervention class raster (Byte, 0–6, nodata=255). "
+            "Reads full arrays in memory; suitable for moderate raster sizes.<br>\n"
+            "<b>Method:</b> Crosses priority (high ≥3, mid=2, low ≤1) with "
+            "conflict (low ≤1, med=2, high ≥3): "
+            "0=Hold, 1=Quick Win (high priority + low conflict), "
+            "2=Deliberate Design (high + medium), "
+            "3=Resolve First (high + high), "
+            "4=Monitor (mid + low), 5=Co-Design (mid + high), "
+            "6=Re-screen (low + high).<br>\n"
+            "<b>Typical use:</b> Action prioritisation fusing "
+            "suitability urgency with cross-scenario reliability.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def initAlgorithm(self, config=None):
         self.addParameter(QgsProcessingParameterRasterLayer(self.PRIORITY_ZONE, "Priority zone raster (0..4)"))
         self.addParameter(QgsProcessingParameterRasterLayer(self.ATTENTION_CLASS, "Attention class raster (0..4)"))

@@ -47,6 +47,26 @@ class DataHarmonizerAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "core"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Aligns multiple rasters to a common grid (CRS, extent, resolution, nodata) "
+            "for multi-criteria analysis.</b></p>"
+            "<p><b>Inputs:</b> Multiple input rasters; optional snap raster (CRS/extent/resolution reference); "
+            "optional target extent override; target resolution in map units (set &lt;=0 to inherit from snap or first raster); "
+            "resampling method (Nearest/Bilinear/Cubic); output nodata value (default -9999).<br>"
+            "<b>Output:</b> Preview aligned raster (copy of the first aligned result), folder of all aligned GeoTIFFs "
+            "(named aligned_NN_safename.tif), and a text manifest listing all outputs with the target CRS, resolution, extent, "
+            "resampling, and nodata used.<br>"
+            "<b>Method:</b> Each input is warped via GDAL Warp (gdal:warpreproject) to the target CRS, extent, and pixel size. "
+            "All outputs share identical grid geometry, making them directly stackable for weighted overlay. "
+            "The first result is duplicated as a preview raster via gdal:translate. Outputs use Float32 data type.<br>"
+            "<b>Typical use:</b> Preprocessing step before any suitability overlay — ensures all criterion rasters are "
+            "perfectly aligned, avoiding resampling-on-the-fly errors during MCDA.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return DataHarmonizerAlgorithm()
 

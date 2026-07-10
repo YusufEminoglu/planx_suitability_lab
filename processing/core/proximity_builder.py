@@ -32,6 +32,29 @@ class ProximityBuilderAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return 'core'
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Computes Euclidean distance from every cell to the nearest target pixel, "
+            "creating a continuous proximity surface.</b></p>"
+            "<p><b>Inputs:</b> Input raster (single-band); target pixel values as comma-separated integers "
+            '(default "1" - cells with these values are distance sources); distance units: '
+            "Georeferenced (map units) or Pixels; maximum distance (0 = unlimited, values >=0 in the "
+            "chosen unit).<br>"
+            "<b>Output:</b> Single-band Float32 GeoTIFF proximity raster, nodata = 0. "
+            "Distance values are in the selected unit, capped at the maximum distance if set.<br>"
+            "<b>Method:</b> Wraps GDAL Proximity (gdal:proximity), computing the Euclidean distance "
+            "transform from each cell to the nearest cell whose band-1 value matches any of the "
+            "target values. Nodata cells in the input are excluded from the distance calculation "
+            "but output as 0. The REPLACE option is disabled so target cells retain their proximity "
+            "distance (typically 0 or very small).<br>"
+            "<b>Typical use:</b> Creating continuous distance-to-feature rasters - e.g., distance "
+            "to roads, transit stops, water bodies, or hazard zones - for use as normalised "
+            "suitability criteria.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return ProximityBuilderAlgorithm()
 

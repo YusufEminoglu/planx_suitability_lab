@@ -42,6 +42,24 @@ class ScenarioSimilarityMatrixAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "reporting"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Computes pairwise Pearson correlation, MAE, and RMSE between scenario suitability rasters.</b></p>"
+            "<p><b>Inputs:</b> Suitability scenario rasters (2-8), Optional mask raster (0/1), "
+            "Block size in pixels (64-2048).<br>"
+            "<b>Output:</b> Feature sink with scenario_a, scenario_b, n_cells, pearson_r, mae, rmse, "
+            "agreement label (VERY_HIGH >=0.95, HIGH >=0.85, MEDIUM >=0.70, LOW otherwise).<br>"
+            "<b>Method:</b> For each pair of scenarios, accumulates sums (x, y, xx, yy, xy, |d|, d^2) "
+            "over all overlapping valid cells in blocks. Computes Pearson r from the accumulated statistics "
+            "with denominator guard. Also reports MAE and RMSE. "
+            "An optional mask filters cells to the analysis domain.<br>"
+            "<b>Typical use:</b> Identify scenarios that are redundant (VERY_HIGH agreement) or divergent, "
+            "to guide scenario portfolio pruning.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return ScenarioSimilarityMatrixAlgorithm()
 

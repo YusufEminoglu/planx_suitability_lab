@@ -34,6 +34,22 @@ class ConsensusZoneAreaStatsAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "reporting"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Computes area per consensus zone class from a scenario agreement raster.</b></p>"
+            "<p><b>Inputs:</b> Consensus zone raster (0-4).<br>"
+            "<b>Output:</b> Feature sink with 5 rows: zone (0-4), label (LOW_OR_NONE, MEDIUM_CONSENSUS, "
+            "HIGH_MEDIUM_CONSENSUS, HIGH_CONSENSUS, NEAR_UNANIMOUS), cells, pct, area.<br>"
+            "<b>Method:</b> Reads the raster, rounds values to integers clipped [0,4], and bins counts. "
+            "Computes percentage of total valid cells and area from geotransform per zone. "
+            "Higher zone values indicate greater agreement among scenarios.<br>"
+            "<b>Typical use:</b> Quantify how much of the study area enjoys strong multi-scenario agreement, "
+            "supporting confidence in priority area delineation.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return ConsensusZoneAreaStatsAlgorithm()
 

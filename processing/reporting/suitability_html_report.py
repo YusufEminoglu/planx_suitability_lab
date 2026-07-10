@@ -29,6 +29,23 @@ class SuitabilityHtmlReportAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "reporting"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Generates an executive HTML report with project metadata, summary, method snapshot, and QA section.</b></p>"
+            "<p><b>Inputs:</b> Project name (string), Summary notes (multiline), "
+            "Active weight method / scenario label, QA summary (optional multiline).<br>"
+            "<b>Output:</b> HTML file with styled cards for project info, executive summary, "
+            "method snapshot (WLC/OWA/Monte Carlo/XAI), and QA acceptance block.<br>"
+            "<b>Method:</b> Assembles a self-contained HTML document with inline CSS. "
+            "Embeds the user-supplied project name, timestamp, weight method, and summary notes. "
+            "Includes a static method-snapshot card listing the analysis pipeline capabilities. "
+            "Renders the QA summary in a preformatted block, or a default message if not provided.<br>"
+            "<b>Typical use:</b> Produce a shareable decision-support document for stakeholders and planning committees.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return SuitabilityHtmlReportAlgorithm()
 

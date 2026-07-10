@@ -23,6 +23,25 @@ class ConstraintBuilderAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return 'core'
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Creates a binary exclusion mask (0/1) from a criterion raster by thresholding: "
+            "cells meeting or exceeding the threshold become 1, others become 0.</b></p>"
+            "<p><b>Inputs:</b> Input criterion raster (single-band); threshold value (default 50.0) "
+            "- cells with value >= threshold are marked as 1 (valid/suitable).<br>"
+            "<b>Output:</b> Single-band binary GeoTIFF (values 0 or 1) matching the input grid geometry "
+            "(same extent, resolution, projection). Value 1 = suitable, 0 = excluded.<br>"
+            "<b>Method:</b> Applies the Boolean expression (A >= threshold) via the plugin's "
+            "raster_calc utility on band 1 of the input. The output is a strict binary mask "
+            "with no intermediate values. Nodata propagation depends on the raster_calc implementation.<br>"
+            "<b>Typical use:</b> Building Boolean constraint layers for weighted overlay - for example, "
+            "excluding slopes steeper than a buildable maximum, masking out protected areas, or limiting "
+            "analysis to parcels above a minimum suitability threshold.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return ConstraintBuilderAlgorithm()
 

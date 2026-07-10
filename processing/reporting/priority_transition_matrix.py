@@ -35,6 +35,23 @@ class PriorityTransitionMatrixAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "reporting"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Computes zone-to-zone transitions between a baseline and a scenario priority zone raster.</b></p>"
+            "<p><b>Inputs:</b> Baseline priority zone raster (0-4), Scenario priority zone raster (0-4).<br>"
+            "<b>Output:</b> Feature sink with 5x5 matrix: from_zone, to_zone, cells, pct_total, pct_from, area, "
+            "transition label (STRONG_UPGRADE delta>=2, UPGRADE delta=1, STABLE, DOWNGRADE, STRONG_DOWNGRADE).<br>"
+            "<b>Method:</b> Reads both rasters, rounds values to integers and clips to [0,4]. "
+            "Cross-tabulates the 5x5 transition matrix. "
+            "Computes percentage of total valid cells and percentage of source zone for each cell. "
+            "Labels each transition by the direction and magnitude of zone change.<br>"
+            "<b>Typical use:</b> Compare a proposed scenario against the baseline to visualize where priority "
+            "zones shift - which areas are upgraded, downgraded, or stable.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return PriorityTransitionMatrixAlgorithm()
 

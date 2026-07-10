@@ -40,6 +40,25 @@ class MinimaxRegretSelectorAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "reporting"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Selects the scenario with the lowest maximum regret using the Savage minimax regret criterion.</b></p>"
+            "<p><b>Inputs:</b> Scenario suitability rasters (2-12), Optional mask raster (0/1), "
+            "Block size (64-2048).<br>"
+            "<b>Output:</b> Feature sink with scenario, rank, selected (YES for rank 1), n_cells, "
+            "max_regret, mean_regret, p90_regret, minimax_score (=100 - max_regret).<br>"
+            "<b>Method:</b> At each cell, computes the best suitability across all scenarios. "
+            "Regret for each scenario = best - scenario_value (clipped [0,100]). "
+            "Accumulates per-scenario max regret, mean regret, p90 regret, and full regret histogram. "
+            "Ranks scenarios by ascending max regret; the scenario with the smallest maximum regret is selected. "
+            "This implements the Savage minimax regret decision rule.<br>"
+            "<b>Typical use:</b> Risk-averse scenario selection: choose the scenario that minimizes the worst-case "
+            "opportunity loss relative to what could have been achieved.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return MinimaxRegretSelectorAlgorithm()
 

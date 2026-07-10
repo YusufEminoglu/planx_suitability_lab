@@ -39,6 +39,26 @@ class SpatialFragmentationAuditAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "reporting"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Assesses spatial compactness of high-priority patches via BFS connected-component analysis.</b></p>"
+            "<p><b>Inputs:</b> Suitability raster (0-100), High-priority threshold (0-100, default 70), "
+            "Connectivity (4 or 8 neighbours, default 8).<br>"
+            "<b>Output:</b> Feature sink with one row: threshold, connectivity, valid_cells, high_cells, "
+            "high_share_pct, patch_count, largest_patch, largest_share_pct, mean_patch, median_patch, "
+            "high_area, mean_patch_area, fragmentation class (COMPACT <=3 patches & largest>=50%, "
+            "MODERATE <=10 & >=30%, FRAGMENTED otherwise, NO_HIGH_PRIORITY_AREA if none).<br>"
+            "<b>Method:</b> Thresholds the raster to create a binary high-priority mask. "
+            "Runs breadth-first search to extract connected components (patches) using 4- or 8-connectivity. "
+            "Reports patch count, largest patch size and share, and mean/median patch size. "
+            "Classifies fragmentation based on patch count and largest patch dominance.<br>"
+            "<b>Typical use:</b> Evaluate whether high-suitability areas form contiguous, developable blocks "
+            "or are scattered in small fragments that complicate infrastructure planning.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return SpatialFragmentationAuditAlgorithm()
 

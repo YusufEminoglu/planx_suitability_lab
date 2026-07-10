@@ -39,6 +39,29 @@ class GlobalSensitivityAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "xai"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Ranks criterion influence on suitability via sampled spatial-variance analysis "
+            "across the study area.</b></p>"
+            "<p><b>Inputs:</b> Multiple criterion rasters (normalized, aligned); "
+            "optional weights CSV (comma-separated, one per criterion; equal weights if blank); "
+            "sampling stride in cells (>=1, default 8).<br>"
+            "<b>Output:</b> Attribute table (no geometry) with fields: criterion name, weight, "
+            "sampled mean, sampled std, weighted_std (std * weight), "
+            "importance (0-1, normalized across all criteria).<br>"
+            "<b>Method:</b> Each criterion raster is sampled at a regular stride; "
+            "the standard deviation of sampled values reflects spatial variation. "
+            "Multiplying by the user-assigned weight yields a weighted sensitivity proxy. "
+            "Importance scores are normalized so they sum to 1, "
+            "ranking criteria by their contribution to overall suitability variation. "
+            "Higher importance means the criterion drives differentiation across the study area.<br>"
+            "<b>Typical use:</b> Quickly identify which criteria dominate the suitability pattern. "
+            "Low-importance criteria may be candidates for removal to simplify the model.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return GlobalSensitivityAlgorithm()
 

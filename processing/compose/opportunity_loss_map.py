@@ -37,6 +37,30 @@ class OpportunityLossMapAlgorithm(QgsProcessingAlgorithm):
     def createInstance(self):
         return OpportunityLossMapAlgorithm()
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Quantifies suitability forfeited by hard constraints "
+            "as opportunity loss.</b></p>\n"
+            "<p><b>Inputs:</b> Suitability raster (0–100); "
+            "constraint mask raster (0/1, required); "
+            "medium-loss threshold (default 40); "
+            "high-loss threshold (default 70); block size 64–2048.<br>\n"
+            "<b>Output:</b> Loss score raster (Float32, 0–100, "
+            "non-failing cells=0); loss class raster (Int16, 0–3). "
+            "Nodata where suitability or constraint is invalid.<br>\n"
+            "<b>Method:</b> Where constraint fails (≤0.5), "
+            "loss = suitability value — the potential forfeited. "
+            "Where constraint passes, loss = 0. "
+            "Classes: 0=no loss, 1=low (<med), 2=medium (med..high), "
+            "3=high (≥high). Chunk-aware block processing.<br>\n"
+            "<b>Typical use:</b> Evaluate whether relaxing specific "
+            "constraints could unlock high-suitability land, "
+            "supporting constraint-revision negotiations.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def initAlgorithm(self, config=None):
         self.addParameter(QgsProcessingParameterRasterLayer(self.SUIT, "Suitability raster (0-100)"))
         self.addParameter(QgsProcessingParameterRasterLayer(self.CONSTRAINT, "Constraint mask raster (0/1)"))

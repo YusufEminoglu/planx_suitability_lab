@@ -36,6 +36,28 @@ class ScenarioComparatorAlgorithm(QgsProcessingAlgorithm):
     def createInstance(self):
         return ScenarioComparatorAlgorithm()
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Computes a pairwise delta map (scenario minus baseline) "
+            "with summary statistics.</b></p>\n"
+            "<p><b>Inputs:</b> Baseline suitability raster; "
+            "scenario suitability raster; block size 64–2048.<br>\n"
+            "<b>Output:</b> Delta raster (Float32, B−A, can be negative); "
+            "stats string with valid cell count, delta min/max/mean. "
+            "Nodata where either input is invalid.<br>\n"
+            "<b>Method:</b> Chunk-aware per-block subtraction: "
+            "delta = scenario − baseline. Running accumulation of "
+            "sum, count, min, max across all blocks. "
+            "Summary statistics are printed to the log and returned "
+            "as a string output.<br>\n"
+            "<b>Typical use:</b> Comparing two planning scenarios "
+            "(e.g. business-as-usual vs. intervention) to map "
+            "gains, losses, and net spatial change.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def initAlgorithm(self, config=None):
         self.addParameter(QgsProcessingParameterRasterLayer(self.A, "Baseline suitability"))
         self.addParameter(QgsProcessingParameterRasterLayer(self.B, "Scenario suitability"))

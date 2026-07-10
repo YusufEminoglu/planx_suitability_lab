@@ -123,12 +123,27 @@ class CandidateSiteExtractorAlgorithm(QgsProcessingAlgorithm):
 
     def shortHelpString(self):
         return (
-            "Extracts contiguous high-suitability patches as ranked candidate site polygons. "
-            "Cells at or above the threshold are grouped into patches, filtered by minimum "
-            "area, ranked by mean suitability (area as tie-break) and vectorized with "
-            "site_id, rank, area_ha, mean/max suitability and compactness attributes. "
-            "Use a projected CRS so hectare areas are meaningful."
+            "<p><b>Extracts contiguous high-suitability patches as ranked "
+            "candidate site polygons.</b></p>\n"
+            "<p><b>Inputs:</b> Suitability raster (0–100); "
+            "site threshold (cells ≥ value, default 75); "
+            "minimum site area in hectares (0=no filter); "
+            "maximum number of top-ranked sites (0=all, up to 1000); "
+            "connectivity 4 or 8 (default 8).<br>\n"
+            "<b>Output:</b> Vector polygon layer with fields: site_id, rank, "
+            "cells, area_ha, mean_suit, max_suit, compactness (0–1). "
+            "Use a projected CRS for meaningful hectare values.<br>\n"
+            "<b>Method:</b> Thresholds suitability, labels contiguous "
+            "components via BFS (4- or 8-connectivity), filters by minimum "
+            "area, ranks by mean suitability (area as tie-break), "
+            "takes top-N, polygonises via GDAL, and computes "
+            "compactness = 4π·area/perimeter².<br>\n"
+            "<b>Typical use:</b> Identifying the best contiguous land parcels "
+            "for development, conservation, or infrastructure siting.</p>"
         )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
 
     def createInstance(self):
         return CandidateSiteExtractorAlgorithm()

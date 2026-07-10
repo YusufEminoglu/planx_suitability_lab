@@ -42,6 +42,26 @@ class InterventionBudgetPhasingAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "reporting"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Computes a budget-step impact-capture curve by ranking cells by intervention urgency.</b></p>"
+            "<p><b>Inputs:</b> Priority zone raster (0-4), Optional priority index raster, "
+            "Optional per-cell cost raster, Fallback unit cost by zone CSV (5 values for zones 0-4), "
+            "Budget step percent (5-50, default 10).<br>"
+            "<b>Output:</b> Feature sink with one row per budget checkpoint: budget_pct, phase_label "
+            "(Quick Wins <=30%, Core Delivery <=60%, Scale-out <=90%, Full Coverage), "
+            "cells_selected, cells_pct, cost_cum, impact_cum, impact_capture_pct, avg_index_selected.<br>"
+            "<b>Method:</b> Ranks cells by (zone*1000 + priority_index) descending, then sorts. "
+            "Computes cumulative cost and cumulative impact (priority index) along this ranked order. "
+            "At each budget checkpoint, reports how many cells are captured, cumulative impact, "
+            "and what percentage of total possible impact has been achieved. "
+            "Missing cost cells fall back to zone-specific unit costs.<br>"
+            "<b>Typical use:</b> Build a business case: show decision-makers how much impact each budget increment buys.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return InterventionBudgetPhasingAlgorithm()
 

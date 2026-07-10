@@ -37,6 +37,30 @@ class DecisionQuadrantMapAlgorithm(QgsProcessingAlgorithm):
     def createInstance(self):
         return DecisionQuadrantMapAlgorithm()
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Classifies cells into a 2×2 suitability-vs-disagreement "
+            "decision quadrant map.</b></p>\n"
+            "<p><b>Inputs:</b> Suitability raster (0–100); "
+            "disagreement score raster (0–100); "
+            "optional constraint mask (0/1); "
+            "high suitability threshold (default 70); "
+            "high disagreement threshold (default 60); block size 64–2048.<br>\n"
+            "<b>Output:</b> Quadrant class raster (Byte, 1–4, nodata=255).<br>\n"
+            "<b>Method:</b> Each cell is classified by crossing suitability "
+            "(high/low) with disagreement (high/low): "
+            "1=high suitability + low conflict (confident opportunity), "
+            "2=high suitability + high conflict (contested opportunity), "
+            "3=low suitability + low conflict (confident avoidance), "
+            "4=low suitability + high conflict (contested avoidance). "
+            "Chunk-aware block processing.<br>\n"
+            "<b>Typical use:</b> Rapid strategic screening to distinguish "
+            "confident investment zones from areas needing further study.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def initAlgorithm(self, config=None):
         self.addParameter(QgsProcessingParameterRasterLayer(self.SUITABILITY, "Suitability raster (0-100)"))
         self.addParameter(QgsProcessingParameterRasterLayer(self.DISAGREEMENT, "Disagreement score raster (0-100)"))

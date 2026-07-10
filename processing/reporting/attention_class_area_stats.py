@@ -34,6 +34,22 @@ class AttentionClassAreaStatsAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "reporting"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Computes area per disagreement attention class from a multi-scenario conflict raster.</b></p>"
+            "<p><b>Inputs:</b> Attention class raster (0-4).<br>"
+            "<b>Output:</b> Feature sink with 5 rows: class_id (0-4), label (LOW, WATCH, REVIEW, "
+            "HIGH_CONFLICT, CRITICAL_CONFLICT), cells, pct, area.<br>"
+            "<b>Method:</b> Reads the raster, rounds values to integers clipped [0,4], and bins counts. "
+            "Computes percentage of total valid cells and area from geotransform per class. "
+            "Higher class values indicate more severe disagreement between scenarios requiring planner attention.<br>"
+            "<b>Typical use:</b> Identify how much of the study area suffers from scenario disagreement, "
+            "helping planners decide where additional data or stakeholder input is needed before commitment.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return AttentionClassAreaStatsAlgorithm()
 

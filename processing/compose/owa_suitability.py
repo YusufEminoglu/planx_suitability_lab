@@ -44,6 +44,30 @@ class OWASuitabilityAlgorithm(QgsProcessingAlgorithm):
     def createInstance(self):
         return OWASuitabilityAlgorithm()
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Multi-criteria suitability via Ordered Weighted Averaging (OWA).</b></p>\n"
+            "<p><b>Inputs:</b> Up to 6 criterion rasters (normalized 0–100); "
+            "optional criteria weights CSV; optional order weights CSV; "
+            "ordering mode (Descending = optimistic, Ascending = pessimistic); "
+            "optional constraint mask (0/1); block size 64–2048.<br>\n"
+            "<b>Output:</b> Suitability raster (Float32, 0–100); "
+            "constraint-failing cells set to 0; nodata where any input is invalid.<br>\n"
+            "<b>Method:</b> Chunk-aware OWA: per cell, criterion values are sorted "
+            "by the chosen ordering, criteria weights are reordered accordingly, "
+            "then alpha = sorted_criteria_weight × order_weight. "
+            "Result = sum(alpha × sorted_value) / sum(alpha). "
+            "Order weights control risk attitude: descending favours high-scoring "
+            "criteria (optimistic/OR-like), ascending favours low-scoring "
+            "(pessimistic/AND-like).<br>\n"
+            "<b>Typical use:</b> When trade-off attitude matters — "
+            "optimistic for opportunity scanning, pessimistic for conservative "
+            "constraint-driven screening.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def initAlgorithm(self, config=None):
         self.addParameter(
             QgsProcessingParameterMultipleLayers(

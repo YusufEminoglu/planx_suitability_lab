@@ -39,6 +39,24 @@ class ActionabilityScorecardAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "reporting"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Produces an overall readiness score (A-D) from KPI, budget, and policy-gate diagnostics.</b></p>"
+            "<p><b>Inputs:</b> Executive KPI snapshot table, Intervention budget phasing table, "
+            "Policy gate recommender table.<br>"
+            "<b>Output:</b> Feature sink with one row: overall score (0-100), grade (A>=85, B>=75, C>=65, D<65), "
+            "readiness (PUBLICATION_READY, NEAR_READY, REVISE_REQUIRED, REWORK_REQUIRED), "
+            "sub-scores (robustness, consensus, implementability, delivery, policy_align), policy_mode, budget_ref, capture_ref.<br>"
+            "<b>Method:</b> Computes five sub-scores: robustness (mean_robust - 0.5*confidence_gap), "
+            "consensus (0.7*high + 0.3*unanimous), implementability (0.65*eligible + 0.35*consensus - 0.35*conflict_penalty), "
+            "delivery (impact capture at ~50% budget), and policy_alignment (100 - 2*threshold_gap - 1.5*lambda_gap). "
+            "Overall = weighted sum (0.26/0.20/0.24/0.16/0.14) times a policy-mode factor (1.0/0.97/0.93).<br>"
+            "<b>Typical use:</b> Gate-check before publication: is the analysis mature enough for stakeholder release?</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return ActionabilityScorecardAlgorithm()
 

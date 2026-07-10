@@ -43,6 +43,24 @@ class ScenarioDominanceMatrixAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "reporting"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Computes pairwise win/loss/tie dominance and ranks scenarios by net dominance.</b></p>"
+            "<p><b>Inputs:</b> Scenario suitability rasters (2-12), Optional mask raster (0/1), "
+            "Tie epsilon (absolute difference threshold, 0-20, default 0.5), Block size (64-2048).<br>"
+            "<b>Output:</b> Feature sink with PAIR rows (wins_pct, loss_pct, tie_pct, mean_diff, net_dom) "
+            "and SCENARIO rows (aggregated net_dom, rank by descending net dominance).<br>"
+            "<b>Method:</b> For each pair of scenarios at each cell, counts wins (diff > eps), "
+            "losses (diff < -eps), and ties (|diff| <= eps). Accumulates across blocks. "
+            "Computes per-scenario net dominance as mean of pairwise (wins_pct - loss_pct). "
+            "Ranks scenarios by descending net dominance.<br>"
+            "<b>Typical use:</b> Determine which scenario consistently outperforms others cell-by-cell, "
+            "supporting transparent scenario selection in planning workshops.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return ScenarioDominanceMatrixAlgorithm()
 

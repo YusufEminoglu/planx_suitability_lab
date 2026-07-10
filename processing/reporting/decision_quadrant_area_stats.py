@@ -34,6 +34,23 @@ class DecisionQuadrantAreaStatsAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "reporting"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Computes area per decision quadrant from a suitability-vs-conflict classification raster.</b></p>"
+            "<p><b>Inputs:</b> Decision quadrant class raster (0-4).<br>"
+            "<b>Output:</b> Feature sink with 5 rows: quadrant (0-4), label (UNCLASSIFIED, HIGH_SUIT_LOW_CONFLICT, "
+            "HIGH_SUIT_HIGH_CONFLICT, LOW_SUIT_LOW_CONFLICT, LOW_SUIT_HIGH_CONFLICT), cells, pct, area.<br>"
+            "<b>Method:</b> Reads the raster, rounds to integers clipped [0,4], bins counts per quadrant. "
+            "Computes percentage of total valid cells and area from geotransform. "
+            "Quadrants partition the study area by suitability level and conflict/disagreement intensity, "
+            "highlighting where high suitability coincides with or avoids conflict.<br>"
+            "<b>Typical use:</b> Distinguish between uncontested priority areas (ready for action) "
+            "and contested high-suitability zones (requiring negotiation).</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return DecisionQuadrantAreaStatsAlgorithm()
 

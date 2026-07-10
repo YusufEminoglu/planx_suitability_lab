@@ -38,6 +38,30 @@ class RiskOpportunityMatrixMapAlgorithm(QgsProcessingAlgorithm):
     def createInstance(self):
         return RiskOpportunityMatrixMapAlgorithm()
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Classifies cells by robust suitability versus uncertainty "
+            "into a risk-opportunity matrix.</b></p>\n"
+            "<p><b>Inputs:</b> Robust suitability raster (0–100); "
+            "uncertainty std raster (0–100 approx); "
+            "optional constraint mask (0/1); "
+            "high robust suitability threshold (default 70); "
+            "high uncertainty threshold (default 15); block size 64–2048.<br>\n"
+            "<b>Output:</b> Matrix class raster (Byte, 1–4, nodata=255).<br>\n"
+            "<b>Method:</b> 2×2 crossing of robust suitability (high/low) "
+            "with uncertainty (high/low): "
+            "1=Invest now (high suitability, low uncertainty), "
+            "2=Validate then invest (high suitability, high uncertainty), "
+            "3=Low strategic value (low suitability, low uncertainty), "
+            "4=Defer and monitor (low suitability, high uncertainty). "
+            "Chunk-aware block processing.<br>\n"
+            "<b>Typical use:</b> Strategic portfolio screening balancing "
+            "expected return (suitability) against decision risk (uncertainty).</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def initAlgorithm(self, config=None):
         self.addParameter(QgsProcessingParameterRasterLayer(self.ROBUST, "Robust suitability raster (0-100)"))
         self.addParameter(QgsProcessingParameterRasterLayer(self.UNC_STD, "Uncertainty std raster (0-100 approx)"))

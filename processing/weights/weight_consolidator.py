@@ -21,6 +21,24 @@ class WeightConsolidatorAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return 'weights'
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Normalise a weight table so all weights sum to 1, selecting which weight set activates "
+            "for downstream scoring.</b></p>"
+            "<p><b>Inputs:</b> Weight table - any vector layer containing criterion_id and weight columns.<br>"
+            "<b>Output:</b> A table with criterion_id and normalised weight (0-1, summing to 1). "
+            "Zero-division is guarded; an all-zero or empty input produces a safely normalised output.<br>"
+            "<b>Method:</b> Reads all features, sums the raw weight values, then divides each weight by the total. "
+            "If the sum is zero, a divisor of 1.0 is substituted to avoid division errors. "
+            "This is a pass-through activation step: it does not alter relative proportions - "
+            "it only ensures weights are ready for weighted overlay or TOPSIS combination.<br>"
+            "<b>Typical use:</b> After generating weights with AHP, PCA, Entropy, or CRITIC, "
+            "run this algorithm to activate the chosen weight set before feeding it into MCDA scoring.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return WeightConsolidatorAlgorithm()
 

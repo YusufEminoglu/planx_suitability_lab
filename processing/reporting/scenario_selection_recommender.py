@@ -38,6 +38,26 @@ class ScenarioSelectionRecommenderAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "reporting"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Recommends primary and challenger scenarios from an adjusted composite of benchmark, "
+            "diversity, minimax, and robustness evidence.</b></p>"
+            "<p><b>Inputs:</b> Method benchmark leaderboard, Scenario portfolio diversity, Minimax regret selector, "
+            "Policy gate recommender, Actionability scorecard, Optional scenario robustness leaderboard.<br>"
+            "<b>Output:</b> Feature sink with one row: primary_scn, challenger_scn, minimax_scn, "
+            "primary_adj (adjusted score), challenger_adj, primary minimax rank/regret, primary/challenger robustness, "
+            "strategy label, policy_mode, rec_threshold, rec_lambda, action_grade, readiness, overall, "
+            "diversity_idx, portfolio_health, note.<br>"
+            "<b>Method:</b> Computes adjusted score = 0.45*composite + 0.11*uniqueness + 0.07*(100-std) "
+            "+ 0.16*minimax_bonus + 0.14*robustness + 0.07*robust_rank_bonus. "
+            "Selects top two as primary and challenger. Strategy adapts to regret exposure, diversity, "
+            "robustness, and policy strictness.<br>"
+            "<b>Typical use:</b> Final scenario recommendation for planning committee decision packages.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return ScenarioSelectionRecommenderAlgorithm()
 

@@ -39,6 +39,29 @@ class WLCSuitabilityAlgorithm(QgsProcessingAlgorithm):
     def createInstance(self):
         return WLCSuitabilityAlgorithm()
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Multi-criteria suitability via Weighted Linear Combination (WLC).</b></p>\n"
+            "<p><b>Inputs:</b> Up to 6 criterion rasters (normalized 0–100); "
+            "criteria weights as CSV (e.g. 0.4,0.3,0.3); "
+            "optional binary constraint mask (0/1, cells >0.5 pass); "
+            "block size 64–2048 pixels.<br>\n"
+            "<b>Output:</b> Suitability raster (Float32, 0–100); "
+            "constraint-failing cells set to 0; "
+            "nodata where any criterion is invalid.<br>\n"
+            "<b>Method:</b> Chunk-aware weighted sum per block: "
+            "each criterion is read, validated, stacked, "
+            "and multiplied by its weight. The constraint mask zeroes "
+            "excluded areas. Result clipped to 0–100. "
+            "Simplest compensatory MCDA technique.<br>\n"
+            "<b>Typical use:</b> Baseline land-suitability scoring "
+            "when criteria are independent. Combine with constraint "
+            "layers (protected areas, water) to exclude infeasible zones.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def initAlgorithm(self, config=None):
         self.addParameter(
             QgsProcessingParameterMultipleLayers(

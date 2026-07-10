@@ -37,6 +37,27 @@ class ActionPlaybookGeneratorAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "reporting"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Generates a structured markdown action playbook from priority zones and optional diagnostics.</b></p>"
+            "<p><b>Inputs:</b> Project name, Priority zone raster (0-4), Optional priority index raster (0-100), "
+            "Optional policy sensitivity frontier table, Optional scenario similarity matrix, "
+            "Optional planner notes (multiline).<br>"
+            "<b>Output:</b> Markdown file with sections: Priority Zoning Snapshot (zone counts with optional mean index), "
+            "Operational Recommendations (5-point action plan), Policy Sensitivity Signal (best lambda, mean score, area>=80), "
+            "Cross-Scenario Reliability (mean/min/max Pearson r, low-agreement pairs), Planner Notes.<br>"
+            "<b>Method:</b> Reads the priority zone raster and computes cell counts per zone (0-4). "
+            "If a priority index raster is provided, computes per-zone mean index. "
+            "Optionally extracts the best lambda from the frontier (maximizing 0.7*mean + 0.3*area>=80) "
+            "and agreement statistics from the similarity matrix (highlighting pairs with r<0.70). "
+            "Assembles all findings into a structured markdown document.<br>"
+            "<b>Typical use:</b> Produce a ready-to-share planning document combining spatial diagnostics "
+            "with actionable guidance.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return ActionPlaybookGeneratorAlgorithm()
 

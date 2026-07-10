@@ -37,6 +37,24 @@ class ScenarioGovernanceAuditAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "reporting"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Performs per-scenario governance risk assessment with flags and portfolio-level summary.</b></p>"
+            "<p><b>Inputs:</b> Scenario robustness leaderboard, Method benchmark leaderboard, "
+            "Minimax regret selector, Scenario selection recommender, "
+            "Optional deployment readiness gate table.<br>"
+            "<b>Output:</b> Feature sink with SCENARIO rows (role, robustness, composite, stability, max_regret, "
+            "risk_score, risk_level HIGH/MEDIUM/LOW, flags for regret>24/robust<62/volatility<68, notes) "
+            "and SUMMARY row (average risk, overall governance status, HIGH count).<br>"
+            "<b>Method:</b> Risk score = 0.40*(100-robustness) + 0.25*regret + 0.20*(100-stability) + 0.15*(100-composite). "
+            "Flags three conditions: high max regret (>24), low robustness (<62), low stability (<68). "
+            "Portfolio classified as UNSAFE_PRIMARY, FRAGILE_PORTFOLIO, ROBUST_PORTFOLIO, or CONTROLLED_PORTFOLIO.<br>"
+            "<b>Typical use:</b> Internal governance review: which scenarios carry unacceptable risk for deployment?</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return ScenarioGovernanceAuditAlgorithm()
 

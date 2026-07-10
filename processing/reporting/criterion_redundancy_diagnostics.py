@@ -42,6 +42,23 @@ class CriterionRedundancyDiagnosticsAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "reporting"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Diagnoses criterion redundancy via pairwise correlation and Variance Inflation Factor (VIF).</b></p>"
+            "<p><b>Inputs:</b> Criterion rasters (2-10), Optional mask raster (0/1), "
+            "Maximum sampled cells (2000-3000000, default 250000), Block size (64-2048).<br>"
+            "<b>Output:</b> Two feature sinks - Pairwise redundancy matrix (criterion_a, criterion_b, corr, abs_corr, "
+            "redundancy label VERY_HIGH/HIGH/MEDIUM/LOW, samples) and Per-criterion diagnostics "
+            "(mean_abs_corr, max_abs_corr, vif, redundancy_flag REVIEW/WATCH/OK).<br>"
+            "<b>Method:</b> Samples up to max_samples valid cells across all criteria using block aggregation "
+            "with a fixed random seed (42). Computes full correlation matrix and VIF via pseudo-inverse of the correlation matrix. "
+            "Flags criteria: REVIEW if max_abs_corr>=0.9 or VIF>=10, WATCH if >=0.75 or >=5, OK otherwise.<br>"
+            "<b>Typical use:</b> Identify redundant criteria before weighting to avoid double-counting information in MCDA.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return CriterionRedundancyDiagnosticsAlgorithm()
 

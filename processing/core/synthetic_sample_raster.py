@@ -23,6 +23,26 @@ class SyntheticSampleRasterAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "core"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Generates four synthetic suitability criteria rasters and one constraint mask "
+            "for testing and demonstrating the MCDA pipeline.</b></p>"
+            "<p><b>Inputs:</b> Study extent (bounding box); pixel size in map units (>=1.0, default 30.0).<br>"
+            "<b>Output:</b> Five Float32 GeoTIFFs written to the output folder: criterion_1 (eastward decay), "
+            "criterion_2 (northward increase), criterion_3 (diagonal ridge), criterion_4 (radial hotspot "
+            "centered at 0.65,0.35 normalised coordinates), and constraint_mask (binary, bottom-left 15%x10% excluded). "
+            "All values clipped 0-100, nodata -9999, forced to EPSG:3857.<br>"
+            "<b>Method:</b> Each criterion is computed from normalised coordinate grids (x,y in [0,1]) "
+            "with per-pixel Gaussian noise added (sigma 8-10, fixed seed 7 for reproducibility). "
+            "The constraint mask is a Boolean AND of x>0.15 and y>0.10. "
+            "Rasters are written via GDAL Create with Float32 data type and a north-up geotransform.<br>"
+            "<b>Typical use:</b> Quick smoke-testing of the full suitability workflow (WLC, OWA, TOPSIS, VIKOR, "
+            "ensemble, scenario diagnostics) without needing real input data.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return SyntheticSampleRasterAlgorithm()
 

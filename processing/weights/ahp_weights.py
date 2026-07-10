@@ -33,6 +33,25 @@ class AHPWeightsAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return 'weights'
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Compute criterion weights from pairwise comparisons using the Analytic Hierarchy Process (AHP) "
+            "with Saaty's eigenvalue method.</b></p>"
+            "<p><b>Inputs:</b> Pairwise matrix JSON - a square reciprocal matrix of Saaty-scale judgments "
+            "(1=equal, 3=moderate, 5=strong, 7=very strong, 9=extreme; fractions for inverse). "
+            "Diagonals must be 1, element [i][j] = 1 / [j][i].<br>"
+            "<b>Output:</b> A table with criterion_id, weight (0-1, summing to 1), cr (consistency ratio), "
+            "and cr_ok (1 if CR <= 0.10, 0 otherwise).<br>"
+            "<b>Method:</b> Extracts the principal eigenvector of the pairwise matrix to derive priority weights. "
+            "The consistency ratio CR = CI / RI is computed using Saaty's random index table keyed to matrix size; "
+            "CR <= 0.10 indicates acceptable consistency. A warning is emitted if CR exceeds this threshold.<br>"
+            "<b>Typical use:</b> Elicit expert or stakeholder judgments for MCDA suitability modelling "
+            "when trade-offs must be grounded in pairwise preference comparisons.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return AHPWeightsAlgorithm()
 

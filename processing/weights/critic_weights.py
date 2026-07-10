@@ -36,6 +36,29 @@ class CriticWeightsAlgorithm(QgsProcessingAlgorithm):
     def groupId(self):
         return "weights"
 
+    def shortHelpString(self):
+        return (
+            "<p><b>Compute objective weights via CRITIC (CRiteria Importance Through Intercriteria Correlation), "
+            "combining contrast intensity and inter-criterion conflict into a single score.</b></p>"
+            "<p><b>Inputs:</b> Criterion rasters - same extent and cell size required. "
+            "Impacts string - a comma-separated list of direction signs per criterion "
+            "(B/benefit/+1 or C/cost/-1); defaults to all benefit if empty.<br>"
+            "<b>Output:</b> A table with criterion_id, weight (0-1, summing to 1), std_dev, contrast, "
+            "and critic_score (= std_dev * contrast).<br>"
+            "<b>Method:</b> Normalises each raster to [0,1] respecting benefit/cost direction, "
+            "then computes standard deviation (contrast intensity) and the sum of 1-correlation "
+            "with all other criteria (inter-criterion conflict) for each criterion. "
+            "The CRITIC score = std_dev * conflict; weights are normalised scores. "
+            "Criteria that are both high-variance and uncorrelated with others receive the largest weights, "
+            "penalising redundant layers.<br>"
+            "<b>Typical use:</b> Objective weighting that automatically penalises redundant criteria "
+            "and rewards independent, high-contrast indicators - well-suited for suitability modelling "
+            "with many overlapping environmental layers.</p>"
+        )
+
+    def helpUrl(self):
+        return "https://github.com/YusufEminoglu/planx_suitability_lab"
+
     def createInstance(self):
         return CriticWeightsAlgorithm()
 
