@@ -147,7 +147,7 @@ class ScenarioRobustnessLeaderboardAlgorithm(QgsProcessingAlgorithm):
             u_norm = self._norm_minmax(uniq_score.get(s, 0.0), u_min, u_max)
             robust = (0.34 * c_norm) + (0.24 * d_norm) + (0.26 * r_norm) + (0.16 * u_norm)
             if robust >= 80.0:
-                tier = "ELITE"
+                tier = "HIGH"
             elif robust >= 67.0:
                 tier = "STRONG"
             elif robust >= 54.0:

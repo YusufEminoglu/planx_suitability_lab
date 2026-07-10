@@ -187,25 +187,18 @@ class ActionPlaybookGeneratorAlgorithm(QgsProcessingAlgorithm):
 
         md += [
             "",
-            "## 2) Operational Recommendations (EN)",
+            "## 2) Operational Recommendations",
             "1. Immediate execution: focus first on Zone 3 polygons (high suitability + high confidence).",
             "2. Pipeline development: prepare feasibility packages for Zone 2.",
             "3. Reserve portfolio: keep Zone 1 in longlist and monitor data updates.",
             "4. Policy revision desk: analyze Zone 4 to identify over-restrictive hard constraints.",
             "5. Defer low-value areas: avoid Zone 0 for near-term investment cycles.",
-            "",
-            "## 3) Uygulama Onerileri (TR)",
-            "1. Acil uygulama: once Zone 3 alanlarinda proje uygulamasina gecin.",
-            "2. Hazirlik paketi: Zone 2 icin detayli fizibilite ve saha dogrulama planlayin.",
-            "3. Aday havuzu: Zone 1'i uzun liste olarak izlemeye alin.",
-            "4. Politika revizyonu: Zone 4 uzerinden kisit kurallarini yeniden degerlendirin.",
-            "5. Dusek oncelik: Zone 0 alanlari kisa vadeli yatirimdan dislayin.",
         ]
 
         if best_frontier is not None:
             md += [
                 "",
-                "## 4) Policy Sensitivity Signal",
+                "## 3) Policy Sensitivity Signal",
                 f"- Suggested balanced lambda: **{best_frontier['lambda']:.2f}**",
                 f"- Mean robust score at this lambda: {best_frontier['mean_score']:.2f}",
                 f"- Area >=80 suitability share: {best_frontier['area_ge_80_pct']:.2f}%",
@@ -214,7 +207,7 @@ class ActionPlaybookGeneratorAlgorithm(QgsProcessingAlgorithm):
         if sim is not None:
             md += [
                 "",
-                "## 5) Cross-Scenario Reliability",
+                "## 4) Cross-Scenario Reliability",
                 f"- Mean Pearson agreement: {sim['mean_r']:.3f}",
                 f"- Min / Max Pearson agreement: {sim['min_r']:.3f} / {sim['max_r']:.3f}",
             ]
@@ -225,7 +218,7 @@ class ActionPlaybookGeneratorAlgorithm(QgsProcessingAlgorithm):
 
         md += [
             "",
-            "## 6) Planner Notes",
+            "## 5) Planner Notes",
             notes if notes else "_No additional notes provided._",
         ]
 

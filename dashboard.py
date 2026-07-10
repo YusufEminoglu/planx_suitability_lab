@@ -97,7 +97,7 @@ ALGO_GROUPS = [
             ("Scenario Similarity Matrix", "planx_suitability_lab:scenario_similarity_matrix", "Pairwise correlation/MAE/RMSE across scenario rasters."),
             ("Scenario Dominance Matrix", "planx_suitability_lab:scenario_dominance_matrix", "Pairwise win/loss/tie dominance and net-dominance rank across scenarios."),
             ("Method Benchmark Leaderboard", "planx_suitability_lab:method_benchmark_leaderboard", "Ranks scenario methods by mean/high-coverage/stability composite score."),
-            ("Scenario Robustness Leaderboard", "planx_suitability_lab:scenario_robustness_leaderboard", "Fuses benchmark, dominance, minimax-regret and diversity into one elite robustness rank."),
+            ("Scenario Robustness Leaderboard", "planx_suitability_lab:scenario_robustness_leaderboard", "Fuses benchmark, dominance, minimax-regret and diversity into one robustness rank."),
             ("Scenario Governance Audit", "planx_suitability_lab:scenario_governance_audit", "Audits scenario-level governance risk flags for primary/challenger/minimax tracks."),
             ("Scenario Portfolio Diversity", "planx_suitability_lab:scenario_portfolio_diversity", "Audits scenario redundancy vs diversification strength in one governance table."),
             ("Minimax Regret Selector", "planx_suitability_lab:minimax_regret_selector", "Selects the least-worst-regret scenario under deep uncertainty."),
@@ -321,13 +321,12 @@ class SuitabilityDashboard(QDialog):
         super().__init__(parent)
         self.iface = iface
         self.settings = QSettings()
-        self.lang = self.settings.value("planx_suitability_lab/lang", "EN", type=str) or "EN"
         self.run_cursor = int(self.settings.value("planx_suitability_lab/run_cursor", 0, type=int) or 0)
         self.recent_runs = []
         self.card_widgets = []
         self._current_card_columns = DEFAULT_CARD_COLUMNS
         self.favorites = set(self.settings.value("planx_suitability_lab/favorites", [], type=list) or [])
-        self.setWindowTitle("PlanX Suitability Lab - Production Console / Uretim Konsolu")
+        self.setWindowTitle("PlanX Suitability Lab - Production Console")
         self.resize(*DASHBOARD_SIZE)
         self._apply_style()
         self._build_ui()
@@ -468,7 +467,7 @@ class SuitabilityDashboard(QDialog):
         ttl_box = QVBoxLayout()
         title = QLabel("PlanX Suitability Lab")
         title.setObjectName("heroTitle")
-        subtitle = QLabel("Raster MCDA workflow: prepare, score, compare, explain, report | Raster MCDA akisi: hazirla, puanla, karsilastir, acikla, raporla")
+        subtitle = QLabel("Raster MCDA workflow: prepare, score, compare, explain, report")
         subtitle.setObjectName("heroSub")
         ttl_box.addWidget(title)
         ttl_box.addWidget(subtitle)
@@ -478,12 +477,6 @@ class SuitabilityDashboard(QDialog):
         self.status_chip = QLabel("System Status: checking...")
         self.status_chip.setObjectName("statusChip")
         status_col.addWidget(self.status_chip, 0, Qt.AlignmentFlag.AlignRight)
-        self.lang_combo = QComboBox()
-        self.lang_combo.addItem("English (Primary)", "EN")
-        self.lang_combo.addItem("Turkce (Secondary)", "TR")
-        self.lang_combo.setCurrentIndex(0 if self.lang == "EN" else 1)
-        self.lang_combo.currentIndexChanged.connect(self._set_language)
-        status_col.addWidget(self.lang_combo, 0, Qt.AlignmentFlag.AlignRight)
         hero_layout.addLayout(status_col, 0)
         root.addWidget(hero)
 
@@ -491,7 +484,7 @@ class SuitabilityDashboard(QDialog):
         root.addWidget(self.tabs, 1)
 
         self.overview = QTextBrowser()
-        self.tabs.addTab(self.overview, "Overview / Genel")
+        self.tabs.addTab(self.overview, "Overview")
 
         workflow_tab = QWidget()
         wf = QVBoxLayout(workflow_tab)
@@ -502,7 +495,7 @@ class SuitabilityDashboard(QDialog):
             for title_txt, aid, desc in items:
                 self.workflow_combo.addItem(f"{group} - {title_txt}", (aid, desc))
         top.addWidget(self.workflow_combo, 1)
-        run_sel = QPushButton("Run Selected / Seciliyi Calistir")
+        run_sel = QPushButton("Run Selected")
         run_sel.clicked.connect(self._run_selected)
         top.addWidget(run_sel)
         wf.addLayout(top)
@@ -512,16 +505,16 @@ class SuitabilityDashboard(QDialog):
         self.workflow_map = QTextBrowser()
         wf.addWidget(self.workflow_map, 1)
         self.workflow_combo.currentIndexChanged.connect(self._update_selected_desc)
-        self.tabs.addTab(workflow_tab, "Workflow / Akis")
+        self.tabs.addTab(workflow_tab, "Workflow")
 
         navigator_tab = QWidget()
         nl = QVBoxLayout(navigator_tab)
         nl.setContentsMargins(section_margin, section_margin, section_margin, section_margin)
         nav_btns = QHBoxLayout()
-        run_next = QPushButton("Run Next Suggested Step / Sonraki Onerilen Adim")
+        run_next = QPushButton("Run Next Suggested Step")
         run_next.clicked.connect(self._run_next_critical)
         nav_btns.addWidget(run_next)
-        copy_runbook = QPushButton("Copy Workflow Checklist / Akis Kontrol Listesi")
+        copy_runbook = QPushButton("Copy Workflow Checklist")
         copy_runbook.setObjectName("ghost")
         copy_runbook.clicked.connect(self._copy_runbook)
         nav_btns.addWidget(copy_runbook)
@@ -529,23 +522,23 @@ class SuitabilityDashboard(QDialog):
         nl.addLayout(nav_btns)
         self.navigator = QTextBrowser()
         nl.addWidget(self.navigator, 1)
-        self.tabs.addTab(navigator_tab, "Guided Flow / Rehberli Akis")
+        self.tabs.addTab(navigator_tab, "Guided Flow")
 
         modules_tab = QWidget()
         ml = QVBoxLayout(modules_tab)
         ml.setContentsMargins(section_margin, section_margin, section_margin, section_margin)
         filter_row = QHBoxLayout()
         self.search = QLineEdit()
-        self.search.setPlaceholderText("Filter modules / Modulleri filtrele (name, group, id)...")
+        self.search.setPlaceholderText("Filter modules (name, group, id)...")
         self.search.textChanged.connect(self._filter_cards)
         filter_row.addWidget(self.search, 1)
         self.group_filter = QComboBox()
-        self.group_filter.addItem("All Groups / Tum Gruplar", "")
+        self.group_filter.addItem("All Groups", "")
         for g, _ in ALGO_GROUPS:
             self.group_filter.addItem(g, g)
         self.group_filter.currentIndexChanged.connect(self._filter_cards)
         filter_row.addWidget(self.group_filter)
-        self.fav_only = QPushButton("Favorites Only / Favoriler")
+        self.fav_only = QPushButton("Favorites Only")
         self.fav_only.setObjectName("ghost")
         self.fav_only.setCheckable(True)
         self.fav_only.toggled.connect(self._filter_cards)
@@ -564,7 +557,7 @@ class SuitabilityDashboard(QDialog):
         self.cards_grid.setVerticalSpacing(grid_spacing)
         self.cards_scroll.setWidget(cards_host)
         ml.addWidget(self.cards_scroll, 1)
-        self.tabs.addTab(modules_tab, "Modules / Moduller")
+        self.tabs.addTab(modules_tab, "Modules")
 
         quick_tab = QWidget()
         ql = QGridLayout(quick_tab)
@@ -572,11 +565,11 @@ class SuitabilityDashboard(QDialog):
         ql.setHorizontalSpacing(grid_spacing)
         ql.setVerticalSpacing(grid_spacing)
         quick_buttons = [
-            ("Run Suggested Next Step / Onerilen Sonraki Adim", self._run_next_critical, False),
-            ("Generate Project Evidence / Proje Ozet Kaniti", self._run_release_evidence, False),
-            ("Open Command Palette / Komut Paleti", self._open_command_palette, False),
+            ("Run Suggested Next Step", self._run_next_critical, False),
+            ("Generate Project Evidence", self._run_release_evidence, False),
+            ("Open Command Palette", self._open_command_palette, False),
             ("Open Command Guide", self._open_command_guide, True),
-            ("Show Shortcut Help / Kisayol Yardimi", self._show_shortcuts, True),
+            ("Show Shortcut Help", self._show_shortcuts, True),
             ("Copy Project Status", self._copy_diagnostics, True),
             ("Copy Shortcuts", self._copy_shortcuts, True),
             ("Copy Workflow Checklist", self._copy_runbook, True),
@@ -588,27 +581,27 @@ class SuitabilityDashboard(QDialog):
                 b.setObjectName("ghost")
             b.clicked.connect(fn)
             ql.addWidget(b, i // 2, i % 2)
-        self.tabs.addTab(quick_tab, "Quick Actions / Hizli")
+        self.tabs.addTab(quick_tab, "Quick Actions")
 
         runlog_tab = QWidget()
         rl = QVBoxLayout(runlog_tab)
         rl.setContentsMargins(section_margin, section_margin, section_margin, section_margin)
         self.runlog = QTextBrowser()
         rl.addWidget(self.runlog, 1)
-        clear_log = QPushButton("Clear Run Log / Gunlugu Temizle")
+        clear_log = QPushButton("Clear Run Log")
         clear_log.setObjectName("ghost")
         clear_log.clicked.connect(self._clear_runlog)
         rl.addWidget(clear_log, 0, Qt.AlignmentFlag.AlignRight)
-        self.tabs.addTab(runlog_tab, "Recent Runs / Son Calismalar")
+        self.tabs.addTab(runlog_tab, "Recent Runs")
 
         self.readiness = QTextBrowser()
-        self.tabs.addTab(self.readiness, "System Health / Sistem Durumu")
+        self.tabs.addTab(self.readiness, "System Health")
 
         footer = QHBoxLayout()
-        refresh = QPushButton("Refresh / Yenile")
+        refresh = QPushButton("Refresh")
         refresh.clicked.connect(self._refresh)
         footer.addWidget(refresh)
-        hint = QLabel("Shortcuts: Ctrl+K palette | Ctrl+R refresh | Ctrl+D status | Ctrl+H help | Ctrl+G guide | Ctrl+P sample(optional) | Ctrl+N next-step | Ctrl+L EN/TR")
+        hint = QLabel("Shortcuts: Ctrl+K palette | Ctrl+R refresh | Ctrl+D status | Ctrl+H help | Ctrl+G guide | Ctrl+P sample(optional) | Ctrl+N next-step")
         hint.setStyleSheet("color:#35545f;")
         footer.addWidget(hint, 1)
         root.addLayout(footer)
@@ -795,20 +788,10 @@ class SuitabilityDashboard(QDialog):
 
         self.overview.setHtml(
             "<h2>Overview</h2>"
-            + (
-                "<p><b>EN:</b> Production raster MCDA workflow with hard constraints, uncertainty, explainability, and reporting.</p>"
-                "<p><b>TR:</b> Ikincil dil destegi etkin. Turkce yardim ve kisayollar arayuzde gorunur.</p>"
-                if self.lang == "EN"
-                else "<p><b>TR:</b> Sert kisit, belirsizlik, aciklanabilirlik ve raporlama iceren uretim-hazir raster MCDA platformu.</p>"
-                "<p><b>EN:</b> Secondary English text remains visible for mixed-language teams.</p>"
-            )
-            + f"<p><b>{'Loaded layers' if self.lang == 'EN' else 'Yuklu katmanlar'}:</b> {len(layers)} (vector: {len(vectors)}, raster: {len(rasters)})</p>"
-            + f"<p><b>{'System health score' if self.lang == 'EN' else 'Sistem saglik skoru'}:</b> {gov_score:.1f}% ({gov_ok}/{gov_total} checks)</p>"
-            + (
-                "<p><b>Tip:</b> Start with <code>Data Harmonizer</code>, then continue from <code>Guided Flow</code>.</p>"
-                if self.lang == "EN"
-                else "<p><b>Ipucu:</b> Once <code>Data Harmonizer</code> calistirin, sonra <code>Rehberli Akis</code> sekmesini takip edin.</p>"
-            )
+            "<p>Production raster MCDA workflow with hard constraints, uncertainty, explainability, and reporting.</p>"
+            + f"<p><b>Loaded layers:</b> {len(layers)} (vector: {len(vectors)}, raster: {len(rasters)})</p>"
+            + f"<p><b>System health score:</b> {gov_score:.1f}% ({gov_ok}/{gov_total} checks)</p>"
+            + "<p><b>Tip:</b> Start with <code>Data Harmonizer</code>, then continue from <code>Guided Flow</code>.</p>"
         )
         self.workflow_map.setHtml(self._build_workflow_html())
         self._update_selected_desc()
@@ -842,18 +825,11 @@ class SuitabilityDashboard(QDialog):
         self.navigator.setHtml(self._build_navigator_html(gov_rows, missing))
 
     def _build_navigator_html(self, gov_rows, missing):
-        if self.lang == "TR":
-            title = "Rehberli Proje Akisi"
-            lead = "Asagidaki sira, yerlesilebilirlik calismasini sistemli ve tekrar edilebilir sekilde yurutur."
-            missing_label = "Eksik moduller"
-            next_step = "Sonraki adim"
-            all_good = "Tum temel moduller aktif. Rehberli akisla devam edebilirsiniz."
-        else:
-            title = "Guided Project Flow"
-            lead = "Follow this sequence to run a complete, production suitability workflow in a consistent way."
-            missing_label = "Missing modules"
-            next_step = "Next best action"
-            all_good = "Core modules are active. Continue with the guided flow."
+        title = "Guided Project Flow"
+        lead = "Follow this sequence to run a complete, production suitability workflow in a consistent way."
+        missing_label = "Missing modules"
+        next_step = "Next best action"
+        all_good = "Core modules are active. Continue with the guided flow."
 
         flow = [
             "1) Prepare: Data Harmonizer + Alignment Audit to standardize all criteria rasters.",
@@ -892,12 +868,6 @@ class SuitabilityDashboard(QDialog):
         )
         return html
 
-    def _set_language(self, *_):
-        data = self.lang_combo.currentData() or "EN"
-        self.lang = str(data)
-        self.settings.setValue("planx_suitability_lab/lang", self.lang)
-        self._refresh()
-
     def _copy_diagnostics(self):
         layers = list(QgsProject.instance().mapLayers().values())
         reg = QgsApplication.processingRegistry()
@@ -930,7 +900,6 @@ class SuitabilityDashboard(QDialog):
             "Ctrl+G : Open command guide\n"
             "Ctrl+P : Run sample workflow (optional)\n"
             "Ctrl+N : Run next suggested step\n"
-            "Ctrl+L : Toggle language EN/TR\n"
         )
         QApplication.clipboard().setText(txt)
 
@@ -958,36 +927,19 @@ class SuitabilityDashboard(QDialog):
         popup.resize(520, 350)
         layout = QVBoxLayout(popup)
         browser = QTextBrowser()
-        if self.lang == "TR":
-            browser.setHtml(
-                "<h2>Kisayollar (TR/EN)</h2>"
-                "<ul>"
-                "<li><b>Ctrl+K</b> - Komut paletini ac</li>"
-                "<li><b>Ctrl+R</b> - Panel kontrollerini yenile</li>"
-                "<li><b>Ctrl+D</b> - Proje durumunu kopyala</li>"
-                "<li><b>Ctrl+I</b> - Akis kontrol listesini kopyala</li>"
-                "<li><b>Ctrl+H</b> - Bu yardimi ac</li>"
-                "<li><b>Ctrl+G</b> - Komut rehberini ac</li>"
-                "<li><b>Ctrl+P</b> - Ornek akis (opsiyonel) calistir</li>"
-                "<li><b>Ctrl+N</b> - Sonraki onerilen adimi calistir</li>"
-                "<li><b>Ctrl+L</b> - EN/TR dil degistir</li>"
-                "</ul>"
-            )
-        else:
-            browser.setHtml(
-                "<h2>Dashboard Shortcuts</h2>"
-                "<ul>"
-                "<li><b>Ctrl+K</b> - Open command palette</li>"
-                "<li><b>Ctrl+R</b> - Refresh dashboard checks</li>"
-                "<li><b>Ctrl+D</b> - Copy project status</li>"
-                "<li><b>Ctrl+I</b> - Copy workflow checklist</li>"
-                "<li><b>Ctrl+H</b> - Show this shortcut help</li>"
-                "<li><b>Ctrl+G</b> - Open full command guide</li>"
-                "<li><b>Ctrl+P</b> - Run sample workflow (optional)</li>"
-                "<li><b>Ctrl+N</b> - Run next suggested step</li>"
-                "<li><b>Ctrl+L</b> - Toggle EN/TR language</li>"
-                "</ul>"
-            )
+        browser.setHtml(
+            "<h2>Dashboard Shortcuts</h2>"
+            "<ul>"
+            "<li><b>Ctrl+K</b> - Open command palette</li>"
+            "<li><b>Ctrl+R</b> - Refresh dashboard checks</li>"
+            "<li><b>Ctrl+D</b> - Copy project status</li>"
+            "<li><b>Ctrl+I</b> - Copy workflow checklist</li>"
+            "<li><b>Ctrl+H</b> - Show this shortcut help</li>"
+            "<li><b>Ctrl+G</b> - Open full command guide</li>"
+            "<li><b>Ctrl+P</b> - Run sample workflow (optional)</li>"
+            "<li><b>Ctrl+N</b> - Run next suggested step</li>"
+            "</ul>"
+        )
         layout.addWidget(browser, 1)
         close_btn = QPushButton("Close")
         close_btn.clicked.connect(popup.accept)
@@ -1125,8 +1077,5 @@ class SuitabilityDashboard(QDialog):
             return
         if event.modifiers() == Qt.KeyboardModifier.ControlModifier and event.key() == Qt.Key.Key_N:
             self._run_next_critical()
-            return
-        if event.modifiers() == Qt.KeyboardModifier.ControlModifier and event.key() == Qt.Key.Key_L:
-            self.lang_combo.setCurrentIndex(1 if self.lang_combo.currentIndex() == 0 else 0)
             return
         super().keyPressEvent(event)

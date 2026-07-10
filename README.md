@@ -100,7 +100,6 @@ PlanX Suitability Lab is a production-ready raster MCDA plugin for QGIS, designe
   - command palette for fast module/action launch (`Ctrl+K`)
   - optional sample workflow runner for onboarding
   - live per-module `Ready/Missing` registry chips
-  - bilingual EN/TR dashboard mode with quick toggle
   - recent-run log panel with timestamps
   - redesigned visual theme and layout
 

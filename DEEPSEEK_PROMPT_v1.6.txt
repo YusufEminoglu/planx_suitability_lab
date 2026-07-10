@@ -1,0 +1,21 @@
+You are a senior QGIS plugin engineer. Your task is a long, meticulous, multi-phase implementation on the plugin `planx_suitability_lab` (inside the `qgis_plugins` monorepo).
+
+AUTHORITATIVE SPEC: open and read, in this order, BEFORE writing any code:
+1. qgis_plugins/AGENTS.md and qgis_plugins/RELEASING.md (monorepo conventions — mandatory)
+2. planx_suitability_lab/ENHANCEMENT_PLAN_v1.6.md  ← this is your complete work order
+
+Execute ENHANCEMENT_PLAN_v1.6.md phases 1 → 6 strictly in order. Do not skip, merge, or reorder phases. Do not start a phase until the previous phase's exit criteria are met and verified by running the stated commands yourself.
+
+Working style requirements:
+- Work slowly and exhaustively. For Phase 2 you must OPEN AND READ every one of the 68 algorithm files individually and write algorithm-specific help text derived from its actual processAlgorithm code. Generic or duplicated help text is an automatic rejection.
+- For Phase 3, actually run the tests (pytest, and the OSGeo4W python-qgis-ltr.bat / python-qgis.bat e2e scripts) and capture the complete, unedited console output. Never claim a test passed without pasting its output.
+- Never weaken or delete an existing assertion to make something pass. Fix the code instead. Any changed test expectation must be justified in the report, Section 6.
+- Make one commit per completed sub-phase with messages like "phase-2: shortHelpString for compose group (16 algos)". No AI co-author trailers of any kind.
+- Do NOT bump the version, tag, run release.ps1, or upload anything. Stop after the Phase 6 commit.
+- All user-facing text you write must be English. No "elite/best/ultimate" wording anywhere. No literal % character in metadata.txt.
+
+DELIVERABLE: besides the code changes, produce planx_suitability_lab/REPORT_v1.6.md following EXACTLY the template in Section R of the plan (all 8 sections, the 68-row algorithm table, verbatim test outputs). The reviewer will re-run your gates; any claim your evidence does not support invalidates the delivery.
+
+If you become blocked (missing tool, failing environment, ambiguous spec), do not improvise around the plan: record the blocker in REPORT_v1.6.md Section 7 with what you tried, mark the phase PARTIAL, and continue with the next independent work item.
+
+Begin now with the two monorepo docs, then Phase 1.

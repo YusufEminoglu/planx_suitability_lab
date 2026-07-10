@@ -171,27 +171,6 @@ class ReleaseNarrativeBuilderAlgorithm(QgsProcessingAlgorithm):
             )
         lines.append(" ".join(en_parts))
 
-        lines += [
-            "",
-            "## Tek Paragraf Yayin Ozeti (TR)",
-        ]
-        tr_parts = [
-            f"{project} {version}, objektif+oznel agirlik guvenirligi, cok-senaryolu birlesik uygunluk, belirsizlik-duyarli politika analizi ve dogrudan uygulama planlama ciktilarini tek hatta birlestirerek eklentiyi yonetisim-hazir raster MCDA karar studyosuna tasir."
-        ]
-        if spick is not None:
-            tr_parts.append(
-                f"Senaryolar arasi ortalama Pearson uyumu {spick['mean_r']:.3f} (aralik {spick['min_r']:.3f}-{spick['max_r']:.3f}) seviyesindedir."
-            )
-        if fpick is not None:
-            tr_parts.append(
-                f"Politika kirilim analizi dengeli risk katsayisini yaklasik lambda={fpick['lambda']:.2f} olarak isaretler; bu noktada ortalama skor {fpick['mean_score']:.2f}, 80 ustu alan payi %{fpick['area_ge_80_pct']:.2f}."
-            )
-        if bpick is not None:
-            tr_parts.append(
-                f"Butce fazlama egriisi, yaklasik %{bpick['b30'][0]} butcede %{bpick['b30'][1]:.2f}, %{bpick['b50'][0]} butcede %{bpick['b50'][1]:.2f}, %{bpick['b80'][0]} butcede %{bpick['b80'][1]:.2f} etki yakalama gosterir."
-            )
-        lines.append(" ".join(tr_parts))
-
         if highlights:
             lines += [
                 "",

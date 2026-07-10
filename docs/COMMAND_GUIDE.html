@@ -15,12 +15,11 @@
   </style>
 </head>
 <body>
-  <h1>PlanX Suitability Lab - Detailed Command Guide (EN/TR)</h1>
-  <p><b>EN:</b> This guide explains each production-ready command and practical tips for reliable MCDA results.</p>
-  <p><b>TR:</b> Bu rehber paylasima hazir komutlari ve guvenilir MCDA sonucu icin pratik ipuclarini aciklar.</p>
+  <h1>PlanX Suitability Lab - Detailed Command Guide</h1>
+  <p>This guide explains each production-ready command and practical tips for reliable MCDA results.</p>
 
   <div class="card">
-    <h2>1) Prepare / Hazirlik</h2>
+    <h2>1) Prepare</h2>
     <p><code>data_harmonizer</code>: Align CRS, extent, resolution, nodata and export full aligned raster stack folder + manifest.</p>
     <p><code>synthetic_sample_raster</code>: Generate 4 criterion rasters + hard mask for smoke testing.</p>
     <p><code>synthetic_pipeline_runner</code>: One-click synthetic end-to-end workflow execution.</p>
@@ -28,14 +27,14 @@
   </div>
 
   <div class="card">
-    <h2>2) Criteria / Kriterler</h2>
+    <h2>2) Criteria</h2>
     <p><code>vector_rasterizer</code>, <code>proximity_builder</code>, <code>normalizer_reclassifier</code>, <code>constraint_builder</code></p>
     <p><b>Normalizer modes:</b> Min-Max (benefit/cost), Fuzzy Linear (benefit/cost), Fuzzy Sigmoid (benefit/cost), Fuzzy Gaussian.</p>
     <p><b>Tip:</b> Keep all criterion scores in 0-100 before weighted overlay.</p>
   </div>
 
   <div class="card">
-    <h2>3) Weights / Agirliklar</h2>
+    <h2>3) Weights</h2>
     <p><code>ahp_weights</code>: pairwise matrix + consistency ratio.</p>
     <p><code>pca_derived_weights</code>: variance-driven weights.</p>
     <p><code>entropy_weights</code>: information-content driven weights.</p>
@@ -46,7 +45,7 @@
   </div>
 
   <div class="card">
-    <h2>4) Compose / Bilesim</h2>
+    <h2>4) Compose</h2>
     <p><code>wlc_suitability</code>: bounded [0,100] weighted linear combination + hard mask.</p>
     <p><code>owa_suitability</code>: true OWA with criteria weights + order weights + ordering mode + optional hard mask.</p>
     <p><code>topsis_suitability</code>: TOPSIS ranking in raster space with benefit/cost impacts + optional hard mask.</p>
@@ -100,7 +99,7 @@
     <p><code>deployment_readiness_gate</code>: produces an automated GO/CONDITIONAL/HOLD publication gate from scorecard, minimax, wave and fragility diagnostics.</p>
     <p><code>intervention_budget_phasing</code>: budget-step capture curve from priority zones and index (cells, cumulative impact, capture %).</p>
     <p><code>action_playbook_generator</code>: creates a structured markdown implementation playbook from priority zones, frontier, and scenario similarity diagnostics.</p>
-    <p><code>release_narrative_builder</code>: auto-generates EN/TR one-paragraph release narrative from frontier, budget and similarity evidence.</p>
+    <p><code>release_narrative_builder</code>: auto-generates an English one-paragraph release narrative from frontier, budget and similarity evidence.</p>
     <p><code>beta_evidence_report</code>: outputs registry-level release readiness HTML evidence; optionally verifies key artifact files from a synthetic/real run output directory.</p>
   </div>
 
@@ -117,11 +116,9 @@
         <tr><td><code>Ctrl+G</code></td><td>Open this command guide</td></tr>
         <tr><td><code>Ctrl+P</code></td><td>Run synthetic pipeline quickly</td></tr>
         <tr><td><code>Ctrl+N</code></td><td>Run next guided critical workflow step</td></tr>
-        <tr><td><code>Ctrl+L</code></td><td>Toggle dashboard language mode (EN/TR)</td></tr>
       </tbody>
     </table>
-    <p><b>EN:</b> Module cards show <b>Ready/Missing</b> status, and Navigator tab provides gate-level publication checklist.</p>
-    <p><b>TR:</b> Modul kartlari <b>Ready/Missing</b> durumunu gosterir; Navigator sekmesi yayin oncesi gate tabanli kontrol listesi sunar.</p>
+    <p>Module cards show <b>Ready/Missing</b> status, and Navigator tab provides gate-level publication checklist.</p>
   </div>
 </body>
 </html>
