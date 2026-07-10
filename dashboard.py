@@ -54,6 +54,7 @@ ALGO_GROUPS = [
             ("Entropy Weights", "planx_suitability_lab:entropy_weights", "Sampled entropy-information weights."),
             ("CRITIC Weights", "planx_suitability_lab:critic_weights", "Objective weighting from contrast + inter-criterion conflict."),
             ("Scenario Weight Pack", "planx_suitability_lab:scenario_weight_pack", "Merge AHP/PCA/Entropy scenarios."),
+            ("Weight Consolidator", "planx_suitability_lab:weight_consolidator", "Normalise and activate a weight set for downstream scoring."),
             ("Weight Consensus Audit", "planx_suitability_lab:weight_consensus_audit", "Method-agreement diagnostics with CV-based confidence."),
         ],
     ),

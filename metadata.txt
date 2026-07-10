@@ -3,7 +3,7 @@ name=PlanX Suitability Lab
 qgisMinimumVersion=3.28
 qgisMaximumVersion=4.99
 description=Raster-based MCDA land suitability workflows with explainable analytics and uncertainty.
-version=1.5.1
+version=1.6.0
 author=Yusuf Eminoglu
 email=yusuf.eminoglu@deu.edu.tr
 
@@ -23,5 +23,5 @@ deprecated=False
 license=GPL-3
 
 changelog=
-    PlanX Suitability Lab 1.5.0 - New Compose: Candidate Site Extractor turns contiguous high-suitability patches into ranked candidate site polygons (site_id, rank, area_ha, mean/max suitability, compactness) with threshold, minimum-area and top-N controls. Package diet: optimized plugin icon and dev-only files excluded from the Hub zip. Verified by new pure-logic tests plus an end-to-end headless QGIS run.
+    PlanX Suitability Lab 1.6.0 - English-only conversion: removed bilingual EN/TR dashboard mode and all Turkish UI text. Added in-toolbox shortHelpString and helpUrl for all 68 algorithms. New pure-logic unit tests for weight derivation math (AHP/Entropy/PCA/CRITIC edge cases). Fixed single-criterion CRITIC and degenerate-covariance PCA edge cases in _mcda_utils. Dashboard catalog corrected to 68 entries (added missing weight_consolidator). Updated docs and command guide.
 

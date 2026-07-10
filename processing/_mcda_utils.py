@@ -266,6 +266,7 @@ def pca_proxy_weights_from_rasters(rasters: List[str]) -> List[float]:
     Z = (X - mu) / sd
 
     cov = np.cov(Z, rowvar=False)
+    cov = np.atleast_2d(cov)
     vals, vecs = np.linalg.eigh(cov)
     idx = np.argsort(vals)[::-1]
     vals = vals[idx]
@@ -340,9 +341,12 @@ def critic_weights_from_rasters(rasters: List[str], impacts: List[int] | None = 
     Z = np.clip(Z, 0.0, 1.0)
 
     sigma = np.std(Z, axis=0)
-    corr = np.corrcoef(Z, rowvar=False)
-    corr = np.where(np.isfinite(corr), corr, 0.0)
-    np.fill_diagonal(corr, 1.0)
+    if n == 1:
+        corr = np.array([[1.0]], dtype=np.float64)
+    else:
+        corr = np.corrcoef(Z, rowvar=False)
+        corr = np.where(np.isfinite(corr), corr, 0.0)
+        np.fill_diagonal(corr, 1.0)
     contrast = np.sum(1.0 - corr, axis=1)
     scores = sigma * contrast
     scores = np.where(np.isfinite(scores), scores, 0.0)

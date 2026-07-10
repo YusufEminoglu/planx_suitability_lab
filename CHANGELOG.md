@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.6.0] - 2026-07-10
+
+- English-only conversion: removed bilingual EN/TR machinery from dashboard (language combo, Ctrl+L, all Turkish UI strings), release_narrative_builder (TR narrative removed), action_playbook_generator (TR recommendations removed), COMMAND_GUIDE.html, and README.
+- In-toolbox documentation: added `shortHelpString()` with algorithm-specific HTML help and `helpUrl()` returning the GitHub repo URL to all 68 Processing algorithms, covering every parameter, output, method, and typical use.
+- New pure-logic unit tests (`tests/test_mcda_logic.py`): 12 test functions with ~80 assertions covering weight parsing (CSV/impacts), AHP eigenvalue derivation with CR check, entropy weights, PCA proxy weights, CRITIC weights, edge cases (constant rasters, empty inputs, single criterion), and slug/label utilities.
+- Fixed edge-case bugs in `_mcda_utils.py`: CRITIC single-criterion guard (1x1 correlation matrix), PCA degenerate covariance (np.atleast_2d).
+- Dashboard: corrected algorithm catalog to 68 entries (added missing weight_consolidator to ALGO_GROUPS).
+- New end-to-end test scaffold (`tests/e2e_qgis_full.py`): provider assertion (68-algo pin), synthetic pipeline execution, per-algorithm coverage with dashboard smoke test (lang-free verification, catalog-provider cross-check).
+- Updated README, COMMAND_GUIDE.html (English-only, no Ctrl+L), and metadata.txt for 1.6.0.
+
 ## [1.5.1] - 2026-06-18
 
 - docs: add CITATION.cff for Zenodo DOI integration
