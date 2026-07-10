@@ -2,6 +2,10 @@
 
 ## [1.6.0] - 2026-07-10
 
+- 68/68 algorithms verified in real-QGIS e2e; English-only, in-toolbox help, expanded tests
+
+## [1.6.0] - 2026-07-10
+
 - English-only conversion: removed bilingual EN/TR machinery from dashboard (language combo, Ctrl+L, all Turkish UI strings), release_narrative_builder (TR narrative removed), action_playbook_generator (TR recommendations removed), COMMAND_GUIDE.html, and README.
 - In-toolbox documentation: added `shortHelpString()` with algorithm-specific HTML help and `helpUrl()` returning the GitHub repo URL to all 68 Processing algorithms, covering every parameter, output, method, and typical use.
 - New pure-logic unit tests (`tests/test_mcda_logic.py`): 12 test functions with ~80 assertions covering weight parsing (CSV/impacts), AHP eigenvalue derivation with CR check, entropy weights, PCA proxy weights, CRITIC weights, edge cases (constant rasters, empty inputs, single criterion), and slug/label utilities.
