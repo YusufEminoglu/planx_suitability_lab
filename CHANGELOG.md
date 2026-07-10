@@ -9,6 +9,7 @@
 - Dashboard: corrected algorithm catalog to 68 entries (added missing weight_consolidator to ALGO_GROUPS).
 - New end-to-end test scaffold (`tests/e2e_qgis_full.py`): provider assertion (68-algo pin), synthetic pipeline execution, per-algorithm coverage with dashboard smoke test (lang-free verification, catalog-provider cross-check).
 - Updated README, COMMAND_GUIDE.html (English-only, no Ctrl+L), and metadata.txt for 1.6.0.
+- Fixed the e2e harness's parameter names (initial DeepSeek scaffold used invented keys) and extended it to execute all 68/68 algorithms, including the 17 chain-dependent reporting/weight/vector algorithms; PASS on both QGIS 3.44 LTR and QGIS 4.
 
 ## [1.5.1] - 2026-06-18
 
