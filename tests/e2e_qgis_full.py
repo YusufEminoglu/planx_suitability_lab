@@ -160,32 +160,29 @@ if criterion_files:
     )
 
     # Step 2i: Weight derivations
-    run_algo(
+    ahp_res = run_algo(
         "planx_suitability_lab:ahp_weights",
         {"MATRIX_JSON": '[[1,2,3],[0.5,1,2],[0.3333,0.5,1]]', "OUTPUT": "TEMPORARY_OUTPUT"},
         "ahp_weights",
     )
 
-    run_algo(
+    entropy_res = run_algo(
         "planx_suitability_lab:entropy_weights",
         {"INPUT_RASTERS": [str(p) for p in criterion_files[:3]], "OUTPUT": "TEMPORARY_OUTPUT"},
         "entropy_weights",
     )
 
-    run_algo(
+    pca_res = run_algo(
         "planx_suitability_lab:pca_derived_weights",
         {"INPUT_RASTERS": [str(p) for p in criterion_files[:3]], "OUTPUT": "TEMPORARY_OUTPUT"},
         "pca_weights",
     )
 
-    run_algo(
+    critic_res = run_algo(
         "planx_suitability_lab:critic_weights",
         {"INPUT_RASTERS": [str(p) for p in criterion_files[:3]], "IMPACTS_CSV": "B, B, B", "OUTPUT": "TEMPORARY_OUTPUT"},
         "critic_weights",
     )
-
-    # Step 2j: Weight consolidator
-    ahp_table = None  # We'd need the actual output; skip if not available
 
     # Step 2k: Monte Carlo on WLC output if available
     if wlc_tif and os.path.exists(wlc_tif):
@@ -274,7 +271,7 @@ if wlc_tif and os.path.exists(wlc_tif):
     )
 
     # 3d: Threshold coverage curve
-    run_algo(
+    threshold_curve_res = run_algo(
         "planx_suitability_lab:threshold_coverage_curve",
         {"INPUT": wlc_tif, "STEP": 10, "OUTPUT": "TEMPORARY_OUTPUT"},
         "threshold_coverage_curve",
@@ -300,7 +297,7 @@ if wlc_tif and os.path.exists(wlc_tif):
     )
 
     # Intervention budget phasing
-    run_algo(
+    budget_phasing_res = run_algo(
         "planx_suitability_lab:intervention_budget_phasing",
         {"PRIORITY_ZONE": zone_path, "COST_BY_ZONE": "0.6,0.9,1.2,1.5,1.8", "STEP": 20, "OUTPUT": "TEMPORARY_OUTPUT"},
         "intervention_budget_phasing",
@@ -387,28 +384,28 @@ if wlc_tif and os.path.exists(wlc_tif):
     )
 
     # Scenario dominance matrix
-    run_algo(
+    dominance_res = run_algo(
         "planx_suitability_lab:scenario_dominance_matrix",
         {"INPUT_RASTERS": scenario_rasters, "EPS": 0.5, "BLOCK": 256, "OUTPUT": "TEMPORARY_OUTPUT"},
         "scenario_dominance_matrix",
     )
 
     # Method benchmark leaderboard
-    run_algo(
+    benchmark_res = run_algo(
         "planx_suitability_lab:method_benchmark_leaderboard",
         {"INPUT_RASTERS": scenario_rasters, "HIGH_THRESHOLD": 70.0, "BLOCK": 256, "OUTPUT": "TEMPORARY_OUTPUT"},
         "method_benchmark_leaderboard",
     )
 
     # Minimax regret selector
-    run_algo(
+    minimax_res = run_algo(
         "planx_suitability_lab:minimax_regret_selector",
         {"INPUT_RASTERS": scenario_rasters, "BLOCK": 256, "OUTPUT": "TEMPORARY_OUTPUT"},
         "minimax_regret_selector",
     )
 
     # Scenario portfolio diversity
-    run_algo(
+    portfolio_res = run_algo(
         "planx_suitability_lab:scenario_portfolio_diversity",
         {"INPUT_RASTERS": scenario_rasters, "BLOCK": 256, "OUTPUT": "TEMPORARY_OUTPUT"},
         "scenario_portfolio_diversity",
@@ -427,7 +424,7 @@ if wlc_tif and os.path.exists(wlc_tif):
     # Risk-opportunity matrix map
     z3_path = os.path.join(out_dir, "unc_proxy.tif")
     _write_tif(z3_path, np.full_like(arr_wlc, 15.0))
-    run_algo(
+    risk_matrix_res = run_algo(
         "planx_suitability_lab:risk_opportunity_matrix_map",
         {"ROBUST": wlc_tif, "UNC_STD": z3_path, "OUTPUT": "TEMPORARY_OUTPUT"},
         "risk_opportunity_matrix_map",
@@ -470,7 +467,7 @@ if wlc_tif and os.path.exists(wlc_tif):
     )
 
     # Policy sensitivity frontier
-    run_algo(
+    frontier_res = run_algo(
         "planx_suitability_lab:policy_sensitivity_frontier",
         {"MEAN": wlc_tif, "STD": z3_path, "LAMBDAS": "0,0.5,1.0,2.0", "OUTPUT": "TEMPORARY_OUTPUT"},
         "policy_sensitivity_frontier",
@@ -536,14 +533,14 @@ if wlc_tif and os.path.exists(wlc_tif):
     cls2_arr = np.clip(cls_arr, 0, 2).astype(np.float32)
     cls2_path = os.path.join(out_dir, "cls2.tif")
     _write_tif(cls2_path, cls2_arr)
-    run_algo(
+    regret_stats_res = run_algo(
         "planx_suitability_lab:regret_fragility_area_stats",
         {"INPUT": cls2_path, "OUTPUT": "TEMPORARY_OUTPUT"},
         "regret_fragility_area_stats",
     )
 
     # Executive KPI snapshot
-    run_algo(
+    kpi_res = run_algo(
         "planx_suitability_lab:executive_kpi_snapshot",
         {"SUITABILITY": wlc_tif, "ROBUST": wlc_tif, "CONSTRAINT": str(mask_files[0]) if mask_files else wlc_tif,
          "CONSENSUS_ZONE": cls_path, "ATTENTION_CLASS": cls_path, "OUTPUT": "TEMPORARY_OUTPUT"},
@@ -551,40 +548,131 @@ if wlc_tif and os.path.exists(wlc_tif):
     )
 
 # ---------------------------------------------------------------------------
-# 6. Upstream-table-consuming reporting algorithms
+# 6. Upstream-table-consuming reporting algorithms (real chains, using tables
+#    produced by earlier steps in this script)
 # ---------------------------------------------------------------------------
 print("\n=== 6. Cross-table reporting algorithms ===")
-# These need output tables from earlier algorithms. We run them with synthetic placeholder
-# tables where possible; some may fail if field names mismatch - that's acceptable at 60/68 floor.
 
-# Try to run the chain: executive_kpi + budget_phasing + policy_gate -> downstream algos
-# These require specific input tables that may not exist from our limited synthetic run.
-# We'll attempt them and track which don't execute.
+# synthetic_pipeline_runner: standalone, generates its own sample data end-to-end
+run_algo(
+    "planx_suitability_lab:synthetic_pipeline_runner",
+    {"EXTENT": extent, "PIXEL": 30.0, "OUTDIR": os.path.join(out_dir, "pipeline_run")},
+    "synthetic_pipeline_runner",
+)
 
-upstream_algos = [
-    "planx_suitability_lab:scenario_robustness_leaderboard",
-    "planx_suitability_lab:scenario_governance_audit",
-    "planx_suitability_lab:scenario_selection_recommender",
-    "planx_suitability_lab:actionability_scorecard",
-    "planx_suitability_lab:implementation_wave_planner",
-    "planx_suitability_lab:deployment_readiness_gate",
+policy_gate_res = run_algo(
     "planx_suitability_lab:policy_gate_recommender",
-    "planx_suitability_lab:intervention_conflict_matrix",
-    "planx_suitability_lab:constraint_impact_audit",
-    "planx_suitability_lab:beta_evidence_report",
-    "planx_suitability_lab:weight_consensus_audit",
-    "planx_suitability_lab:scenario_weight_pack",
-    "planx_suitability_lab:weight_consolidator",
-    "planx_suitability_lab:candidate_site_extractor",
-    "planx_suitability_lab:vector_rasterizer",
-    "planx_suitability_lab:data_harmonizer",
-]
+    {"THRESHOLD_CURVE": threshold_curve_res.get("OUTPUT"), "FRONTIER": frontier_res.get("OUTPUT"),
+     "TARGET_COVERAGE": 40.0, "MAX_CRITICAL_CONFLICT": 20.0, "OUTPUT": "TEMPORARY_OUTPUT"},
+    "policy_gate_recommender",
+)
 
-for algo_id in upstream_algos:
-    note = f"  [SKIP] {algo_id} - requires specific upstream tables not available in synthetic run"
-    # We skip these as they require inter-algorithm data chains that our synthetic
-    # test setup cannot easily produce. The synthetic_pipeline_runner covers most of them.
-    algo_count += 1
+scorecard_res = run_algo(
+    "planx_suitability_lab:actionability_scorecard",
+    {"KPI": kpi_res.get("OUTPUT"), "BUDGET": budget_phasing_res.get("OUTPUT"),
+     "GATE": policy_gate_res.get("OUTPUT"), "OUTPUT": "TEMPORARY_OUTPUT"},
+    "actionability_scorecard",
+)
+
+wave_plan_res = run_algo(
+    "planx_suitability_lab:implementation_wave_planner",
+    {"PRIORITY_ZONE": zone_path, "RISK_MATRIX": risk_matrix_res.get("OUTPUT"), "OUTPUT": "TEMPORARY_OUTPUT"},
+    "implementation_wave_planner",
+)
+
+run_algo(
+    "planx_suitability_lab:intervention_conflict_matrix",
+    {"PRIORITY_ZONE": zone_path, "ATTENTION_CLASS": cls_path,
+     "CONSTRAINT": str(mask_files[0]) if mask_files else None, "OUTPUT": "TEMPORARY_OUTPUT"},
+    "intervention_conflict_matrix",
+)
+
+robustness_res = run_algo(
+    "planx_suitability_lab:scenario_robustness_leaderboard",
+    {"BENCHMARK": benchmark_res.get("OUTPUT"), "DOMINANCE": dominance_res.get("OUTPUT"),
+     "MINIMAX": minimax_res.get("OUTPUT"), "PORTFOLIO": portfolio_res.get("OUTPUT"), "OUTPUT": "TEMPORARY_OUTPUT"},
+    "scenario_robustness_leaderboard",
+)
+
+selection_res = run_algo(
+    "planx_suitability_lab:scenario_selection_recommender",
+    {"BENCHMARK": benchmark_res.get("OUTPUT"), "PORTFOLIO": portfolio_res.get("OUTPUT"),
+     "MINIMAX": minimax_res.get("OUTPUT"), "GATE": policy_gate_res.get("OUTPUT"),
+     "SCORECARD": scorecard_res.get("OUTPUT"), "ROBUSTNESS": robustness_res.get("OUTPUT"),
+     "OUTPUT": "TEMPORARY_OUTPUT"},
+    "scenario_selection_recommender",
+)
+
+deployment_res = run_algo(
+    "planx_suitability_lab:deployment_readiness_gate",
+    {"SCORECARD": scorecard_res.get("OUTPUT"), "SCENARIO_SELECTION": selection_res.get("OUTPUT"),
+     "MINIMAX": minimax_res.get("OUTPUT"), "WAVE_PLAN": wave_plan_res.get("OUTPUT"),
+     "REGRET_STATS": regret_stats_res.get("OUTPUT"), "OUTPUT": "TEMPORARY_OUTPUT"},
+    "deployment_readiness_gate",
+)
+
+run_algo(
+    "planx_suitability_lab:scenario_governance_audit",
+    {"ROBUSTNESS": robustness_res.get("OUTPUT"), "BENCHMARK": benchmark_res.get("OUTPUT"),
+     "MINIMAX": minimax_res.get("OUTPUT"), "SELECTION": selection_res.get("OUTPUT"),
+     "DEPLOYMENT": deployment_res.get("OUTPUT"), "OUTPUT": "TEMPORARY_OUTPUT"},
+    "scenario_governance_audit",
+)
+
+run_algo(
+    "planx_suitability_lab:weight_consensus_audit",
+    {"INPUT": ahp_res.get("OUTPUT"), "OUTPUT": "TEMPORARY_OUTPUT"},
+    "weight_consensus_audit",
+)
+
+weight_pack_res = run_algo(
+    "planx_suitability_lab:scenario_weight_pack",
+    {"AHP": ahp_res.get("OUTPUT"), "PCA": pca_res.get("OUTPUT"), "ENT": entropy_res.get("OUTPUT"),
+     "CRIT": critic_res.get("OUTPUT"), "OUTPUT": "TEMPORARY_OUTPUT"},
+    "scenario_weight_pack",
+)
+
+run_algo(
+    "planx_suitability_lab:weight_consolidator",
+    {"INPUT": ahp_res.get("OUTPUT"), "OUTPUT": "TEMPORARY_OUTPUT"},
+    "weight_consolidator",
+)
+
+site_res = run_algo(
+    "planx_suitability_lab:candidate_site_extractor",
+    {"SUIT": wlc_tif, "THRESHOLD": 60.0, "MIN_AREA_HA": 0.1, "TOP_N": 10, "CONNECTIVITY": 8, "OUTPUT": "TEMPORARY_OUTPUT"},
+    "candidate_site_extractor",
+)
+
+if site_res.get("OUTPUT"):
+    run_algo(
+        "planx_suitability_lab:vector_rasterizer",
+        {"INPUT": site_res.get("OUTPUT"), "FIELD": "mean_suit", "BURN": 1.0, "PIXEL": 30.0, "OUTPUT": "TEMPORARY_OUTPUT"},
+        "vector_rasterizer",
+    )
+
+run_algo(
+    "planx_suitability_lab:data_harmonizer",
+    {"INPUT_RASTERS": [str(p) for p in criterion_files[:3]], "SNAP_RASTER": str(criterion_files[0]),
+     "TARGET_RES": 30.0, "RESAMPLING": 0,
+     "OUTPUT_RASTER": "TEMPORARY_OUTPUT", "OUTPUT_DIR": os.path.join(out_dir, "harmonized"),
+     "OUTPUT_MANIFEST": os.path.join(out_dir, "harmonized_manifest.json")},
+    "data_harmonizer",
+)
+
+if mask_files:
+    run_algo(
+        "planx_suitability_lab:constraint_impact_audit",
+        {"SUITABILITY": wlc_tif, "CONSTRAINTS": [str(mask_files[0])], "HIGH_THRESHOLD": 70.0,
+         "BLOCK": 256, "OUTPUT": "TEMPORARY_OUTPUT"},
+        "constraint_impact_audit",
+    )
+
+run_algo(
+    "planx_suitability_lab:beta_evidence_report",
+    {"SUMMARY": "E2E synthetic run evidence.", "ARTIFACT_DIR": out_dir, "OUTPUT": os.path.join(out_dir, "beta_evidence.html")},
+    "beta_evidence_report",
+)
 
 # ---------------------------------------------------------------------------
 # 7. Dashboard smoke test
