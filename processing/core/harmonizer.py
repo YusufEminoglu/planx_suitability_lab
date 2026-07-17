@@ -71,14 +71,14 @@ class DataHarmonizerAlgorithm(QgsProcessingAlgorithm):
         return DataHarmonizerAlgorithm()
 
     def initAlgorithm(self, config=None):
-        self.addParameter(QgsProcessingParameterMultipleLayers(self.INPUT_RASTERS, "Input rasters", QgsProcessing.TypeRaster))
+        self.addParameter(QgsProcessingParameterMultipleLayers(self.INPUT_RASTERS, "Input rasters", QgsProcessing.SourceType.TypeRaster))
         self.addParameter(QgsProcessingParameterRasterLayer(self.SNAP_RASTER, "Snap raster (optional)", optional=True))
         self.addParameter(QgsProcessingParameterExtent(self.TARGET_EXTENT, "Target extent (optional)", optional=True))
         self.addParameter(
             QgsProcessingParameterNumber(
                 self.TARGET_RES,
                 "Target resolution (set <=0 to inherit from snap/first raster)",
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 defaultValue=0.0,
             )
         )
@@ -87,7 +87,7 @@ class DataHarmonizerAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.NODATA,
                 "Output nodata",
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 defaultValue=-9999.0,
             )
         )

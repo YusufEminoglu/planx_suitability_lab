@@ -68,13 +68,13 @@ class SuitabilityClassAreaStatsAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.BLOCK,
                 "Block size (pixels)",
-                type=QgsProcessingParameterNumber.Integer,
+                type=QgsProcessingParameterNumber.Type.Integer,
                 defaultValue=512,
                 minValue=64,
                 maxValue=4096,
             )
         )
-        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Class area stats table", QgsProcessing.TypeVector))
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Class area stats table", QgsProcessing.SourceType.TypeVector))
         self.addOutput(QgsProcessingOutputString(self.SUMMARY, "Stats summary"))
 
     def _parse_breaks(self, text):

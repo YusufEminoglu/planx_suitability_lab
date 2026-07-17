@@ -81,13 +81,13 @@ class InterventionBudgetPhasingAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.STEP,
                 "Budget step percent",
-                type=QgsProcessingParameterNumber.Integer,
+                type=QgsProcessingParameterNumber.Type.Integer,
                 defaultValue=10,
                 minValue=5,
                 maxValue=50,
             )
         )
-        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Budget phasing table", QgsProcessing.TypeVector))
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Budget phasing table", QgsProcessing.SourceType.TypeVector))
 
     @staticmethod
     def _parse_zone_costs(text: str):

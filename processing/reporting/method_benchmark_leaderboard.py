@@ -69,7 +69,7 @@ class MethodBenchmarkLeaderboardAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterMultipleLayers(
                 self.INPUT_RASTERS,
                 "Scenario rasters to benchmark (2..12)",
-                QgsProcessing.TypeRaster,
+                QgsProcessing.SourceType.TypeRaster,
             )
         )
         self.addParameter(QgsProcessingParameterRasterLayer(self.MASK, "Optional analysis mask raster (0/1)", optional=True))
@@ -77,7 +77,7 @@ class MethodBenchmarkLeaderboardAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.HIGH_THRESHOLD,
                 "High suitability threshold (0-100)",
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 defaultValue=70.0,
                 minValue=0.0,
                 maxValue=100.0,
@@ -87,13 +87,13 @@ class MethodBenchmarkLeaderboardAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.BLOCK,
                 "Block size (pixels)",
-                type=QgsProcessingParameterNumber.Integer,
+                type=QgsProcessingParameterNumber.Type.Integer,
                 defaultValue=256,
                 minValue=64,
                 maxValue=2048,
             )
         )
-        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Method benchmark leaderboard", QgsProcessing.TypeVector))
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Method benchmark leaderboard", QgsProcessing.SourceType.TypeVector))
 
     def processAlgorithm(self, parameters, context, feedback):
         layers = ensure_list(self.parameterAsLayerList(parameters, self.INPUT_RASTERS, context))[:12]

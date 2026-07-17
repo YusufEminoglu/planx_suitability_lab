@@ -55,7 +55,7 @@ class AttentionClassAreaStatsAlgorithm(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, config=None):
         self.addParameter(QgsProcessingParameterRasterLayer(self.INPUT, "Attention class raster (0..4)"))
-        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Attention class area stats", QgsProcessing.TypeVector))
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Attention class area stats", QgsProcessing.SourceType.TypeVector))
 
     def processAlgorithm(self, parameters, context, feedback):
         rl = self.parameterAsRasterLayer(parameters, self.INPUT, context)

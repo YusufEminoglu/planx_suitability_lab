@@ -67,7 +67,7 @@ class WLCSuitabilityAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterMultipleLayers(
                 self.INPUT_RASTERS,
                 "Criterion rasters (max 6, normalized to 0-100)",
-                QgsProcessing.TypeRaster,
+                QgsProcessing.SourceType.TypeRaster,
             )
         )
         self.addParameter(QgsProcessingParameterString(self.WEIGHTS_CSV, "Weights CSV (e.g. 0.4,0.3,0.3)", defaultValue=""))
@@ -76,7 +76,7 @@ class WLCSuitabilityAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.BLOCK,
                 "Block size (pixels)",
-                type=QgsProcessingParameterNumber.Integer,
+                type=QgsProcessingParameterNumber.Type.Integer,
                 defaultValue=256,
                 minValue=64,
                 maxValue=2048,

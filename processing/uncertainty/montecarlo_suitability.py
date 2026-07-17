@@ -71,7 +71,7 @@ class MonteCarloSuitabilityAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.ITER,
                 "Iterations",
-                type=QgsProcessingParameterNumber.Integer,
+                type=QgsProcessingParameterNumber.Type.Integer,
                 defaultValue=300,
                 minValue=20,
             )
@@ -80,7 +80,7 @@ class MonteCarloSuitabilityAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.SIGMA,
                 "Noise sigma (0-0.5, relative)",
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 defaultValue=0.08,
                 minValue=0.0,
                 maxValue=0.5,
@@ -90,7 +90,7 @@ class MonteCarloSuitabilityAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.BLOCK,
                 "Block size (pixels)",
-                type=QgsProcessingParameterNumber.Integer,
+                type=QgsProcessingParameterNumber.Type.Integer,
                 defaultValue=256,
                 minValue=64,
                 maxValue=2048,

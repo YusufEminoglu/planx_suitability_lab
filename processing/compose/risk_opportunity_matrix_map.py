@@ -70,7 +70,7 @@ class RiskOpportunityMatrixMapAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.ROBUST_HIGH,
                 "High robust suitability threshold",
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 defaultValue=70.0,
                 minValue=0.0,
                 maxValue=100.0,
@@ -80,7 +80,7 @@ class RiskOpportunityMatrixMapAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.STD_HIGH,
                 "High uncertainty (std) threshold",
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 defaultValue=15.0,
                 minValue=0.0,
                 maxValue=100.0,
@@ -90,7 +90,7 @@ class RiskOpportunityMatrixMapAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.BLOCK,
                 "Block size (pixels)",
-                type=QgsProcessingParameterNumber.Integer,
+                type=QgsProcessingParameterNumber.Type.Integer,
                 defaultValue=256,
                 minValue=64,
                 maxValue=2048,

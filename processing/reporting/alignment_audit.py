@@ -62,11 +62,11 @@ class AlignmentAuditAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterMultipleLayers(
                 self.INPUT_RASTERS,
                 "Input rasters to audit (2..20)",
-                QgsProcessing.TypeRaster,
+                QgsProcessing.SourceType.TypeRaster,
             )
         )
         self.addParameter(QgsProcessingParameterRasterLayer(self.SNAP, "Optional snap raster (reference)", optional=True))
-        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Alignment audit table", QgsProcessing.TypeVector))
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Alignment audit table", QgsProcessing.SourceType.TypeVector))
 
     @staticmethod
     def _extent_key(gt, xsize, ysize):

@@ -79,7 +79,7 @@ class NormalizerAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.LOW,
                 "Low bound (min or lower breakpoint)",
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 defaultValue=0.0,
             )
         )
@@ -87,7 +87,7 @@ class NormalizerAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.HIGH,
                 "High bound (max or upper breakpoint)",
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 defaultValue=100.0,
             )
         )
@@ -95,7 +95,7 @@ class NormalizerAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.MID,
                 "Midpoint (sigmoid/gaussian)",
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 defaultValue=50.0,
             )
         )
@@ -103,7 +103,7 @@ class NormalizerAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.SPREAD,
                 "Spread (>0) for sigmoid/gaussian",
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 defaultValue=10.0,
                 minValue=0.0001,
             )

@@ -60,7 +60,7 @@ class LocalContributionAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterMultipleLayers(
                 self.INPUT_RASTERS,
                 "Criterion rasters (max 6)",
-                QgsProcessing.TypeRaster,
+                QgsProcessing.SourceType.TypeRaster,
             )
         )
         self.addParameter(QgsProcessingParameterString(self.WEIGHTS_CSV, "Weights CSV", defaultValue=""))

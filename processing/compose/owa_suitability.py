@@ -73,7 +73,7 @@ class OWASuitabilityAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterMultipleLayers(
                 self.INPUT_RASTERS,
                 "Criterion rasters (max 6, normalized to 0-100)",
-                QgsProcessing.TypeRaster,
+                QgsProcessing.SourceType.TypeRaster,
             )
         )
         self.addParameter(QgsProcessingParameterString(self.CRITERIA_WEIGHTS, "Criteria weights CSV (optional)", defaultValue="", optional=True))
@@ -84,7 +84,7 @@ class OWASuitabilityAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.BLOCK,
                 "Block size (pixels)",
-                type=QgsProcessingParameterNumber.Integer,
+                type=QgsProcessingParameterNumber.Type.Integer,
                 defaultValue=256,
                 minValue=64,
                 maxValue=2048,

@@ -73,7 +73,7 @@ class PriorityZoningFromSuitabilityAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.SUIT_MED,
                 "Suitability medium threshold",
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 defaultValue=50.0,
                 minValue=0.0,
                 maxValue=100.0,
@@ -83,7 +83,7 @@ class PriorityZoningFromSuitabilityAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.SUIT_HIGH,
                 "Suitability high threshold",
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 defaultValue=75.0,
                 minValue=0.0,
                 maxValue=100.0,
@@ -93,7 +93,7 @@ class PriorityZoningFromSuitabilityAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.CONF_MED,
                 "Confidence medium threshold",
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 defaultValue=60.0,
                 minValue=0.0,
                 maxValue=100.0,
@@ -103,7 +103,7 @@ class PriorityZoningFromSuitabilityAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.CONF_HIGH,
                 "Confidence high threshold",
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 defaultValue=80.0,
                 minValue=0.0,
                 maxValue=100.0,
@@ -113,7 +113,7 @@ class PriorityZoningFromSuitabilityAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.OPP_HIGH,
                 "Opportunity-loss high threshold",
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 defaultValue=70.0,
                 minValue=0.0,
                 maxValue=100.0,
@@ -123,7 +123,7 @@ class PriorityZoningFromSuitabilityAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.BLOCK,
                 "Block size (pixels)",
-                type=QgsProcessingParameterNumber.Integer,
+                type=QgsProcessingParameterNumber.Type.Integer,
                 defaultValue=256,
                 minValue=64,
                 maxValue=2048,

@@ -57,7 +57,7 @@ class RasterizerAlgorithm(QgsProcessingAlgorithm):
         return RasterizerAlgorithm()
 
     def initAlgorithm(self, config=None):
-        self.addParameter(QgsProcessingParameterFeatureSource(self.INPUT, 'Vector input', [QgsProcessing.TypeVectorAnyGeometry]))
+        self.addParameter(QgsProcessingParameterFeatureSource(self.INPUT, 'Vector input', [QgsProcessing.SourceType.TypeVectorAnyGeometry]))
         self.addParameter(
             QgsProcessingParameterField(
                 self.FIELD,
@@ -66,8 +66,8 @@ class RasterizerAlgorithm(QgsProcessingAlgorithm):
                 optional=True,
             )
         )
-        self.addParameter(QgsProcessingParameterNumber(self.BURN, 'Burn value', type=QgsProcessingParameterNumber.Double, defaultValue=1.0))
-        self.addParameter(QgsProcessingParameterNumber(self.PIXEL, 'Pixel size', type=QgsProcessingParameterNumber.Double, defaultValue=10.0, minValue=0.01))
+        self.addParameter(QgsProcessingParameterNumber(self.BURN, 'Burn value', type=QgsProcessingParameterNumber.Type.Double, defaultValue=1.0))
+        self.addParameter(QgsProcessingParameterNumber(self.PIXEL, 'Pixel size', type=QgsProcessingParameterNumber.Type.Double, defaultValue=10.0, minValue=0.01))
         self.addParameter(QgsProcessingParameterRasterDestination(self.OUTPUT, 'Rasterized output'))
 
     def processAlgorithm(self, parameters, context, feedback):

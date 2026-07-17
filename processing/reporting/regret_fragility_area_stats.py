@@ -56,7 +56,7 @@ class RegretFragilityAreaStatsAlgorithm(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, config=None):
         self.addParameter(QgsProcessingParameterRasterLayer(self.INPUT, "Regret fragility class raster (0..2)"))
-        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Regret fragility area stats", QgsProcessing.TypeVector))
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Regret fragility area stats", QgsProcessing.SourceType.TypeVector))
 
     def processAlgorithm(self, parameters, context, feedback):
         rl = self.parameterAsRasterLayer(parameters, self.INPUT, context)

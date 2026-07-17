@@ -154,7 +154,7 @@ class CandidateSiteExtractorAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.THRESHOLD,
                 "Site threshold (cells >= value)",
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 defaultValue=75.0,
                 minValue=0.0,
                 maxValue=100.0,
@@ -164,7 +164,7 @@ class CandidateSiteExtractorAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.MIN_AREA_HA,
                 "Minimum site area (ha, 0 = no filter)",
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 defaultValue=1.0,
                 minValue=0.0,
             )
@@ -173,7 +173,7 @@ class CandidateSiteExtractorAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.TOP_N,
                 "Maximum number of sites (0 = all)",
-                type=QgsProcessingParameterNumber.Integer,
+                type=QgsProcessingParameterNumber.Type.Integer,
                 defaultValue=20,
                 minValue=0,
                 maxValue=1000,
@@ -183,14 +183,14 @@ class CandidateSiteExtractorAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.CONNECTIVITY,
                 "Connectivity (4 or 8)",
-                type=QgsProcessingParameterNumber.Integer,
+                type=QgsProcessingParameterNumber.Type.Integer,
                 defaultValue=8,
                 minValue=4,
                 maxValue=8,
             )
         )
         self.addParameter(
-            QgsProcessingParameterFeatureSink(self.OUTPUT, "Candidate sites", QgsProcessing.TypeVectorPolygon)
+            QgsProcessingParameterFeatureSink(self.OUTPUT, "Candidate sites", QgsProcessing.SourceType.TypeVectorPolygon)
         )
 
     def processAlgorithm(self, parameters, context, feedback):

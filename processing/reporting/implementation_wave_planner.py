@@ -60,7 +60,7 @@ class ImplementationWavePlannerAlgorithm(QgsProcessingAlgorithm):
     def initAlgorithm(self, config=None):
         self.addParameter(QgsProcessingParameterRasterLayer(self.PRIORITY_ZONE, "Priority zone raster (0..4)"))
         self.addParameter(QgsProcessingParameterRasterLayer(self.RISK_MATRIX, "Risk-opportunity matrix raster (0..4)"))
-        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Implementation wave plan", QgsProcessing.TypeVector))
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Implementation wave plan", QgsProcessing.SourceType.TypeVector))
 
     def processAlgorithm(self, parameters, context, feedback):
         pr_rl = self.parameterAsRasterLayer(parameters, self.PRIORITY_ZONE, context)

@@ -62,18 +62,18 @@ class ScenarioWeightPackAlgorithm(QgsProcessingAlgorithm):
         return ScenarioWeightPackAlgorithm()
 
     def initAlgorithm(self, config=None):
-        self.addParameter(QgsProcessingParameterFeatureSource(self.AHP, "AHP weight table", [QgsProcessing.TypeVector]))
-        self.addParameter(QgsProcessingParameterFeatureSource(self.PCA, "PCA weight table", [QgsProcessing.TypeVector]))
-        self.addParameter(QgsProcessingParameterFeatureSource(self.ENT, "Entropy weight table", [QgsProcessing.TypeVector]))
+        self.addParameter(QgsProcessingParameterFeatureSource(self.AHP, "AHP weight table", [QgsProcessing.SourceType.TypeVector]))
+        self.addParameter(QgsProcessingParameterFeatureSource(self.PCA, "PCA weight table", [QgsProcessing.SourceType.TypeVector]))
+        self.addParameter(QgsProcessingParameterFeatureSource(self.ENT, "Entropy weight table", [QgsProcessing.SourceType.TypeVector]))
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.CRIT,
                 "CRITIC weight table (optional)",
-                [QgsProcessing.TypeVector],
+                [QgsProcessing.SourceType.TypeVector],
                 optional=True,
             )
         )
-        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Scenario weights table", QgsProcessing.TypeVector))
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Scenario weights table", QgsProcessing.SourceType.TypeVector))
 
     def _collect(self, src, method_name):
         out = []

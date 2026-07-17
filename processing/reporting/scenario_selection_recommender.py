@@ -66,25 +66,25 @@ class ScenarioSelectionRecommenderAlgorithm(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, config=None):
         self.addParameter(
-            QgsProcessingParameterFeatureSource(self.BENCHMARK, "Method benchmark leaderboard table", [QgsProcessing.TypeVector])
+            QgsProcessingParameterFeatureSource(self.BENCHMARK, "Method benchmark leaderboard table", [QgsProcessing.SourceType.TypeVector])
         )
         self.addParameter(
-            QgsProcessingParameterFeatureSource(self.PORTFOLIO, "Scenario portfolio diversity table", [QgsProcessing.TypeVector])
+            QgsProcessingParameterFeatureSource(self.PORTFOLIO, "Scenario portfolio diversity table", [QgsProcessing.SourceType.TypeVector])
         )
         self.addParameter(
-            QgsProcessingParameterFeatureSource(self.MINIMAX, "Minimax regret selector table", [QgsProcessing.TypeVector])
+            QgsProcessingParameterFeatureSource(self.MINIMAX, "Minimax regret selector table", [QgsProcessing.SourceType.TypeVector])
         )
-        self.addParameter(QgsProcessingParameterFeatureSource(self.GATE, "Policy gate recommender table", [QgsProcessing.TypeVector]))
-        self.addParameter(QgsProcessingParameterFeatureSource(self.SCORECARD, "Actionability scorecard table", [QgsProcessing.TypeVector]))
+        self.addParameter(QgsProcessingParameterFeatureSource(self.GATE, "Policy gate recommender table", [QgsProcessing.SourceType.TypeVector]))
+        self.addParameter(QgsProcessingParameterFeatureSource(self.SCORECARD, "Actionability scorecard table", [QgsProcessing.SourceType.TypeVector]))
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.ROBUSTNESS,
                 "Optional scenario robustness leaderboard table",
-                [QgsProcessing.TypeVector],
+                [QgsProcessing.SourceType.TypeVector],
                 optional=True,
             )
         )
-        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Scenario selection recommendation", QgsProcessing.TypeVector))
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Scenario selection recommendation", QgsProcessing.SourceType.TypeVector))
 
     @staticmethod
     def _rows(src):

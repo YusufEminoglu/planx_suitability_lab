@@ -69,7 +69,7 @@ class DecisionQuadrantMapAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.SUIT_HIGH,
                 "High suitability threshold",
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 defaultValue=70.0,
                 minValue=0.0,
                 maxValue=100.0,
@@ -79,7 +79,7 @@ class DecisionQuadrantMapAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.DISAGREE_HIGH,
                 "High disagreement threshold",
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 defaultValue=60.0,
                 minValue=0.0,
                 maxValue=100.0,
@@ -89,7 +89,7 @@ class DecisionQuadrantMapAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.BLOCK,
                 "Block size (pixels)",
-                type=QgsProcessingParameterNumber.Integer,
+                type=QgsProcessingParameterNumber.Type.Integer,
                 defaultValue=256,
                 minValue=64,
                 maxValue=2048,

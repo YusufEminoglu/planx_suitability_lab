@@ -47,8 +47,8 @@ class PCAWeightsAlgorithm(QgsProcessingAlgorithm):
         return PCAWeightsAlgorithm()
 
     def initAlgorithm(self, config=None):
-        self.addParameter(QgsProcessingParameterMultipleLayers(self.INPUT_RASTERS, 'Criterion rasters', QgsProcessing.TypeRaster))
-        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, 'PCA weights table', QgsProcessing.TypeVector))
+        self.addParameter(QgsProcessingParameterMultipleLayers(self.INPUT_RASTERS, 'Criterion rasters', QgsProcessing.SourceType.TypeRaster))
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, 'PCA weights table', QgsProcessing.SourceType.TypeVector))
 
     def processAlgorithm(self, parameters, context, feedback):
         layers = ensure_list(self.parameterAsLayerList(parameters, self.INPUT_RASTERS, context))

@@ -47,7 +47,7 @@ class ConstraintBuilderAlgorithm(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, config=None):
         self.addParameter(QgsProcessingParameterRasterLayer(self.INPUT, 'Input criterion raster'))
-        self.addParameter(QgsProcessingParameterNumber(self.THRESHOLD, 'Threshold', type=QgsProcessingParameterNumber.Double, defaultValue=50.0))
+        self.addParameter(QgsProcessingParameterNumber(self.THRESHOLD, 'Threshold', type=QgsProcessingParameterNumber.Type.Double, defaultValue=50.0))
         self.addParameter(QgsProcessingParameterRasterDestination(self.OUTPUT, 'Constraint mask'))
 
     def processAlgorithm(self, parameters, context, feedback):

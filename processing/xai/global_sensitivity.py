@@ -66,18 +66,18 @@ class GlobalSensitivityAlgorithm(QgsProcessingAlgorithm):
         return GlobalSensitivityAlgorithm()
 
     def initAlgorithm(self, config=None):
-        self.addParameter(QgsProcessingParameterMultipleLayers(self.INPUT_RASTERS, "Criterion rasters", QgsProcessing.TypeRaster))
+        self.addParameter(QgsProcessingParameterMultipleLayers(self.INPUT_RASTERS, "Criterion rasters", QgsProcessing.SourceType.TypeRaster))
         self.addParameter(QgsProcessingParameterString(self.WEIGHTS_CSV, "Weights CSV (optional)", defaultValue="", optional=True))
         self.addParameter(
             QgsProcessingParameterNumber(
                 self.SAMPLE,
                 "Sampling stride (cells)",
-                type=QgsProcessingParameterNumber.Integer,
+                type=QgsProcessingParameterNumber.Type.Integer,
                 defaultValue=8,
                 minValue=1,
             )
         )
-        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "xai_global_table", QgsProcessing.TypeVector))
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "xai_global_table", QgsProcessing.SourceType.TypeVector))
 
     def _sample_stats(self, raster_path, stride):
         ds = gdal.Open(raster_path, gdal.GA_ReadOnly)

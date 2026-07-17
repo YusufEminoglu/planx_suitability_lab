@@ -64,20 +64,20 @@ class DeploymentReadinessGateAlgorithm(QgsProcessingAlgorithm):
         return DeploymentReadinessGateAlgorithm()
 
     def initAlgorithm(self, config=None):
-        self.addParameter(QgsProcessingParameterFeatureSource(self.SCORECARD, "Actionability scorecard table", [QgsProcessing.TypeVector]))
+        self.addParameter(QgsProcessingParameterFeatureSource(self.SCORECARD, "Actionability scorecard table", [QgsProcessing.SourceType.TypeVector]))
         self.addParameter(
             QgsProcessingParameterFeatureSource(
-                self.SCENARIO_SELECTION, "Scenario selection recommender table", [QgsProcessing.TypeVector]
+                self.SCENARIO_SELECTION, "Scenario selection recommender table", [QgsProcessing.SourceType.TypeVector]
             )
         )
-        self.addParameter(QgsProcessingParameterFeatureSource(self.MINIMAX, "Minimax regret selector table", [QgsProcessing.TypeVector]))
-        self.addParameter(QgsProcessingParameterFeatureSource(self.WAVE_PLAN, "Implementation wave planner table", [QgsProcessing.TypeVector]))
+        self.addParameter(QgsProcessingParameterFeatureSource(self.MINIMAX, "Minimax regret selector table", [QgsProcessing.SourceType.TypeVector]))
+        self.addParameter(QgsProcessingParameterFeatureSource(self.WAVE_PLAN, "Implementation wave planner table", [QgsProcessing.SourceType.TypeVector]))
         self.addParameter(
             QgsProcessingParameterFeatureSource(
-                self.REGRET_STATS, "Regret fragility area stats table", [QgsProcessing.TypeVector]
+                self.REGRET_STATS, "Regret fragility area stats table", [QgsProcessing.SourceType.TypeVector]
             )
         )
-        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Deployment readiness gate", QgsProcessing.TypeVector))
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Deployment readiness gate", QgsProcessing.SourceType.TypeVector))
 
     @staticmethod
     def _first(src):

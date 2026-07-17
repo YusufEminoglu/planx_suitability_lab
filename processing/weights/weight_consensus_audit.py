@@ -65,10 +65,10 @@ class WeightConsensusAuditAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.INPUT,
                 "Scenario weights table (from scenario_weight_pack)",
-                [QgsProcessing.TypeVector],
+                [QgsProcessing.SourceType.TypeVector],
             )
         )
-        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Weight consensus audit table", QgsProcessing.TypeVector))
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Weight consensus audit table", QgsProcessing.SourceType.TypeVector))
 
     def processAlgorithm(self, parameters, context, feedback):
         src = self.parameterAsSource(parameters, self.INPUT, context)

@@ -69,7 +69,7 @@ class ScenarioDisagreementAttentionAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterMultipleLayers(
                 self.INPUT_RASTERS,
                 "Scenario suitability rasters (2..10)",
-                QgsProcessing.TypeRaster,
+                QgsProcessing.SourceType.TypeRaster,
             )
         )
         self.addParameter(QgsProcessingParameterRasterLayer(self.CONSTRAINT, "Optional hard constraint raster (0/1)", optional=True))
@@ -77,7 +77,7 @@ class ScenarioDisagreementAttentionAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.STD_REF,
                 "Reference std interpreted as 100 disagreement score",
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 defaultValue=18.0,
                 minValue=1.0,
                 maxValue=100.0,
@@ -87,7 +87,7 @@ class ScenarioDisagreementAttentionAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.HIGH_MEAN,
                 "High suitability threshold for critical conflict",
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 defaultValue=70.0,
                 minValue=0.0,
                 maxValue=100.0,
@@ -97,7 +97,7 @@ class ScenarioDisagreementAttentionAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.BLOCK,
                 "Block size (pixels)",
-                type=QgsProcessingParameterNumber.Integer,
+                type=QgsProcessingParameterNumber.Type.Integer,
                 defaultValue=256,
                 minValue=64,
                 maxValue=2048,

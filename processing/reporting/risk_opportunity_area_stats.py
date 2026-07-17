@@ -56,7 +56,7 @@ class RiskOpportunityAreaStatsAlgorithm(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, config=None):
         self.addParameter(QgsProcessingParameterRasterLayer(self.INPUT, "Risk-opportunity class raster (0..4)"))
-        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Risk-opportunity area stats", QgsProcessing.TypeVector))
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Risk-opportunity area stats", QgsProcessing.SourceType.TypeVector))
 
     def processAlgorithm(self, parameters, context, feedback):
         rl = self.parameterAsRasterLayer(parameters, self.INPUT, context)

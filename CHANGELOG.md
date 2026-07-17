@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.6.2] - 2026-07-17
+
+- QGIS 4 / Qt6 readiness: scoped all 169 remaining Qt5-style enum accesses across 63 algorithm files for the Hub's Qt6 static check — `QgsProcessing.Type*` → `QgsProcessing.SourceType.Type*` and `QgsProcessingParameterNumber.Integer|Double` → `QgsProcessingParameterNumber.Type.*`. Every scoped form was probe-verified against both QGIS 3.44 LTR and QGIS 4 before rewriting (`scratch/qt6_enum_audit.py`); `QVariant.*` field types intentionally stay unscoped (PyQt6 has no `QVariant.Type`; the qgis.PyQt compatibility layer keeps them working). No functional change.
+
 ## [1.6.1] - 2026-07-17
 
 - Security hardening: resolved all remaining Bandit findings in code — the B110/B112 `try/except: pass|continue` patterns in `_mcda_utils` and the six reporting algorithms (actionability scorecard, deployment readiness gate, policy gate recommender, scenario governance audit, scenario robustness leaderboard, scenario selection recommender) were rewritten with `contextlib.suppress`, preserving row-skip semantics. The `.bandit` skip configuration was removed entirely; the QGIS Hub security scan now passes plain CLEAN with zero findings and zero suppressions.

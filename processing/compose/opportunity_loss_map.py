@@ -68,7 +68,7 @@ class OpportunityLossMapAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.MEDIUM,
                 "Medium-loss threshold",
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 defaultValue=40.0,
                 minValue=0.0,
                 maxValue=100.0,
@@ -78,7 +78,7 @@ class OpportunityLossMapAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.HIGH,
                 "High-loss threshold",
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 defaultValue=70.0,
                 minValue=0.0,
                 maxValue=100.0,
@@ -88,7 +88,7 @@ class OpportunityLossMapAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.BLOCK,
                 "Block size (pixels)",
-                type=QgsProcessingParameterNumber.Integer,
+                type=QgsProcessingParameterNumber.Type.Integer,
                 defaultValue=256,
                 minValue=64,
                 maxValue=2048,

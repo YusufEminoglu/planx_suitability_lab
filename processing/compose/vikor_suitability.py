@@ -69,7 +69,7 @@ class VIKORSuitabilityAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterMultipleLayers(
                 self.INPUT_RASTERS,
                 "Criterion rasters (max 6, normalized to 0-100)",
-                QgsProcessing.TypeRaster,
+                QgsProcessing.SourceType.TypeRaster,
             )
         )
         self.addParameter(QgsProcessingParameterString(self.WEIGHTS_CSV, "Criteria weights CSV (optional)", defaultValue="", optional=True))
@@ -85,7 +85,7 @@ class VIKORSuitabilityAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.V,
                 "Compromise weight v (0..1, higher favors group utility S)",
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 defaultValue=0.5,
                 minValue=0.0,
                 maxValue=1.0,
@@ -96,7 +96,7 @@ class VIKORSuitabilityAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.BLOCK,
                 "Block size (pixels)",
-                type=QgsProcessingParameterNumber.Integer,
+                type=QgsProcessingParameterNumber.Type.Integer,
                 defaultValue=256,
                 minValue=64,
                 maxValue=2048,

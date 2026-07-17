@@ -63,26 +63,26 @@ class ScenarioGovernanceAuditAlgorithm(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, config=None):
         self.addParameter(
-            QgsProcessingParameterFeatureSource(self.ROBUSTNESS, "Scenario robustness leaderboard table", [QgsProcessing.TypeVector])
+            QgsProcessingParameterFeatureSource(self.ROBUSTNESS, "Scenario robustness leaderboard table", [QgsProcessing.SourceType.TypeVector])
         )
         self.addParameter(
-            QgsProcessingParameterFeatureSource(self.BENCHMARK, "Method benchmark leaderboard table", [QgsProcessing.TypeVector])
+            QgsProcessingParameterFeatureSource(self.BENCHMARK, "Method benchmark leaderboard table", [QgsProcessing.SourceType.TypeVector])
         )
         self.addParameter(
-            QgsProcessingParameterFeatureSource(self.MINIMAX, "Minimax regret selector table", [QgsProcessing.TypeVector])
+            QgsProcessingParameterFeatureSource(self.MINIMAX, "Minimax regret selector table", [QgsProcessing.SourceType.TypeVector])
         )
         self.addParameter(
-            QgsProcessingParameterFeatureSource(self.SELECTION, "Scenario selection recommender table", [QgsProcessing.TypeVector])
+            QgsProcessingParameterFeatureSource(self.SELECTION, "Scenario selection recommender table", [QgsProcessing.SourceType.TypeVector])
         )
         self.addParameter(
             QgsProcessingParameterFeatureSource(
                 self.DEPLOYMENT,
                 "Optional deployment readiness gate table",
-                [QgsProcessing.TypeVector],
+                [QgsProcessing.SourceType.TypeVector],
                 optional=True,
             )
         )
-        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Scenario governance audit", QgsProcessing.TypeVector))
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Scenario governance audit", QgsProcessing.SourceType.TypeVector))
 
     @staticmethod
     def _rows(src):

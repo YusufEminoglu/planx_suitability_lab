@@ -64,7 +64,7 @@ class UncertaintyAdjustedSuitabilityAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.RISK,
                 "Risk aversion factor (lambda)",
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 defaultValue=1.0,
                 minValue=0.0,
                 maxValue=5.0,

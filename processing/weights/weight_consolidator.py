@@ -43,8 +43,8 @@ class WeightConsolidatorAlgorithm(QgsProcessingAlgorithm):
         return WeightConsolidatorAlgorithm()
 
     def initAlgorithm(self, config=None):
-        self.addParameter(QgsProcessingParameterFeatureSource(self.INPUT, 'Weight table', [QgsProcessing.TypeVector]))
-        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, 'Consolidated weights table', QgsProcessing.TypeVector))
+        self.addParameter(QgsProcessingParameterFeatureSource(self.INPUT, 'Weight table', [QgsProcessing.SourceType.TypeVector]))
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, 'Consolidated weights table', QgsProcessing.SourceType.TypeVector))
 
     def processAlgorithm(self, parameters, context, feedback):
         src = self.parameterAsSource(parameters, self.INPUT, context)

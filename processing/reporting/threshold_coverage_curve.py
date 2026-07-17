@@ -62,13 +62,13 @@ class ThresholdCoverageCurveAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.STEP,
                 "Threshold step",
-                type=QgsProcessingParameterNumber.Integer,
+                type=QgsProcessingParameterNumber.Type.Integer,
                 defaultValue=5,
                 minValue=1,
                 maxValue=25,
             )
         )
-        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Threshold coverage table", QgsProcessing.TypeVector))
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Threshold coverage table", QgsProcessing.SourceType.TypeVector))
 
     def processAlgorithm(self, parameters, context, feedback):
         rl = self.parameterAsRasterLayer(parameters, self.INPUT, context)

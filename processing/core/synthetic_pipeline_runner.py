@@ -53,7 +53,7 @@ class SyntheticPipelineRunnerAlgorithm(QgsProcessingAlgorithm):
     def initAlgorithm(self, config=None):
         self.addParameter(QgsProcessingParameterExtent(self.EXTENT, "Study extent"))
         self.addParameter(
-            QgsProcessingParameterNumber(self.PIXEL, "Pixel size", type=QgsProcessingParameterNumber.Double, defaultValue=30.0, minValue=1.0)
+            QgsProcessingParameterNumber(self.PIXEL, "Pixel size", type=QgsProcessingParameterNumber.Type.Double, defaultValue=30.0, minValue=1.0)
         )
         self.addParameter(QgsProcessingParameterFolderDestination(self.OUTDIR, "Output folder"))
 

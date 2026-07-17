@@ -68,7 +68,7 @@ class RegretFragilityMapAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterMultipleLayers(
                 self.INPUT_RASTERS,
                 "Scenario suitability rasters (2..12)",
-                QgsProcessing.TypeRaster,
+                QgsProcessing.SourceType.TypeRaster,
             )
         )
         self.addParameter(QgsProcessingParameterRasterLayer(self.MASK, "Optional analysis mask raster (0/1)", optional=True))
@@ -76,7 +76,7 @@ class RegretFragilityMapAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.LOW,
                 "Low fragility threshold (score)",
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 defaultValue=12.0,
                 minValue=0.0,
                 maxValue=100.0,
@@ -86,7 +86,7 @@ class RegretFragilityMapAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.HIGH,
                 "High fragility threshold (score)",
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 defaultValue=25.0,
                 minValue=0.0,
                 maxValue=100.0,
@@ -96,7 +96,7 @@ class RegretFragilityMapAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.BLOCK,
                 "Block size (pixels)",
-                type=QgsProcessingParameterNumber.Integer,
+                type=QgsProcessingParameterNumber.Type.Integer,
                 defaultValue=256,
                 minValue=64,
                 maxValue=2048,

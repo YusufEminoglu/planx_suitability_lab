@@ -64,10 +64,10 @@ class ActionabilityScorecardAlgorithm(QgsProcessingAlgorithm):
         return ActionabilityScorecardAlgorithm()
 
     def initAlgorithm(self, config=None):
-        self.addParameter(QgsProcessingParameterFeatureSource(self.KPI, "Executive KPI snapshot table", [QgsProcessing.TypeVector]))
-        self.addParameter(QgsProcessingParameterFeatureSource(self.BUDGET, "Intervention budget phasing table", [QgsProcessing.TypeVector]))
-        self.addParameter(QgsProcessingParameterFeatureSource(self.GATE, "Policy gate recommender table", [QgsProcessing.TypeVector]))
-        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Actionability scorecard", QgsProcessing.TypeVector))
+        self.addParameter(QgsProcessingParameterFeatureSource(self.KPI, "Executive KPI snapshot table", [QgsProcessing.SourceType.TypeVector]))
+        self.addParameter(QgsProcessingParameterFeatureSource(self.BUDGET, "Intervention budget phasing table", [QgsProcessing.SourceType.TypeVector]))
+        self.addParameter(QgsProcessingParameterFeatureSource(self.GATE, "Policy gate recommender table", [QgsProcessing.SourceType.TypeVector]))
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Actionability scorecard", QgsProcessing.SourceType.TypeVector))
 
     @staticmethod
     def _first(src):

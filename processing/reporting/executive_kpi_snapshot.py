@@ -68,7 +68,7 @@ class ExecutiveKpiSnapshotAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterRasterLayer(self.CONSTRAINT, "Constraint mask raster (0/1)"))
         self.addParameter(QgsProcessingParameterRasterLayer(self.CONSENSUS_ZONE, "Consensus zone raster (0..4)"))
         self.addParameter(QgsProcessingParameterRasterLayer(self.ATTENTION_CLASS, "Disagreement attention class raster (0..4)"))
-        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Executive KPI table", QgsProcessing.TypeVector))
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Executive KPI table", QgsProcessing.SourceType.TypeVector))
 
     @staticmethod
     def _read_arr(rl):

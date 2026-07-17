@@ -68,7 +68,7 @@ class SpatialFragmentationAuditAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.THRESHOLD,
                 "High-priority threshold",
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 defaultValue=70.0,
                 minValue=0.0,
                 maxValue=100.0,
@@ -78,13 +78,13 @@ class SpatialFragmentationAuditAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.CONNECTIVITY,
                 "Connectivity (4 or 8)",
-                type=QgsProcessingParameterNumber.Integer,
+                type=QgsProcessingParameterNumber.Type.Integer,
                 defaultValue=8,
                 minValue=4,
                 maxValue=8,
             )
         )
-        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Spatial fragmentation metrics", QgsProcessing.TypeVector))
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Spatial fragmentation metrics", QgsProcessing.SourceType.TypeVector))
 
     def _neighbors(self, r, c, rows, cols, conn):
         if conn == 4:

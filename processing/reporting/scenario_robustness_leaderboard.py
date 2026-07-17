@@ -63,18 +63,18 @@ class ScenarioRobustnessLeaderboardAlgorithm(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, config=None):
         self.addParameter(
-            QgsProcessingParameterFeatureSource(self.BENCHMARK, "Method benchmark leaderboard table", [QgsProcessing.TypeVector])
+            QgsProcessingParameterFeatureSource(self.BENCHMARK, "Method benchmark leaderboard table", [QgsProcessing.SourceType.TypeVector])
         )
         self.addParameter(
-            QgsProcessingParameterFeatureSource(self.DOMINANCE, "Scenario dominance matrix table", [QgsProcessing.TypeVector])
+            QgsProcessingParameterFeatureSource(self.DOMINANCE, "Scenario dominance matrix table", [QgsProcessing.SourceType.TypeVector])
         )
         self.addParameter(
-            QgsProcessingParameterFeatureSource(self.MINIMAX, "Minimax regret selector table", [QgsProcessing.TypeVector])
+            QgsProcessingParameterFeatureSource(self.MINIMAX, "Minimax regret selector table", [QgsProcessing.SourceType.TypeVector])
         )
         self.addParameter(
-            QgsProcessingParameterFeatureSource(self.PORTFOLIO, "Scenario portfolio diversity table", [QgsProcessing.TypeVector])
+            QgsProcessingParameterFeatureSource(self.PORTFOLIO, "Scenario portfolio diversity table", [QgsProcessing.SourceType.TypeVector])
         )
-        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Scenario robustness leaderboard", QgsProcessing.TypeVector))
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Scenario robustness leaderboard", QgsProcessing.SourceType.TypeVector))
 
     @staticmethod
     def _read_rows(src):

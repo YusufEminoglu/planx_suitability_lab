@@ -63,7 +63,7 @@ class CriticWeightsAlgorithm(QgsProcessingAlgorithm):
         return CriticWeightsAlgorithm()
 
     def initAlgorithm(self, config=None):
-        self.addParameter(QgsProcessingParameterMultipleLayers(self.INPUT_RASTERS, "Criterion rasters", QgsProcessing.TypeRaster))
+        self.addParameter(QgsProcessingParameterMultipleLayers(self.INPUT_RASTERS, "Criterion rasters", QgsProcessing.SourceType.TypeRaster))
         self.addParameter(
             QgsProcessingParameterString(
                 self.IMPACTS_CSV,
@@ -72,7 +72,7 @@ class CriticWeightsAlgorithm(QgsProcessingAlgorithm):
                 optional=True,
             )
         )
-        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "CRITIC weights table", QgsProcessing.TypeVector))
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "CRITIC weights table", QgsProcessing.SourceType.TypeVector))
 
     def processAlgorithm(self, parameters, context, feedback):
         layers = ensure_list(self.parameterAsLayerList(parameters, self.INPUT_RASTERS, context))

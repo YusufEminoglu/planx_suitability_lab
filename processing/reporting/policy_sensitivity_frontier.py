@@ -69,7 +69,7 @@ class PolicySensitivityFrontierAlgorithm(QgsProcessingAlgorithm):
                 optional=False,
             )
         )
-        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Policy sensitivity frontier table", QgsProcessing.TypeVector))
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Policy sensitivity frontier table", QgsProcessing.SourceType.TypeVector))
 
     @staticmethod
     def _parse_lambdas(text: str):

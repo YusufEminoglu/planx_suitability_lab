@@ -66,7 +66,7 @@ class ProximityBuilderAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.MAX_DISTANCE,
                 'Maximum distance (0 for unlimited)',
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 defaultValue=0.0,
                 minValue=0.0,
             )

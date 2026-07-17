@@ -69,7 +69,7 @@ class ActionPlaybookGeneratorAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.FRONTIER,
                 "Policy sensitivity frontier table (optional)",
-                [QgsProcessing.TypeVector],
+                [QgsProcessing.SourceType.TypeVector],
                 optional=True,
             )
         )
@@ -77,7 +77,7 @@ class ActionPlaybookGeneratorAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterFeatureSource(
                 self.SIMILARITY,
                 "Scenario similarity matrix table (optional)",
-                [QgsProcessing.TypeVector],
+                [QgsProcessing.SourceType.TypeVector],
                 optional=True,
             )
         )

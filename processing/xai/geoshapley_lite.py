@@ -65,7 +65,7 @@ class GeoShapleyLiteAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterMultipleLayers(
                 self.INPUT_RASTERS,
                 "Criterion rasters (max 6)",
-                QgsProcessing.TypeRaster,
+                QgsProcessing.SourceType.TypeRaster,
             )
         )
         self.addParameter(QgsProcessingParameterString(self.WEIGHTS_CSV, "Weights CSV (optional)", defaultValue="", optional=True))
@@ -73,7 +73,7 @@ class GeoShapleyLiteAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.SAMPLE,
                 "Sample size for baseline estimation",
-                type=QgsProcessingParameterNumber.Integer,
+                type=QgsProcessingParameterNumber.Type.Integer,
                 defaultValue=2000,
                 minValue=200,
             )

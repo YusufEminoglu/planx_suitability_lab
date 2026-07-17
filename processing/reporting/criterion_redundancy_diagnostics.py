@@ -67,7 +67,7 @@ class CriterionRedundancyDiagnosticsAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterMultipleLayers(
                 self.INPUT_RASTERS,
                 "Criterion rasters (2..10)",
-                QgsProcessing.TypeRaster,
+                QgsProcessing.SourceType.TypeRaster,
             )
         )
         self.addParameter(QgsProcessingParameterRasterLayer(self.MASK, "Optional analysis mask raster (0/1)", optional=True))
@@ -75,7 +75,7 @@ class CriterionRedundancyDiagnosticsAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.MAX_SAMPLES,
                 "Maximum sampled valid cells",
-                type=QgsProcessingParameterNumber.Integer,
+                type=QgsProcessingParameterNumber.Type.Integer,
                 defaultValue=250000,
                 minValue=2000,
                 maxValue=3000000,
@@ -85,14 +85,14 @@ class CriterionRedundancyDiagnosticsAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.BLOCK,
                 "Block size (pixels)",
-                type=QgsProcessingParameterNumber.Integer,
+                type=QgsProcessingParameterNumber.Type.Integer,
                 defaultValue=256,
                 minValue=64,
                 maxValue=2048,
             )
         )
-        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT_PAIRS, "Pairwise redundancy matrix", QgsProcessing.TypeVector))
-        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT_CRITERIA, "Per-criterion diagnostics", QgsProcessing.TypeVector))
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT_PAIRS, "Pairwise redundancy matrix", QgsProcessing.SourceType.TypeVector))
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT_CRITERIA, "Per-criterion diagnostics", QgsProcessing.SourceType.TypeVector))
 
     @staticmethod
     def _redundancy_label(abs_corr: float) -> str:

@@ -58,7 +58,7 @@ class PriorityTransitionMatrixAlgorithm(QgsProcessingAlgorithm):
     def initAlgorithm(self, config=None):
         self.addParameter(QgsProcessingParameterRasterLayer(self.FROM_ZONE, "Baseline priority zone raster (0..4)"))
         self.addParameter(QgsProcessingParameterRasterLayer(self.TO_ZONE, "Scenario priority zone raster (0..4)"))
-        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Priority transition matrix", QgsProcessing.TypeVector))
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Priority transition matrix", QgsProcessing.SourceType.TypeVector))
 
     @staticmethod
     def _transition_label(delta: int) -> str:

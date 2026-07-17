@@ -55,7 +55,7 @@ class InterventionConflictAreaStatsAlgorithm(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, config=None):
         self.addParameter(QgsProcessingParameterRasterLayer(self.INPUT, "Intervention conflict class raster (0..6)"))
-        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Intervention conflict area stats", QgsProcessing.TypeVector))
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Intervention conflict area stats", QgsProcessing.SourceType.TypeVector))
 
     def processAlgorithm(self, parameters, context, feedback):
         rl = self.parameterAsRasterLayer(parameters, self.INPUT, context)

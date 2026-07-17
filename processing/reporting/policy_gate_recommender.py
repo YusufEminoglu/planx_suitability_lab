@@ -63,13 +63,13 @@ class PolicyGateRecommenderAlgorithm(QgsProcessingAlgorithm):
         return PolicyGateRecommenderAlgorithm()
 
     def initAlgorithm(self, config=None):
-        self.addParameter(QgsProcessingParameterFeatureSource(self.THRESHOLD_CURVE, "Threshold coverage curve table", [QgsProcessing.TypeVector]))
-        self.addParameter(QgsProcessingParameterFeatureSource(self.FRONTIER, "Policy sensitivity frontier table", [QgsProcessing.TypeVector]))
+        self.addParameter(QgsProcessingParameterFeatureSource(self.THRESHOLD_CURVE, "Threshold coverage curve table", [QgsProcessing.SourceType.TypeVector]))
+        self.addParameter(QgsProcessingParameterFeatureSource(self.FRONTIER, "Policy sensitivity frontier table", [QgsProcessing.SourceType.TypeVector]))
         self.addParameter(
             QgsProcessingParameterNumber(
                 self.TARGET_COVERAGE,
                 "Target area coverage percent",
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 defaultValue=25.0,
                 minValue=1.0,
                 maxValue=95.0,
@@ -79,13 +79,13 @@ class PolicyGateRecommenderAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterNumber(
                 self.MAX_CRITICAL_CONFLICT,
                 "Max acceptable critical conflict percent (guideline)",
-                type=QgsProcessingParameterNumber.Double,
+                type=QgsProcessingParameterNumber.Type.Double,
                 defaultValue=10.0,
                 minValue=0.0,
                 maxValue=100.0,
             )
         )
-        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Policy gate recommendation", QgsProcessing.TypeVector))
+        self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Policy gate recommendation", QgsProcessing.SourceType.TypeVector))
 
     @staticmethod
     def _rows(src):
