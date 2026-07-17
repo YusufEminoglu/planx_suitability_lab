@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import numpy as np
 from osgeo import gdal
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (
     Qgis,
     QgsFeature,
@@ -113,7 +113,7 @@ class CriterionRedundancyDiagnosticsAlgorithm(QgsProcessingAlgorithm):
         block = int(self.parameterAsInt(parameters, self.BLOCK, context))
         mask = self.parameterAsRasterLayer(parameters, self.MASK, context)
 
-        names = [l.name() for l in layers]
+        names = [lyr.name() for lyr in layers]
         datasets = []
         bands = []
         nodatas = []
@@ -210,12 +210,12 @@ class CriterionRedundancyDiagnosticsAlgorithm(QgsProcessingAlgorithm):
             vifs = np.full(k, np.nan, dtype=np.float64)
 
         pair_fields = QgsFields()
-        pair_fields.append(QgsField("criterion_a", QVariant.String))
-        pair_fields.append(QgsField("criterion_b", QVariant.String))
-        pair_fields.append(QgsField("corr", QVariant.Double))
-        pair_fields.append(QgsField("abs_corr", QVariant.Double))
-        pair_fields.append(QgsField("redundancy", QVariant.String))
-        pair_fields.append(QgsField("samples", QVariant.LongLong))
+        pair_fields.append(QgsField("criterion_a", QMetaType.Type.QString))
+        pair_fields.append(QgsField("criterion_b", QMetaType.Type.QString))
+        pair_fields.append(QgsField("corr", QMetaType.Type.Double))
+        pair_fields.append(QgsField("abs_corr", QMetaType.Type.Double))
+        pair_fields.append(QgsField("redundancy", QMetaType.Type.QString))
+        pair_fields.append(QgsField("samples", QMetaType.Type.LongLong))
         pair_sink, pair_dest = self.parameterAsSink(parameters, self.OUTPUT_PAIRS, context, pair_fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         for i in range(k):
@@ -232,11 +232,11 @@ class CriterionRedundancyDiagnosticsAlgorithm(QgsProcessingAlgorithm):
                 pair_sink.addFeature(f)
 
         crit_fields = QgsFields()
-        crit_fields.append(QgsField("criterion", QVariant.String))
-        crit_fields.append(QgsField("mean_abs_corr", QVariant.Double))
-        crit_fields.append(QgsField("max_abs_corr", QVariant.Double))
-        crit_fields.append(QgsField("vif", QVariant.Double))
-        crit_fields.append(QgsField("redundancy_flag", QVariant.String))
+        crit_fields.append(QgsField("criterion", QMetaType.Type.QString))
+        crit_fields.append(QgsField("mean_abs_corr", QMetaType.Type.Double))
+        crit_fields.append(QgsField("max_abs_corr", QMetaType.Type.Double))
+        crit_fields.append(QgsField("vif", QMetaType.Type.Double))
+        crit_fields.append(QgsField("redundancy_flag", QMetaType.Type.QString))
         crit_sink, crit_dest = self.parameterAsSink(parameters, self.OUTPUT_CRITERIA, context, crit_fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         abs_corr = np.abs(corr)

@@ -5,7 +5,7 @@ from math import ceil
 
 import numpy as np
 from osgeo import gdal
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (
     Qgis,
     QgsFeature,
@@ -180,14 +180,14 @@ class InterventionBudgetPhasingAlgorithm(QgsProcessingAlgorithm):
         n_cells = int(cf.size)
 
         fields = QgsFields()
-        fields.append(QgsField("budget_pct", QVariant.Int))
-        fields.append(QgsField("phase_label", QVariant.String))
-        fields.append(QgsField("cells_selected", QVariant.LongLong))
-        fields.append(QgsField("cells_pct", QVariant.Double))
-        fields.append(QgsField("cost_cum", QVariant.Double))
-        fields.append(QgsField("impact_cum", QVariant.Double))
-        fields.append(QgsField("impact_capture_pct", QVariant.Double))
-        fields.append(QgsField("avg_index_selected", QVariant.Double))
+        fields.append(QgsField("budget_pct", QMetaType.Type.Int))
+        fields.append(QgsField("phase_label", QMetaType.Type.QString))
+        fields.append(QgsField("cells_selected", QMetaType.Type.LongLong))
+        fields.append(QgsField("cells_pct", QMetaType.Type.Double))
+        fields.append(QgsField("cost_cum", QMetaType.Type.Double))
+        fields.append(QgsField("impact_cum", QMetaType.Type.Double))
+        fields.append(QgsField("impact_capture_pct", QMetaType.Type.Double))
+        fields.append(QgsField("avg_index_selected", QMetaType.Type.Double))
         sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         checkpoints = list(range(step, 101, step))

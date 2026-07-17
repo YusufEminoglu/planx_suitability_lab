@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (
     Qgis,
     QgsFeature,
@@ -98,10 +98,10 @@ class ScenarioWeightPackAlgorithm(QgsProcessingAlgorithm):
             by_method[method] += w
 
         fields = QgsFields()
-        fields.append(QgsField("method", QVariant.String))
-        fields.append(QgsField("criterion_id", QVariant.Int))
-        fields.append(QgsField("weight_raw", QVariant.Double))
-        fields.append(QgsField("weight_norm", QVariant.Double))
+        fields.append(QgsField("method", QMetaType.Type.QString))
+        fields.append(QgsField("criterion_id", QMetaType.Type.Int))
+        fields.append(QgsField("weight_raw", QMetaType.Type.Double))
+        fields.append(QgsField("weight_norm", QMetaType.Type.Double))
         sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         for method, cid, w in rows:

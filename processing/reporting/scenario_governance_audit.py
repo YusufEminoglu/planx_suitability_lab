@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (
     Qgis,
     QgsFeature,
@@ -166,21 +166,21 @@ class ScenarioGovernanceAuditAlgorithm(QgsProcessingAlgorithm):
             raise QgsProcessingException("No scenario names could be extracted from input tables.")
 
         fields = QgsFields()
-        fields.append(QgsField("row_type", QVariant.String))
-        fields.append(QgsField("scenario", QVariant.String))
-        fields.append(QgsField("role", QVariant.String))
-        fields.append(QgsField("robustness", QVariant.Double))
-        fields.append(QgsField("composite", QVariant.Double))
-        fields.append(QgsField("stability", QVariant.Double))
-        fields.append(QgsField("max_regret", QVariant.Double))
-        fields.append(QgsField("risk_score", QVariant.Double))
-        fields.append(QgsField("risk_level", QVariant.String))
-        fields.append(QgsField("flag_regret", QVariant.Int))
-        fields.append(QgsField("flag_robust", QVariant.Int))
-        fields.append(QgsField("flag_vol", QVariant.Int))
-        fields.append(QgsField("notes", QVariant.String))
-        fields.append(QgsField("strategy", QVariant.String))
-        fields.append(QgsField("deploy_dec", QVariant.String))
+        fields.append(QgsField("row_type", QMetaType.Type.QString))
+        fields.append(QgsField("scenario", QMetaType.Type.QString))
+        fields.append(QgsField("role", QMetaType.Type.QString))
+        fields.append(QgsField("robustness", QMetaType.Type.Double))
+        fields.append(QgsField("composite", QMetaType.Type.Double))
+        fields.append(QgsField("stability", QMetaType.Type.Double))
+        fields.append(QgsField("max_regret", QMetaType.Type.Double))
+        fields.append(QgsField("risk_score", QMetaType.Type.Double))
+        fields.append(QgsField("risk_level", QMetaType.Type.QString))
+        fields.append(QgsField("flag_regret", QMetaType.Type.Int))
+        fields.append(QgsField("flag_robust", QMetaType.Type.Int))
+        fields.append(QgsField("flag_vol", QMetaType.Type.Int))
+        fields.append(QgsField("notes", QMetaType.Type.QString))
+        fields.append(QgsField("strategy", QMetaType.Type.QString))
+        fields.append(QgsField("deploy_dec", QMetaType.Type.QString))
         sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         scenario_risks = []

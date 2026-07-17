@@ -4,7 +4,7 @@ from __future__ import annotations
 from collections import defaultdict
 from statistics import median
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (
     Qgis,
     QgsFeature,
@@ -87,16 +87,16 @@ class WeightConsensusAuditAlgorithm(QgsProcessingAlgorithm):
             by_criterion[cid].append(float(f[w_field]))
 
         fields = QgsFields()
-        fields.append(QgsField("criterion_id", QVariant.Int))
-        fields.append(QgsField("method_count", QVariant.Int))
-        fields.append(QgsField("w_mean", QVariant.Double))
-        fields.append(QgsField("w_median", QVariant.Double))
-        fields.append(QgsField("w_min", QVariant.Double))
-        fields.append(QgsField("w_max", QVariant.Double))
-        fields.append(QgsField("w_range", QVariant.Double))
-        fields.append(QgsField("w_std", QVariant.Double))
-        fields.append(QgsField("cv_pct", QVariant.Double))
-        fields.append(QgsField("agreement", QVariant.String))
+        fields.append(QgsField("criterion_id", QMetaType.Type.Int))
+        fields.append(QgsField("method_count", QMetaType.Type.Int))
+        fields.append(QgsField("w_mean", QMetaType.Type.Double))
+        fields.append(QgsField("w_median", QMetaType.Type.Double))
+        fields.append(QgsField("w_min", QMetaType.Type.Double))
+        fields.append(QgsField("w_max", QMetaType.Type.Double))
+        fields.append(QgsField("w_range", QMetaType.Type.Double))
+        fields.append(QgsField("w_std", QMetaType.Type.Double))
+        fields.append(QgsField("cv_pct", QMetaType.Type.Double))
+        fields.append(QgsField("agreement", QMetaType.Type.QString))
         sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         for cid in sorted(by_criterion.keys()):

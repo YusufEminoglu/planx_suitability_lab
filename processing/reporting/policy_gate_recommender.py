@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (
     Qgis,
     QgsFeature,
@@ -152,15 +152,15 @@ class PolicyGateRecommenderAlgorithm(QgsProcessingAlgorithm):
         )
 
         fields = QgsFields()
-        fields.append(QgsField("target_cov_pct", QVariant.Double))
-        fields.append(QgsField("rec_threshold", QVariant.Double))
-        fields.append(QgsField("threshold_cov_pct", QVariant.Double))
-        fields.append(QgsField("rec_lambda", QVariant.Double))
-        fields.append(QgsField("lambda_mean", QVariant.Double))
-        fields.append(QgsField("lambda_area60_pct", QVariant.Double))
-        fields.append(QgsField("max_critical_conf", QVariant.Double))
-        fields.append(QgsField("policy_mode", QVariant.String))
-        fields.append(QgsField("note", QVariant.String))
+        fields.append(QgsField("target_cov_pct", QMetaType.Type.Double))
+        fields.append(QgsField("rec_threshold", QMetaType.Type.Double))
+        fields.append(QgsField("threshold_cov_pct", QMetaType.Type.Double))
+        fields.append(QgsField("rec_lambda", QMetaType.Type.Double))
+        fields.append(QgsField("lambda_mean", QMetaType.Type.Double))
+        fields.append(QgsField("lambda_area60_pct", QMetaType.Type.Double))
+        fields.append(QgsField("max_critical_conf", QMetaType.Type.Double))
+        fields.append(QgsField("policy_mode", QMetaType.Type.QString))
+        fields.append(QgsField("note", QMetaType.Type.QString))
         sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         out = QgsFeature(fields)

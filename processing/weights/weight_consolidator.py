@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from qgis.core import Qgis, QgsFeature, QgsFields, QgsField, QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParameterFeatureSource, QgsProcessingParameterFeatureSink, QgsCoordinateReferenceSystem
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 
 
 class WeightConsolidatorAlgorithm(QgsProcessingAlgorithm):
@@ -49,8 +49,8 @@ class WeightConsolidatorAlgorithm(QgsProcessingAlgorithm):
     def processAlgorithm(self, parameters, context, feedback):
         src = self.parameterAsSource(parameters, self.INPUT, context)
         fields = QgsFields()
-        fields.append(QgsField('criterion_id', QVariant.Int))
-        fields.append(QgsField('weight', QVariant.Double))
+        fields.append(QgsField('criterion_id', QMetaType.Type.Int))
+        fields.append(QgsField('weight', QMetaType.Type.Double))
         sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
         total = 0.0
         rows = []

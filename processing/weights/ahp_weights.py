@@ -12,7 +12,7 @@ from qgis.core import (
     QgsProcessingParameterFeatureSink,
     QgsCoordinateReferenceSystem,
 )
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 
 from .._mcda_utils import ahp_weights_from_json
 
@@ -63,10 +63,10 @@ class AHPWeightsAlgorithm(QgsProcessingAlgorithm):
         txt = self.parameterAsString(parameters, self.MATRIX_JSON, context)
         w, cr = ahp_weights_from_json(txt)
         fields = QgsFields()
-        fields.append(QgsField('criterion_id', QVariant.Int))
-        fields.append(QgsField('weight', QVariant.Double))
-        fields.append(QgsField('cr', QVariant.Double))
-        fields.append(QgsField('cr_ok', QVariant.Int))
+        fields.append(QgsField('criterion_id', QMetaType.Type.Int))
+        fields.append(QgsField('weight', QMetaType.Type.Double))
+        fields.append(QgsField('cr', QMetaType.Type.Double))
+        fields.append(QgsField('cr_ok', QMetaType.Type.Int))
         sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
         cr_ok = 1 if cr <= 0.10 else 0
         if cr_ok == 0:

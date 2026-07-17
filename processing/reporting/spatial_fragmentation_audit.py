@@ -5,7 +5,7 @@ from collections import deque
 
 import numpy as np
 from osgeo import gdal
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (
     Qgis,
     QgsFeature,
@@ -173,19 +173,19 @@ class SpatialFragmentationAuditAlgorithm(QgsProcessingAlgorithm):
             frag_class = "FRAGMENTED"
 
         fields = QgsFields()
-        fields.append(QgsField("threshold", QVariant.Double))
-        fields.append(QgsField("connectivity", QVariant.Int))
-        fields.append(QgsField("valid_cells", QVariant.LongLong))
-        fields.append(QgsField("high_cells", QVariant.LongLong))
-        fields.append(QgsField("high_share_pct", QVariant.Double))
-        fields.append(QgsField("patch_count", QVariant.Int))
-        fields.append(QgsField("largest_patch", QVariant.LongLong))
-        fields.append(QgsField("largest_share_pct", QVariant.Double))
-        fields.append(QgsField("mean_patch", QVariant.Double))
-        fields.append(QgsField("median_patch", QVariant.Double))
-        fields.append(QgsField("high_area", QVariant.Double))
-        fields.append(QgsField("mean_patch_area", QVariant.Double))
-        fields.append(QgsField("fragmentation", QVariant.String))
+        fields.append(QgsField("threshold", QMetaType.Type.Double))
+        fields.append(QgsField("connectivity", QMetaType.Type.Int))
+        fields.append(QgsField("valid_cells", QMetaType.Type.LongLong))
+        fields.append(QgsField("high_cells", QMetaType.Type.LongLong))
+        fields.append(QgsField("high_share_pct", QMetaType.Type.Double))
+        fields.append(QgsField("patch_count", QMetaType.Type.Int))
+        fields.append(QgsField("largest_patch", QMetaType.Type.LongLong))
+        fields.append(QgsField("largest_share_pct", QMetaType.Type.Double))
+        fields.append(QgsField("mean_patch", QMetaType.Type.Double))
+        fields.append(QgsField("median_patch", QMetaType.Type.Double))
+        fields.append(QgsField("high_area", QMetaType.Type.Double))
+        fields.append(QgsField("mean_patch_area", QMetaType.Type.Double))
+        fields.append(QgsField("fragmentation", QMetaType.Type.QString))
         sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         feat = QgsFeature(fields)

@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import numpy as np
 from osgeo import gdal
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (
     Qgis,
     QgsFeature,
@@ -111,12 +111,12 @@ class ImplementationWavePlannerAlgorithm(QgsProcessingAlgorithm):
         total = float(np.sum(counts[1:5]))
 
         fields = QgsFields()
-        fields.append(QgsField("wave_id", QVariant.Int))
-        fields.append(QgsField("wave_label", QVariant.String))
-        fields.append(QgsField("strategy", QVariant.String))
-        fields.append(QgsField("cells", QVariant.LongLong))
-        fields.append(QgsField("pct", QVariant.Double))
-        fields.append(QgsField("area", QVariant.Double))
+        fields.append(QgsField("wave_id", QMetaType.Type.Int))
+        fields.append(QgsField("wave_label", QMetaType.Type.QString))
+        fields.append(QgsField("strategy", QMetaType.Type.QString))
+        fields.append(QgsField("cells", QMetaType.Type.LongLong))
+        fields.append(QgsField("pct", QMetaType.Type.Double))
+        fields.append(QgsField("area", QMetaType.Type.Double))
         sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         labels = {

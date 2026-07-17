@@ -5,7 +5,7 @@ from itertools import combinations
 
 import numpy as np
 from osgeo import gdal
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (
     Qgis,
     QgsFeature,
@@ -103,7 +103,7 @@ class ScenarioDominanceMatrixAlgorithm(QgsProcessingAlgorithm):
         eps = float(self.parameterAsDouble(parameters, self.EPS, context))
         block = int(self.parameterAsInt(parameters, self.BLOCK, context))
 
-        names = [l.name() for l in layers]
+        names = [lyr.name() for lyr in layers]
         n_s = len(layers)
         datasets = []
         bands = []
@@ -205,15 +205,15 @@ class ScenarioDominanceMatrixAlgorithm(QgsProcessingAlgorithm):
                 feedback.setProgress(int((done / total_blocks) * 100))
 
         fields = QgsFields()
-        fields.append(QgsField("row_type", QVariant.String))
-        fields.append(QgsField("scenario_a", QVariant.String))
-        fields.append(QgsField("scenario_b", QVariant.String))
-        fields.append(QgsField("wins_pct", QVariant.Double))
-        fields.append(QgsField("loss_pct", QVariant.Double))
-        fields.append(QgsField("tie_pct", QVariant.Double))
-        fields.append(QgsField("mean_diff", QVariant.Double))
-        fields.append(QgsField("net_dom", QVariant.Double))
-        fields.append(QgsField("rank", QVariant.Int))
+        fields.append(QgsField("row_type", QMetaType.Type.QString))
+        fields.append(QgsField("scenario_a", QMetaType.Type.QString))
+        fields.append(QgsField("scenario_b", QMetaType.Type.QString))
+        fields.append(QgsField("wins_pct", QMetaType.Type.Double))
+        fields.append(QgsField("loss_pct", QMetaType.Type.Double))
+        fields.append(QgsField("tie_pct", QMetaType.Type.Double))
+        fields.append(QgsField("mean_diff", QMetaType.Type.Double))
+        fields.append(QgsField("net_dom", QMetaType.Type.Double))
+        fields.append(QgsField("rank", QMetaType.Type.Int))
         sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         # Pairwise rows

@@ -5,7 +5,7 @@ from math import ceil
 
 import numpy as np
 from osgeo import gdal
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (
     Qgis,
     QgsFeature,
@@ -103,7 +103,7 @@ class MethodBenchmarkLeaderboardAlgorithm(QgsProcessingAlgorithm):
         block = int(self.parameterAsInt(parameters, self.BLOCK, context))
         mask = self.parameterAsRasterLayer(parameters, self.MASK, context)
 
-        names = [l.name() for l in layers]
+        names = [lyr.name() for lyr in layers]
         datasets = []
         bands = []
         nodatas = []
@@ -233,16 +233,16 @@ class MethodBenchmarkLeaderboardAlgorithm(QgsProcessingAlgorithm):
             r["rank"] = rank
 
         fields = QgsFields()
-        fields.append(QgsField("scenario", QVariant.String))
-        fields.append(QgsField("rank", QVariant.Int))
-        fields.append(QgsField("n_cells", QVariant.LongLong))
-        fields.append(QgsField("mean_score", QVariant.Double))
-        fields.append(QgsField("std_score", QVariant.Double))
-        fields.append(QgsField("p90_score", QVariant.Double))
-        fields.append(QgsField("high_pct", QVariant.Double))
-        fields.append(QgsField("stability", QVariant.Double))
-        fields.append(QgsField("composite", QVariant.Double))
-        fields.append(QgsField("grade", QVariant.String))
+        fields.append(QgsField("scenario", QMetaType.Type.QString))
+        fields.append(QgsField("rank", QMetaType.Type.Int))
+        fields.append(QgsField("n_cells", QMetaType.Type.LongLong))
+        fields.append(QgsField("mean_score", QMetaType.Type.Double))
+        fields.append(QgsField("std_score", QMetaType.Type.Double))
+        fields.append(QgsField("p90_score", QMetaType.Type.Double))
+        fields.append(QgsField("high_pct", QMetaType.Type.Double))
+        fields.append(QgsField("stability", QMetaType.Type.Double))
+        fields.append(QgsField("composite", QMetaType.Type.Double))
+        fields.append(QgsField("grade", QMetaType.Type.QString))
         sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         for r in rows_out:

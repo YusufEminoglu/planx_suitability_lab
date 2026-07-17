@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import numpy as np
 from osgeo import gdal
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (
     Qgis,
     QgsFeature,
@@ -176,13 +176,13 @@ class ConstraintImpactAuditAlgorithm(QgsProcessingAlgorithm):
                 feedback.setProgress(int((done / total_blocks) * 100))
 
         fields = QgsFields()
-        fields.append(QgsField("constraint", QVariant.String))
-        fields.append(QgsField("excluded_cells", QVariant.LongLong))
-        fields.append(QgsField("excluded_pct", QVariant.Double))
-        fields.append(QgsField("excluded_area", QVariant.Double))
-        fields.append(QgsField("excluded_high_cells", QVariant.LongLong))
-        fields.append(QgsField("excluded_high_pct", QVariant.Double))
-        fields.append(QgsField("priority_risk", QVariant.String))
+        fields.append(QgsField("constraint", QMetaType.Type.QString))
+        fields.append(QgsField("excluded_cells", QMetaType.Type.LongLong))
+        fields.append(QgsField("excluded_pct", QMetaType.Type.Double))
+        fields.append(QgsField("excluded_area", QMetaType.Type.Double))
+        fields.append(QgsField("excluded_high_cells", QMetaType.Type.LongLong))
+        fields.append(QgsField("excluded_high_pct", QMetaType.Type.Double))
+        fields.append(QgsField("priority_risk", QMetaType.Type.QString))
         sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         def _risk_tag(ex_pct: float, high_pct: float) -> str:

@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import numpy as np
 from osgeo import gdal
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (
     Qgis,
     QgsFeature,
@@ -106,13 +106,13 @@ class PriorityTransitionMatrixAlgorithm(QgsProcessingAlgorithm):
         cell_area = abs(float(gt[1] * gt[5])) if gt else 1.0
 
         fields = QgsFields()
-        fields.append(QgsField("from_zone", QVariant.Int))
-        fields.append(QgsField("to_zone", QVariant.Int))
-        fields.append(QgsField("cells", QVariant.LongLong))
-        fields.append(QgsField("pct_total", QVariant.Double))
-        fields.append(QgsField("pct_from", QVariant.Double))
-        fields.append(QgsField("area", QVariant.Double))
-        fields.append(QgsField("transition", QVariant.String))
+        fields.append(QgsField("from_zone", QMetaType.Type.Int))
+        fields.append(QgsField("to_zone", QMetaType.Type.Int))
+        fields.append(QgsField("cells", QMetaType.Type.LongLong))
+        fields.append(QgsField("pct_total", QMetaType.Type.Double))
+        fields.append(QgsField("pct_from", QMetaType.Type.Double))
+        fields.append(QgsField("area", QMetaType.Type.Double))
+        fields.append(QgsField("transition", QMetaType.Type.QString))
         sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         from_counts = np.bincount(a_i, minlength=5).astype(np.float64)

@@ -5,7 +5,7 @@ from itertools import combinations
 
 import numpy as np
 from osgeo import gdal
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (
     Qgis,
     QgsFeature,
@@ -91,7 +91,7 @@ class ScenarioSimilarityMatrixAlgorithm(QgsProcessingAlgorithm):
         block = int(self.parameterAsInt(parameters, self.BLOCK, context))
         mask = self.parameterAsRasterLayer(parameters, self.MASK, context)
 
-        names = [l.name() for l in layers]
+        names = [lyr.name() for lyr in layers]
         datasets = []
         bands = []
         nodatas = []
@@ -191,13 +191,13 @@ class ScenarioSimilarityMatrixAlgorithm(QgsProcessingAlgorithm):
                 feedback.setProgress(int((done / total_blocks) * 100))
 
         fields = QgsFields()
-        fields.append(QgsField("scenario_a", QVariant.String))
-        fields.append(QgsField("scenario_b", QVariant.String))
-        fields.append(QgsField("n_cells", QVariant.LongLong))
-        fields.append(QgsField("pearson_r", QVariant.Double))
-        fields.append(QgsField("mae", QVariant.Double))
-        fields.append(QgsField("rmse", QVariant.Double))
-        fields.append(QgsField("agreement", QVariant.String))
+        fields.append(QgsField("scenario_a", QMetaType.Type.QString))
+        fields.append(QgsField("scenario_b", QMetaType.Type.QString))
+        fields.append(QgsField("n_cells", QMetaType.Type.LongLong))
+        fields.append(QgsField("pearson_r", QMetaType.Type.Double))
+        fields.append(QgsField("mae", QMetaType.Type.Double))
+        fields.append(QgsField("rmse", QMetaType.Type.Double))
+        fields.append(QgsField("agreement", QMetaType.Type.QString))
         sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         for idx, (i, j) in enumerate(pairs):

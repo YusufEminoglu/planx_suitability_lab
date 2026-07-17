@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import numpy as np
 from osgeo import gdal
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (
     Qgis,
     QgsFeature,
@@ -130,13 +130,13 @@ class SuitabilityClassAreaStatsAlgorithm(QgsProcessingAlgorithm):
                 feedback.setProgress(int((done / total_blocks) * 100))
 
         fields = QgsFields()
-        fields.append(QgsField("class_id", QVariant.Int))
-        fields.append(QgsField("class_label", QVariant.String))
-        fields.append(QgsField("min_score", QVariant.Double))
-        fields.append(QgsField("max_score", QVariant.Double))
-        fields.append(QgsField("cell_count", QVariant.LongLong))
-        fields.append(QgsField("pct_valid", QVariant.Double))
-        fields.append(QgsField("area_units2", QVariant.Double))
+        fields.append(QgsField("class_id", QMetaType.Type.Int))
+        fields.append(QgsField("class_label", QMetaType.Type.QString))
+        fields.append(QgsField("min_score", QMetaType.Type.Double))
+        fields.append(QgsField("max_score", QMetaType.Type.Double))
+        fields.append(QgsField("cell_count", QMetaType.Type.LongLong))
+        fields.append(QgsField("pct_valid", QMetaType.Type.Double))
+        fields.append(QgsField("area_units2", QMetaType.Type.Double))
         sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         top_id = 1

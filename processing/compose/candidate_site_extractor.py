@@ -9,7 +9,7 @@ from collections import deque
 import numpy as np
 import processing
 from osgeo import gdal
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (
     Qgis,
     QgsFeature,
@@ -229,13 +229,13 @@ class CandidateSiteExtractorAlgorithm(QgsProcessingAlgorithm):
         feedback.setProgress(60)
 
         fields = QgsFields()
-        fields.append(QgsField("site_id", QVariant.Int))
-        fields.append(QgsField("rank", QVariant.Int))
-        fields.append(QgsField("cells", QVariant.LongLong))
-        fields.append(QgsField("area_ha", QVariant.Double))
-        fields.append(QgsField("mean_suit", QVariant.Double))
-        fields.append(QgsField("max_suit", QVariant.Double))
-        fields.append(QgsField("compactness", QVariant.Double))
+        fields.append(QgsField("site_id", QMetaType.Type.Int))
+        fields.append(QgsField("rank", QMetaType.Type.Int))
+        fields.append(QgsField("cells", QMetaType.Type.LongLong))
+        fields.append(QgsField("area_ha", QMetaType.Type.Double))
+        fields.append(QgsField("mean_suit", QMetaType.Type.Double))
+        fields.append(QgsField("max_suit", QMetaType.Type.Double))
+        fields.append(QgsField("compactness", QMetaType.Type.Double))
         sink, dest = self.parameterAsSink(
             parameters, self.OUTPUT, context, fields, Qgis.WkbType.MultiPolygon, rl.crs()
         )

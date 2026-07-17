@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import numpy as np
 from osgeo import gdal
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (
     Qgis,
     QgsFeature,
@@ -111,13 +111,13 @@ class PolicySensitivityFrontierAlgorithm(QgsProcessingAlgorithm):
             raise QgsProcessingException("No valid overlapping cells in mean/std rasters.")
 
         fields = QgsFields()
-        fields.append(QgsField("lambda", QVariant.Double))
-        fields.append(QgsField("mean_score", QVariant.Double))
-        fields.append(QgsField("median_score", QVariant.Double))
-        fields.append(QgsField("p90_score", QVariant.Double))
-        fields.append(QgsField("area_ge_80_pct", QVariant.Double))
-        fields.append(QgsField("area_ge_60_pct", QVariant.Double))
-        fields.append(QgsField("delta_vs_prev", QVariant.Double))
+        fields.append(QgsField("lambda", QMetaType.Type.Double))
+        fields.append(QgsField("mean_score", QMetaType.Type.Double))
+        fields.append(QgsField("median_score", QMetaType.Type.Double))
+        fields.append(QgsField("p90_score", QMetaType.Type.Double))
+        fields.append(QgsField("area_ge_80_pct", QMetaType.Type.Double))
+        fields.append(QgsField("area_ge_60_pct", QMetaType.Type.Double))
+        fields.append(QgsField("delta_vs_prev", QMetaType.Type.Double))
         sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         prev_mean = None

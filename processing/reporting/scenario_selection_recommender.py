@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (
     Qgis,
     QgsFeature,
@@ -219,25 +219,25 @@ class ScenarioSelectionRecommenderAlgorithm(QgsProcessingAlgorithm):
             note = "Diversity and policy allow a primary-challenger two-track decision package."
 
         fields = QgsFields()
-        fields.append(QgsField("primary_scn", QVariant.String))
-        fields.append(QgsField("challenger_scn", QVariant.String))
-        fields.append(QgsField("minimax_scn", QVariant.String))
-        fields.append(QgsField("primary_adj", QVariant.Double))
-        fields.append(QgsField("chall_adj", QVariant.Double))
-        fields.append(QgsField("primary_mm_rk", QVariant.Double))
-        fields.append(QgsField("primary_mm_rg", QVariant.Double))
-        fields.append(QgsField("primary_rb", QVariant.Double))
-        fields.append(QgsField("chall_rb", QVariant.Double))
-        fields.append(QgsField("strategy", QVariant.String))
-        fields.append(QgsField("policy_mode", QVariant.String))
-        fields.append(QgsField("rec_threshold", QVariant.Double))
-        fields.append(QgsField("rec_lambda", QVariant.Double))
-        fields.append(QgsField("action_grade", QVariant.String))
-        fields.append(QgsField("readiness", QVariant.String))
-        fields.append(QgsField("overall", QVariant.Double))
-        fields.append(QgsField("diversity_idx", QVariant.Double))
-        fields.append(QgsField("portfolio_hlth", QVariant.Double))
-        fields.append(QgsField("note", QVariant.String))
+        fields.append(QgsField("primary_scn", QMetaType.Type.QString))
+        fields.append(QgsField("challenger_scn", QMetaType.Type.QString))
+        fields.append(QgsField("minimax_scn", QMetaType.Type.QString))
+        fields.append(QgsField("primary_adj", QMetaType.Type.Double))
+        fields.append(QgsField("chall_adj", QMetaType.Type.Double))
+        fields.append(QgsField("primary_mm_rk", QMetaType.Type.Double))
+        fields.append(QgsField("primary_mm_rg", QMetaType.Type.Double))
+        fields.append(QgsField("primary_rb", QMetaType.Type.Double))
+        fields.append(QgsField("chall_rb", QMetaType.Type.Double))
+        fields.append(QgsField("strategy", QMetaType.Type.QString))
+        fields.append(QgsField("policy_mode", QMetaType.Type.QString))
+        fields.append(QgsField("rec_threshold", QMetaType.Type.Double))
+        fields.append(QgsField("rec_lambda", QMetaType.Type.Double))
+        fields.append(QgsField("action_grade", QMetaType.Type.QString))
+        fields.append(QgsField("readiness", QMetaType.Type.QString))
+        fields.append(QgsField("overall", QMetaType.Type.Double))
+        fields.append(QgsField("diversity_idx", QMetaType.Type.Double))
+        fields.append(QgsField("portfolio_hlth", QMetaType.Type.Double))
+        fields.append(QgsField("note", QMetaType.Type.QString))
         sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         out = QgsFeature(fields)

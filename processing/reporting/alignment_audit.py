@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from osgeo import gdal
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (
     Qgis,
     QgsFeature,
@@ -103,16 +103,16 @@ class AlignmentAuditAlgorithm(QgsProcessingAlgorithm):
             ref_name = snap.name()
 
         fields = QgsFields()
-        fields.append(QgsField("raster", QVariant.String))
-        fields.append(QgsField("width", QVariant.Int))
-        fields.append(QgsField("height", QVariant.Int))
-        fields.append(QgsField("pixel_x", QVariant.Double))
-        fields.append(QgsField("pixel_y", QVariant.Double))
-        fields.append(QgsField("crs_authid", QVariant.String))
-        fields.append(QgsField("aligned_px", QVariant.Int))
-        fields.append(QgsField("aligned_extent", QVariant.Int))
-        fields.append(QgsField("aligned_shape", QVariant.Int))
-        fields.append(QgsField("aligned_all", QVariant.Int))
+        fields.append(QgsField("raster", QMetaType.Type.QString))
+        fields.append(QgsField("width", QMetaType.Type.Int))
+        fields.append(QgsField("height", QMetaType.Type.Int))
+        fields.append(QgsField("pixel_x", QMetaType.Type.Double))
+        fields.append(QgsField("pixel_y", QMetaType.Type.Double))
+        fields.append(QgsField("crs_authid", QMetaType.Type.QString))
+        fields.append(QgsField("aligned_px", QMetaType.Type.Int))
+        fields.append(QgsField("aligned_extent", QMetaType.Type.Int))
+        fields.append(QgsField("aligned_shape", QMetaType.Type.Int))
+        fields.append(QgsField("aligned_all", QMetaType.Type.Int))
         sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         aligned_all_count = 0

@@ -83,7 +83,7 @@ class LocalContributionAlgorithm(QgsProcessingAlgorithm):
         # Sum of absolute weighted contributions for local share denominator.
         denom = os.path.join(out_dir, "xai_local_contribution_total_abs.tif")
         d_letters = letters[: len(abs_terms)]
-        d_formula = "maximum(0.000001,(" + "+".join([f"abs({l})" for l in d_letters]) + "))"
+        d_formula = "maximum(0.000001,(" + "+".join([f"abs({letter})" for letter in d_letters]) + "))"
         raster_calc(abs_terms, d_formula, denom)
 
         for i, abs_path in enumerate(abs_terms):

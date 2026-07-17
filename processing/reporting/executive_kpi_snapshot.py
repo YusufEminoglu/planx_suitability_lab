@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import numpy as np
 from osgeo import gdal
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (
     Qgis,
     QgsFeature,
@@ -135,19 +135,19 @@ class ExecutiveKpiSnapshotAlgorithm(QgsProcessingAlgorithm):
         confidence_gap = float(mean_s - mean_r)
 
         fields = QgsFields()
-        fields.append(QgsField("cells_total", QVariant.LongLong))
-        fields.append(QgsField("area_total", QVariant.Double))
-        fields.append(QgsField("mean_suit", QVariant.Double))
-        fields.append(QgsField("mean_robust", QVariant.Double))
-        fields.append(QgsField("top80_suit_pct", QVariant.Double))
-        fields.append(QgsField("top80_robust_pct", QVariant.Double))
-        fields.append(QgsField("eligible_pct", QVariant.Double))
-        fields.append(QgsField("excluded_pct", QVariant.Double))
-        fields.append(QgsField("consensus_high_pct", QVariant.Double))
-        fields.append(QgsField("consensus_unanim_pct", QVariant.Double))
-        fields.append(QgsField("high_conflict_pct", QVariant.Double))
-        fields.append(QgsField("critical_conflict_pct", QVariant.Double))
-        fields.append(QgsField("confidence_gap", QVariant.Double))
+        fields.append(QgsField("cells_total", QMetaType.Type.LongLong))
+        fields.append(QgsField("area_total", QMetaType.Type.Double))
+        fields.append(QgsField("mean_suit", QMetaType.Type.Double))
+        fields.append(QgsField("mean_robust", QMetaType.Type.Double))
+        fields.append(QgsField("top80_suit_pct", QMetaType.Type.Double))
+        fields.append(QgsField("top80_robust_pct", QMetaType.Type.Double))
+        fields.append(QgsField("eligible_pct", QMetaType.Type.Double))
+        fields.append(QgsField("excluded_pct", QMetaType.Type.Double))
+        fields.append(QgsField("consensus_high_pct", QMetaType.Type.Double))
+        fields.append(QgsField("consensus_unanim_pct", QMetaType.Type.Double))
+        fields.append(QgsField("high_conflict_pct", QMetaType.Type.Double))
+        fields.append(QgsField("critical_conflict_pct", QMetaType.Type.Double))
+        fields.append(QgsField("confidence_gap", QMetaType.Type.Double))
         sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         feat = QgsFeature(fields)

@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import numpy as np
 from osgeo import gdal
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (
     Qgis,
     QgsFeature,
@@ -92,11 +92,11 @@ class ThresholdCoverageCurveAlgorithm(QgsProcessingAlgorithm):
         total = float(vals.size)
 
         fields = QgsFields()
-        fields.append(QgsField("threshold", QVariant.Double))
-        fields.append(QgsField("cells_ge", QVariant.LongLong))
-        fields.append(QgsField("pct_ge", QVariant.Double))
-        fields.append(QgsField("area_ge", QVariant.Double))
-        fields.append(QgsField("delta_pct_prev", QVariant.Double))
+        fields.append(QgsField("threshold", QMetaType.Type.Double))
+        fields.append(QgsField("cells_ge", QMetaType.Type.LongLong))
+        fields.append(QgsField("pct_ge", QMetaType.Type.Double))
+        fields.append(QgsField("area_ge", QMetaType.Type.Double))
+        fields.append(QgsField("delta_pct_prev", QMetaType.Type.Double))
         sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         prev_pct = None

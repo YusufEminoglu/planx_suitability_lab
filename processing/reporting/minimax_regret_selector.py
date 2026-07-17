@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import numpy as np
 from osgeo import gdal
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (
     Qgis,
     QgsFeature,
@@ -90,7 +90,7 @@ class MinimaxRegretSelectorAlgorithm(QgsProcessingAlgorithm):
         mask = self.parameterAsRasterLayer(parameters, self.MASK, context)
         block = int(self.parameterAsInt(parameters, self.BLOCK, context))
 
-        names = [l.name() for l in layers]
+        names = [lyr.name() for lyr in layers]
         n_s = len(layers)
         datasets = []
         bands = []
@@ -210,14 +210,14 @@ class MinimaxRegretSelectorAlgorithm(QgsProcessingAlgorithm):
             r["selected"] = "YES" if rank == 1 else "NO"
 
         fields = QgsFields()
-        fields.append(QgsField("scenario", QVariant.String))
-        fields.append(QgsField("rank", QVariant.Int))
-        fields.append(QgsField("selected", QVariant.String))
-        fields.append(QgsField("n_cells", QVariant.LongLong))
-        fields.append(QgsField("max_regret", QVariant.Double))
-        fields.append(QgsField("mean_regret", QVariant.Double))
-        fields.append(QgsField("p90_regret", QVariant.Double))
-        fields.append(QgsField("minimax_score", QVariant.Double))
+        fields.append(QgsField("scenario", QMetaType.Type.QString))
+        fields.append(QgsField("rank", QMetaType.Type.Int))
+        fields.append(QgsField("selected", QMetaType.Type.QString))
+        fields.append(QgsField("n_cells", QMetaType.Type.LongLong))
+        fields.append(QgsField("max_regret", QMetaType.Type.Double))
+        fields.append(QgsField("mean_regret", QMetaType.Type.Double))
+        fields.append(QgsField("p90_regret", QMetaType.Type.Double))
+        fields.append(QgsField("minimax_score", QMetaType.Type.Double))
         sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         for r in rows_out:

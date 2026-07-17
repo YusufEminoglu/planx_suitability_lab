@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.6.3] - 2026-07-17
+
+- QGIS Hub review fixes for 1.6.2. Qt6 compatibility: migrated all 296 Qt5-style `QVariant.*` field-type enums across 37 algorithm files to `QMetaType.Type.*` (`Double`/`Int`/`LongLong` map 1:1, `String` → `QString`) — PyQt6 has no `QVariant.Type`, and `QMetaType.Type` is the documented replacement (the `QgsField` QVariant constructor is deprecated since QGIS 3.38); every mapping was probe-verified with a `QgsField` round-trip on QGIS 3.44 LTR and QGIS 4.2 before rewriting (`scratch/qvariant_to_qmetatype.py`).
+- Code quality: renamed the ambiguous loop variable `l` flagged by the Hub's Flake8 panel (E741) in 10 files; the local Hub-scan mirror now also checks E741/E742/E743 so quality findings surface before upload.
+
 ## [1.6.2] - 2026-07-17
 
 - QGIS 4 / Qt6 readiness: scoped all 169 remaining Qt5-style enum accesses across 63 algorithm files for the Hub's Qt6 static check — `QgsProcessing.Type*` → `QgsProcessing.SourceType.Type*` and `QgsProcessingParameterNumber.Integer|Double` → `QgsProcessingParameterNumber.Type.*`. Every scoped form was probe-verified against both QGIS 3.44 LTR and QGIS 4 before rewriting (`scratch/qt6_enum_audit.py`); `QVariant.*` field types intentionally stay unscoped (PyQt6 has no `QVariant.Type`; the qgis.PyQt compatibility layer keeps them working). No functional change.

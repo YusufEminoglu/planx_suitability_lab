@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (
     Qgis,
     QgsFeature,
@@ -200,20 +200,20 @@ class ScenarioRobustnessLeaderboardAlgorithm(QgsProcessingAlgorithm):
             row["rank"] = i
 
         fields = QgsFields()
-        fields.append(QgsField("scenario", QVariant.String))
-        fields.append(QgsField("rank", QVariant.Int))
-        fields.append(QgsField("tier", QVariant.String))
-        fields.append(QgsField("robustness", QVariant.Double))
-        fields.append(QgsField("composite", QVariant.Double))
-        fields.append(QgsField("stability", QVariant.Double))
-        fields.append(QgsField("net_dom", QVariant.Double))
-        fields.append(QgsField("max_regret", QVariant.Double))
-        fields.append(QgsField("minimax_rk", QVariant.Int))
-        fields.append(QgsField("uniq_score", QVariant.Double))
-        fields.append(QgsField("score_comp", QVariant.Double))
-        fields.append(QgsField("score_dom", QVariant.Double))
-        fields.append(QgsField("score_reg", QVariant.Double))
-        fields.append(QgsField("score_div", QVariant.Double))
+        fields.append(QgsField("scenario", QMetaType.Type.QString))
+        fields.append(QgsField("rank", QMetaType.Type.Int))
+        fields.append(QgsField("tier", QMetaType.Type.QString))
+        fields.append(QgsField("robustness", QMetaType.Type.Double))
+        fields.append(QgsField("composite", QMetaType.Type.Double))
+        fields.append(QgsField("stability", QMetaType.Type.Double))
+        fields.append(QgsField("net_dom", QMetaType.Type.Double))
+        fields.append(QgsField("max_regret", QMetaType.Type.Double))
+        fields.append(QgsField("minimax_rk", QMetaType.Type.Int))
+        fields.append(QgsField("uniq_score", QMetaType.Type.Double))
+        fields.append(QgsField("score_comp", QMetaType.Type.Double))
+        fields.append(QgsField("score_dom", QMetaType.Type.Double))
+        fields.append(QgsField("score_reg", QMetaType.Type.Double))
+        fields.append(QgsField("score_div", QMetaType.Type.Double))
         sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         for row in rows:

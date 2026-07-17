@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (
     Qgis,
     QgsFeature,
@@ -79,14 +79,14 @@ class CriticWeightsAlgorithm(QgsProcessingAlgorithm):
         if not layers:
             raise QgsProcessingException("No criterion rasters provided.")
         impacts = parse_impacts_csv(self.parameterAsString(parameters, self.IMPACTS_CSV, context), len(layers))
-        weights, sigma, contrast = critic_weights_from_rasters([l.source() for l in layers], impacts=impacts)
+        weights, sigma, contrast = critic_weights_from_rasters([lyr.source() for lyr in layers], impacts=impacts)
 
         fields = QgsFields()
-        fields.append(QgsField("criterion_id", QVariant.Int))
-        fields.append(QgsField("weight", QVariant.Double))
-        fields.append(QgsField("std_dev", QVariant.Double))
-        fields.append(QgsField("contrast", QVariant.Double))
-        fields.append(QgsField("critic_score", QVariant.Double))
+        fields.append(QgsField("criterion_id", QMetaType.Type.Int))
+        fields.append(QgsField("weight", QMetaType.Type.Double))
+        fields.append(QgsField("std_dev", QMetaType.Type.Double))
+        fields.append(QgsField("contrast", QMetaType.Type.Double))
+        fields.append(QgsField("critic_score", QMetaType.Type.Double))
         sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         for i, wi in enumerate(weights, start=1):

@@ -5,7 +5,7 @@ from itertools import combinations
 
 import numpy as np
 from osgeo import gdal
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (
     Qgis,
     QgsFeature,
@@ -93,7 +93,7 @@ class ScenarioPortfolioDiversityAlgorithm(QgsProcessingAlgorithm):
         block = int(self.parameterAsInt(parameters, self.BLOCK, context))
         mask = self.parameterAsRasterLayer(parameters, self.MASK, context)
 
-        names = [l.name() for l in layers]
+        names = [lyr.name() for lyr in layers]
         n_s = len(layers)
         datasets = []
         bands = []
@@ -251,18 +251,18 @@ class ScenarioPortfolioDiversityAlgorithm(QgsProcessingAlgorithm):
         uniq_rows.sort(key=lambda x: (-x[2], x[1], x[0]))
 
         fields = QgsFields()
-        fields.append(QgsField("row_type", QVariant.String))
-        fields.append(QgsField("scenario", QVariant.String))
-        fields.append(QgsField("rank", QVariant.Int))
-        fields.append(QgsField("uniq_score", QVariant.Double))
-        fields.append(QgsField("mean_abs_corr", QVariant.Double))
-        fields.append(QgsField("role", QVariant.String))
-        fields.append(QgsField("diversity_idx", QVariant.Double))
-        fields.append(QgsField("eff_methods", QVariant.Double))
-        fields.append(QgsField("disagree_std", QVariant.Double))
-        fields.append(QgsField("health_score", QVariant.Double))
-        fields.append(QgsField("div_class", QVariant.String))
-        fields.append(QgsField("spread_class", QVariant.String))
+        fields.append(QgsField("row_type", QMetaType.Type.QString))
+        fields.append(QgsField("scenario", QMetaType.Type.QString))
+        fields.append(QgsField("rank", QMetaType.Type.Int))
+        fields.append(QgsField("uniq_score", QMetaType.Type.Double))
+        fields.append(QgsField("mean_abs_corr", QMetaType.Type.Double))
+        fields.append(QgsField("role", QMetaType.Type.QString))
+        fields.append(QgsField("diversity_idx", QMetaType.Type.Double))
+        fields.append(QgsField("eff_methods", QMetaType.Type.Double))
+        fields.append(QgsField("disagree_std", QMetaType.Type.Double))
+        fields.append(QgsField("health_score", QMetaType.Type.Double))
+        fields.append(QgsField("div_class", QMetaType.Type.QString))
+        fields.append(QgsField("spread_class", QMetaType.Type.QString))
         sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         summary = QgsFeature(fields)

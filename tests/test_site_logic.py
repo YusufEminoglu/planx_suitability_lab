@@ -59,7 +59,7 @@ def _install_stubs() -> None:
     }
     qgis.core = _stub("qgis.core", **core_attrs)
     qgis.PyQt = _stub("qgis.PyQt")
-    qgis.PyQt.QtCore = _stub("qgis.PyQt.QtCore", QVariant=_Anything)
+    qgis.PyQt.QtCore = _stub("qgis.PyQt.QtCore", QVariant=_Anything, QMetaType=_Anything)
 
 
 def _load_module():

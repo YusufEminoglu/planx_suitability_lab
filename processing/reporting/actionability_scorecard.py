@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (
     Qgis,
     QgsFeature,
@@ -162,17 +162,17 @@ class ActionabilityScorecardAlgorithm(QgsProcessingAlgorithm):
             readiness = "REWORK_REQUIRED"
 
         fields = QgsFields()
-        fields.append(QgsField("overall", QVariant.Double))
-        fields.append(QgsField("grade", QVariant.String))
-        fields.append(QgsField("readiness", QVariant.String))
-        fields.append(QgsField("robustness", QVariant.Double))
-        fields.append(QgsField("consensus", QVariant.Double))
-        fields.append(QgsField("implement", QVariant.Double))
-        fields.append(QgsField("delivery", QVariant.Double))
-        fields.append(QgsField("policy_align", QVariant.Double))
-        fields.append(QgsField("policy_mode", QVariant.String))
-        fields.append(QgsField("budget_ref", QVariant.Double))
-        fields.append(QgsField("capture_ref", QVariant.Double))
+        fields.append(QgsField("overall", QMetaType.Type.Double))
+        fields.append(QgsField("grade", QMetaType.Type.QString))
+        fields.append(QgsField("readiness", QMetaType.Type.QString))
+        fields.append(QgsField("robustness", QMetaType.Type.Double))
+        fields.append(QgsField("consensus", QMetaType.Type.Double))
+        fields.append(QgsField("implement", QMetaType.Type.Double))
+        fields.append(QgsField("delivery", QMetaType.Type.Double))
+        fields.append(QgsField("policy_align", QMetaType.Type.Double))
+        fields.append(QgsField("policy_mode", QMetaType.Type.QString))
+        fields.append(QgsField("budget_ref", QMetaType.Type.Double))
+        fields.append(QgsField("capture_ref", QMetaType.Type.Double))
         sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         feat = QgsFeature(fields)

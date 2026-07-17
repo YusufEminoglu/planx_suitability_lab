@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import numpy as np
 from osgeo import gdal
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (
     Qgis,
     QgsFeature,
@@ -79,11 +79,11 @@ class RiskOpportunityAreaStatsAlgorithm(QgsProcessingAlgorithm):
         cell_area = abs(float(gt[1] * gt[5])) if gt else 1.0
 
         fields = QgsFields()
-        fields.append(QgsField("class_id", QVariant.Int))
-        fields.append(QgsField("label", QVariant.String))
-        fields.append(QgsField("cells", QVariant.LongLong))
-        fields.append(QgsField("pct", QVariant.Double))
-        fields.append(QgsField("area", QVariant.Double))
+        fields.append(QgsField("class_id", QMetaType.Type.Int))
+        fields.append(QgsField("label", QMetaType.Type.QString))
+        fields.append(QgsField("cells", QMetaType.Type.LongLong))
+        fields.append(QgsField("pct", QMetaType.Type.Double))
+        fields.append(QgsField("area", QMetaType.Type.Double))
         sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
 
         labels = {

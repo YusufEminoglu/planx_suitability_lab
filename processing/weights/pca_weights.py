@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from qgis.core import Qgis, QgsFeature, QgsFields, QgsField, QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParameterMultipleLayers, QgsProcessingParameterFeatureSink, QgsCoordinateReferenceSystem
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 
 from .._mcda_utils import ensure_list, pca_proxy_weights_from_rasters
 
@@ -52,10 +52,10 @@ class PCAWeightsAlgorithm(QgsProcessingAlgorithm):
 
     def processAlgorithm(self, parameters, context, feedback):
         layers = ensure_list(self.parameterAsLayerList(parameters, self.INPUT_RASTERS, context))
-        weights = pca_proxy_weights_from_rasters([l.source() for l in layers])
+        weights = pca_proxy_weights_from_rasters([lyr.source() for lyr in layers])
         fields = QgsFields()
-        fields.append(QgsField('criterion_id', QVariant.Int))
-        fields.append(QgsField('weight', QVariant.Double))
+        fields.append(QgsField('criterion_id', QMetaType.Type.Int))
+        fields.append(QgsField('weight', QMetaType.Type.Double))
         sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
         for i, wi in enumerate(weights, start=1):
             f = QgsFeature(fields)

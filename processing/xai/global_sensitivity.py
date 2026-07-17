@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import numpy as np
 from osgeo import gdal
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (
     Qgis,
     QgsFeature,
@@ -107,12 +107,12 @@ class GlobalSensitivityAlgorithm(QgsProcessingAlgorithm):
 
         total = sum(abs(r[4]) for r in stats) or 1.0
         fields = QgsFields()
-        fields.append(QgsField("criterion", QVariant.String))
-        fields.append(QgsField("weight", QVariant.Double))
-        fields.append(QgsField("mean", QVariant.Double))
-        fields.append(QgsField("std", QVariant.Double))
-        fields.append(QgsField("weighted_std", QVariant.Double))
-        fields.append(QgsField("importance", QVariant.Double))
+        fields.append(QgsField("criterion", QMetaType.Type.QString))
+        fields.append(QgsField("weight", QMetaType.Type.Double))
+        fields.append(QgsField("mean", QMetaType.Type.Double))
+        fields.append(QgsField("std", QMetaType.Type.Double))
+        fields.append(QgsField("weighted_std", QMetaType.Type.Double))
+        fields.append(QgsField("importance", QMetaType.Type.Double))
         sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
         for row in stats:
             f = QgsFeature(fields)
