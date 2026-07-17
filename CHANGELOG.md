@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.6.1] - 2026-07-17
+
+- Security hardening: resolved all remaining Bandit findings in code — the B110/B112 `try/except: pass|continue` patterns in `_mcda_utils` and the six reporting algorithms (actionability scorecard, deployment readiness gate, policy gate recommender, scenario governance audit, scenario robustness leaderboard, scenario selection recommender) were rewritten with `contextlib.suppress`, preserving row-skip semantics. The `.bandit` skip configuration was removed entirely; the QGIS Hub security scan now passes plain CLEAN with zero findings and zero suppressions.
+- Packaging hygiene fix: `packaging/zip_hub.py` now always excludes internal AI-agent work-order files (`ENHANCEMENT_PLAN_*.md`, `DEEPSEEK_PROMPT_*.txt`, `REPORT_v*.md`) from the built zip, regardless of version suffix. These files remain in the GitHub repository as project history but no longer ship in the QGIS Hub package.
+
 ## [1.6.0] - 2026-07-10
 
 - English-only conversion: removed bilingual EN/TR machinery from dashboard (language combo, Ctrl+L, all Turkish UI strings), release_narrative_builder (TR narrative removed), action_playbook_generator (TR recommendations removed), COMMAND_GUIDE.html, and README.

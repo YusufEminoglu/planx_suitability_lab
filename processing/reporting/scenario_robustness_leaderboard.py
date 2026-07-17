@@ -17,6 +17,9 @@ from qgis.core import (
 )
 
 
+from contextlib import suppress
+
+
 class ScenarioRobustnessLeaderboardAlgorithm(QgsProcessingAlgorithm):
     BENCHMARK = "BENCHMARK"
     DOMINANCE = "DOMINANCE"
@@ -101,47 +104,39 @@ class ScenarioRobustnessLeaderboardAlgorithm(QgsProcessingAlgorithm):
         composite = {}
         stability = {}
         for f in benchmark_rows:
-            try:
+            with suppress(Exception):
                 scenario = str(f["scenario"])
                 composite[scenario] = float(f["composite"])
                 stability[scenario] = float(f["stability"])
-            except Exception:
-                continue
         if not composite:
             raise QgsProcessingException("Benchmark table missing required scenario/composite fields.")
 
         net_dom = {}
         for f in dominance_rows:
-            try:
+            with suppress(Exception):
                 if str(f["row_type"]) != "SCENARIO":
                     continue
                 scenario = str(f["scenario_a"])
                 net_dom[scenario] = float(f["net_dom"])
-            except Exception:
-                continue
         if not net_dom:
             raise QgsProcessingException("Dominance table missing SCENARIO rows (scenario_a/net_dom).")
 
         minimax_regret = {}
         minimax_rank = {}
         for f in minimax_rows:
-            try:
+            with suppress(Exception):
                 scenario = str(f["scenario"])
                 minimax_regret[scenario] = float(f["max_regret"])
                 minimax_rank[scenario] = int(f["rank"])
-            except Exception:
-                continue
         if not minimax_regret:
             raise QgsProcessingException("Minimax table missing scenario/max_regret fields.")
 
         uniq_score = {}
         for f in portfolio_rows:
-            try:
+            with suppress(Exception):
                 if str(f["row_type"]) != "SCENARIO":
                     continue
                 uniq_score[str(f["scenario"])] = float(f["uniq_score"])
-            except Exception:
-                continue
 
         scenarios = sorted(set(composite.keys()) & set(minimax_regret.keys()))
         if not scenarios:

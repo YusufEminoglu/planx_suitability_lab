@@ -18,6 +18,9 @@ from qgis.core import (
 )
 
 
+from contextlib import suppress
+
+
 class PolicyGateRecommenderAlgorithm(QgsProcessingAlgorithm):
     THRESHOLD_CURVE = "THRESHOLD_CURVE"
     FRONTIER = "FRONTIER"
@@ -109,16 +112,14 @@ class PolicyGateRecommenderAlgorithm(QgsProcessingAlgorithm):
         best_thr_cov = None
         best_thr_gap = None
         for f in curve:
-            try:
+            with suppress(Exception):
                 t = float(f["threshold"])
                 cov = float(f["pct_ge"])
-            except Exception:
-                continue
-            gap = abs(cov - target_cov)
-            if best_thr is None or gap < best_thr_gap:
-                best_thr = t
-                best_thr_cov = cov
-                best_thr_gap = gap
+                gap = abs(cov - target_cov)
+                if best_thr is None or gap < best_thr_gap:
+                    best_thr = t
+                    best_thr_cov = cov
+                    best_thr_gap = gap
         if best_thr is None:
             raise QgsProcessingException("Threshold curve table does not contain threshold/pct_ge fields.")
 
@@ -128,19 +129,17 @@ class PolicyGateRecommenderAlgorithm(QgsProcessingAlgorithm):
         best_area60 = None
         best_score = None
         for f in frontier:
-            try:
+            with suppress(Exception):
                 lam = float(f["lambda"])
                 m = float(f["mean_score"])
                 a60 = float(f["area_ge_60_pct"])
-            except Exception:
-                continue
-            # Multi-objective surrogate: prioritize high mean and closeness to target coverage.
-            score = m - 0.35 * abs(a60 - target_cov)
-            if best_lam is None or score > best_score:
-                best_lam = lam
-                best_mean = m
-                best_area60 = a60
-                best_score = score
+                # Multi-objective surrogate: prioritize high mean and closeness to target coverage.
+                score = m - 0.35 * abs(a60 - target_cov)
+                if best_lam is None or score > best_score:
+                    best_lam = lam
+                    best_mean = m
+                    best_area60 = a60
+                    best_score = score
         if best_lam is None:
             raise QgsProcessingException("Policy frontier table does not contain lambda/mean_score/area_ge_60_pct fields.")
 

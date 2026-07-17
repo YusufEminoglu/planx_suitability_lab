@@ -17,6 +17,9 @@ from qgis.core import (
 )
 
 
+from contextlib import suppress
+
+
 class ScenarioGovernanceAuditAlgorithm(QgsProcessingAlgorithm):
     ROBUSTNESS = "ROBUSTNESS"
     BENCHMARK = "BENCHMARK"
@@ -115,34 +118,30 @@ class ScenarioGovernanceAuditAlgorithm(QgsProcessingAlgorithm):
 
         rb = {}
         for f in robustness_rows:
-            try:
+            with suppress(Exception):
                 s = str(f["scenario"])
                 rb[s] = {
                     "robustness": float(f["robustness"]),
                     "tier": str(f["tier"]),
                     "rb_rank": int(f["rank"]),
                 }
-            except Exception:
-                continue
         if not rb:
             raise QgsProcessingException("Robustness table missing required scenario fields.")
 
         bm = {}
         for f in benchmark_rows:
-            try:
+            with suppress(Exception):
                 s = str(f["scenario"])
                 bm[s] = {
                     "composite": float(f["composite"]),
                     "stability": float(f["stability"]),
                     "std_score": float(f["std_score"]),
                 }
-            except Exception:
-                continue
 
         mm = {}
         mm_selected = None
         for f in minimax_rows:
-            try:
+            with suppress(Exception):
                 s = str(f["scenario"])
                 mm[s] = {
                     "max_regret": float(f["max_regret"]),
@@ -150,8 +149,6 @@ class ScenarioGovernanceAuditAlgorithm(QgsProcessingAlgorithm):
                 }
                 if str(f["selected"]).upper() == "YES":
                     mm_selected = s
-            except Exception:
-                continue
         if not mm:
             raise QgsProcessingException("Minimax table missing required scenario fields.")
 

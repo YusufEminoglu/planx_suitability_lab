@@ -17,6 +17,11 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "processing"))
+# _mcda_utils does a top-level `import processing` (QGIS Processing framework,
+# used only at algorithm call sites). For these pure-logic tests the plugin's
+# own light `processing` package is a sufficient stand-in, so make ROOT
+# importable too — keeps the tests runnable without a QGIS plugin path.
+sys.path.insert(1, str(ROOT))
 
 
 # ---------------------------------------------------------------------------

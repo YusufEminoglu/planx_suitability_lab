@@ -17,6 +17,9 @@ from qgis.core import (
 )
 
 
+from contextlib import suppress
+
+
 class DeploymentReadinessGateAlgorithm(QgsProcessingAlgorithm):
     SCORECARD = "SCORECARD"
     SCENARIO_SELECTION = "SCENARIO_SELECTION"
@@ -128,12 +131,10 @@ class DeploymentReadinessGateAlgorithm(QgsProcessingAlgorithm):
 
         mm_top = None
         for f in mm_rows:
-            try:
+            with suppress(Exception):
                 if str(f["selected"]).upper() == "YES":
                     mm_top = f
                     break
-            except Exception:
-                continue
         if mm_top is None:
             mm_top = mm_rows[0]
 
@@ -145,26 +146,22 @@ class DeploymentReadinessGateAlgorithm(QgsProcessingAlgorithm):
         wave1_pct = 0.0
         wave2_pct = 0.0
         for f in wave_rows:
-            try:
+            with suppress(Exception):
                 wid = int(f["wave_id"])
                 pct = float(f["pct"])
-            except Exception:
-                continue
-            if wid == 1:
-                wave1_pct = pct
-            elif wid == 2:
-                wave2_pct = pct
+                if wid == 1:
+                    wave1_pct = pct
+                elif wid == 2:
+                    wave2_pct = pct
 
         fragile_pct = 0.0
         for f in reg_rows:
-            try:
+            with suppress(Exception):
                 cid = int(f["class_id"])
                 pct = float(f["pct"])
-            except Exception:
-                continue
-            if cid == 2:
-                fragile_pct = pct
-                break
+                if cid == 2:
+                    fragile_pct = pct
+                    break
 
         flags = []
         if overall < 75.0:

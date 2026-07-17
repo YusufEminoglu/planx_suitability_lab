@@ -13,6 +13,9 @@ import processing
 from osgeo import gdal
 
 
+from contextlib import suppress
+
+
 def ensure_list(value):
     if value is None:
         return []
@@ -26,12 +29,10 @@ def infer_layer_label(layer_or_path, fallback: str = "layer") -> str:
     if layer_or_path is None:
         return fallback
     # QGIS layer-like object
-    try:
+    with suppress(Exception):
         nm = layer_or_path.name()
         if isinstance(nm, str) and nm.strip():
             return nm.strip()
-    except Exception:
-        pass
     # String/path
     try:
         s = str(layer_or_path).strip()

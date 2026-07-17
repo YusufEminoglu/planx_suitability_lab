@@ -23,7 +23,11 @@ from qgis.core import QgsApplication  # noqa: E402
 qgs = QgsApplication([], False)
 qgs.initQgis()
 
-sys.path.insert(0, r"C:\OSGeo4W\apps\qgis-ltr\python\plugins")
+import qgis  # noqa: E402
+
+# Resolve the Processing plugin dir of the *running* QGIS (qgis vs qgis-ltr),
+# so the harness works under both python-qgis-ltr.bat and python-qgis.bat.
+sys.path.insert(0, str(Path(qgis.__file__).resolve().parents[1] / "plugins"))
 sys.path.append(r"C:\Users\YE\PyCharmMiscProject\qgis_plugins")
 
 import processing  # noqa: E402

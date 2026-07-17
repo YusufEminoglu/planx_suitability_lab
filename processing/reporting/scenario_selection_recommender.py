@@ -17,6 +17,9 @@ from qgis.core import (
 )
 
 
+from contextlib import suppress
+
+
 class ScenarioSelectionRecommenderAlgorithm(QgsProcessingAlgorithm):
     BENCHMARK = "BENCHMARK"
     PORTFOLIO = "PORTFOLIO"
@@ -124,17 +127,14 @@ class ScenarioSelectionRecommenderAlgorithm(QgsProcessingAlgorithm):
         portfolio_summary = None
         uniq_by_scenario = {}
         for f in portfolio_rows:
-            try:
+            row_type = ""
+            with suppress(Exception):
                 row_type = str(f["row_type"])
-            except Exception:
-                row_type = ""
             if row_type == "SUMMARY":
                 portfolio_summary = f
             elif row_type == "SCENARIO":
-                try:
+                with suppress(Exception):
                     uniq_by_scenario[str(f["scenario"])] = float(f["uniq_score"])
-                except Exception:
-                    continue
 
         if portfolio_summary is None:
             raise QgsProcessingException("Portfolio diversity table is missing SUMMARY row.")
@@ -143,14 +143,12 @@ class ScenarioSelectionRecommenderAlgorithm(QgsProcessingAlgorithm):
         minimax_max = {}
         minimax_selected = None
         for f in minimax_rows:
-            try:
+            with suppress(Exception):
                 scn = str(f["scenario"])
                 minimax_rank[scn] = int(f["rank"])
                 minimax_max[scn] = float(f["max_regret"])
                 if str(f["selected"]).upper() == "YES":
                     minimax_selected = scn
-            except Exception:
-                continue
         if not minimax_rank:
             raise QgsProcessingException("Minimax table missing scenario/rank/max_regret fields.")
 
@@ -158,29 +156,25 @@ class ScenarioSelectionRecommenderAlgorithm(QgsProcessingAlgorithm):
         robust_rank = {}
         if robustness_src is not None:
             for f in robustness_src.getFeatures(QgsFeatureRequest()):
-                try:
+                with suppress(Exception):
                     scenario = str(f["scenario"])
                     robust_score[scenario] = float(f["robustness"])
                     robust_rank[scenario] = int(f["rank"])
-                except Exception:
-                    continue
 
         ranked = []
         for f in benchmark_rows:
-            try:
+            with suppress(Exception):
                 scenario = str(f["scenario"])
                 composite = float(f["composite"])
                 std_score = float(f["std_score"])
-            except Exception:
-                continue
-            uniq = float(uniq_by_scenario.get(scenario, 0.0))
-            mm_rank = float(minimax_rank.get(scenario, max(2, len(minimax_rank))))
-            mm_bonus = max(0.0, 100.0 - 8.0 * (mm_rank - 1.0))
-            mm_reg = float(minimax_max.get(scenario, 100.0))
-            robust_bonus = float(robust_score.get(scenario, 50.0))
-            robust_rank_bonus = max(0.0, 100.0 - 7.0 * float(max(1, robust_rank.get(scenario, 8)) - 1))
-            adjusted = (0.45 * composite) + (0.11 * uniq) + (0.07 * max(0.0, 100.0 - std_score)) + (0.16 * mm_bonus) + (0.14 * robust_bonus) + (0.07 * robust_rank_bonus)
-            ranked.append((scenario, composite, std_score, uniq, mm_rank, mm_reg, robust_bonus, robust_rank_bonus, adjusted))
+                uniq = float(uniq_by_scenario.get(scenario, 0.0))
+                mm_rank = float(minimax_rank.get(scenario, max(2, len(minimax_rank))))
+                mm_bonus = max(0.0, 100.0 - 8.0 * (mm_rank - 1.0))
+                mm_reg = float(minimax_max.get(scenario, 100.0))
+                robust_bonus = float(robust_score.get(scenario, 50.0))
+                robust_rank_bonus = max(0.0, 100.0 - 7.0 * float(max(1, robust_rank.get(scenario, 8)) - 1))
+                adjusted = (0.45 * composite) + (0.11 * uniq) + (0.07 * max(0.0, 100.0 - std_score)) + (0.16 * mm_bonus) + (0.14 * robust_bonus) + (0.07 * robust_rank_bonus)
+                ranked.append((scenario, composite, std_score, uniq, mm_rank, mm_reg, robust_bonus, robust_rank_bonus, adjusted))
 
         if not ranked:
             raise QgsProcessingException("Benchmark table does not include required fields: scenario/composite/std_score.")

@@ -17,6 +17,9 @@ from qgis.core import (
 )
 
 
+from contextlib import suppress
+
+
 def _clamp(v: float, lo: float = 0.0, hi: float = 100.0) -> float:
     return max(lo, min(hi, float(v)))
 
@@ -78,16 +81,14 @@ class ActionabilityScorecardAlgorithm(QgsProcessingAlgorithm):
         best_capture = None
         best_budget = None
         for f in budget_src.getFeatures(QgsFeatureRequest()):
-            try:
+            with suppress(Exception):
                 b = float(f["budget_pct"])
                 c = float(f["impact_capture_pct"])
-            except Exception:
-                continue
-            d = abs(b - target_budget_pct)
-            if best_diff is None or d < best_diff:
-                best_diff = d
-                best_capture = c
-                best_budget = b
+                d = abs(b - target_budget_pct)
+                if best_diff is None or d < best_diff:
+                    best_diff = d
+                    best_capture = c
+                    best_budget = b
         if best_capture is None:
             return 0.0, 0.0
         return float(best_budget), float(best_capture)
