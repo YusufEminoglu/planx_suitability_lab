@@ -120,6 +120,30 @@ def run() -> int:
         if pid not in processing_ids:
             errors.append(f"Dashboard references unknown processing id: {pid}")
 
+    model_flows = []
+    try:
+        dashboard_ast = ast.parse(dashboard_text.lstrip("\ufeff"), filename="dashboard.py")
+        flow_assignment = next(
+            node
+            for node in dashboard_ast.body
+            if isinstance(node, ast.Assign)
+            and any(isinstance(target, ast.Name) and target.id == "MODEL_FLOWS" for target in node.targets)
+        )
+        model_flows = ast.literal_eval(flow_assignment.value)
+    except (StopIteration, SyntaxError, ValueError) as exc:
+        errors.append(f"MODEL_FLOWS could not be parsed: {exc}")
+    if len(model_flows) != 3:
+        errors.append(f"MODEL_FLOWS must expose exactly 3 alternatives (got {len(model_flows)})")
+    flow_ids = [flow.get("id") for flow in model_flows]
+    if len(flow_ids) != len(set(flow_ids)):
+        errors.append("MODEL_FLOWS contains duplicate flow ids.")
+    for flow in model_flows:
+        steps = flow.get("steps", [])
+        if not 3 <= len(steps) <= 6:
+            errors.append(f"Model flow {flow.get('id')} is not compact (got {len(steps)} stages).")
+        if not flow.get("outcome", "").startswith("Final output:"):
+            errors.append(f"Model flow {flow.get('id')} does not state its final output up front.")
+
     # 5) synthetic pipeline references should resolve
     pipe_text = _read(ROOT / "processing" / "core" / "synthetic_pipeline_runner.py")
     pipe_ids = _extract_plugin_ids(pipe_text)
@@ -148,6 +172,7 @@ def run() -> int:
     print("HEADLESS INTEGRITY: PASS")
     print(f"- Processing ids discovered: {len(processing_ids)}")
     print(f"- Dashboard ids checked: {len(dashboard_ids)}")
+    print(f"- Compact model flows checked: {len(model_flows)}")
     print(f"- Pipeline ids checked: {len(pipe_ids)}")
     print(f"- Evidence ids checked: {len(evidence_ids)}")
     return 0

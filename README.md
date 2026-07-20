@@ -92,13 +92,12 @@ PlanX Suitability Lab is a production-ready raster MCDA plugin for QGIS, designe
   - `numerical_qa_check`
   - `beta_evidence_report` (project evidence summary)
 - Dashboard:
-  - production workflow pages: Overview, Workflow, Guided Flow, Modules, Quick Actions, Recent Runs, System Health
+  - compact `Model Flow` screen with three outcome-led routes: Essential Suitability, Robust Decision Map, and Scenario Comparison
+  - locked stage-by-stage progression, persisted per-model progress, and the final deliverable shown before the first run
+  - focused production pages: Model Flow, Overview, Modules, Recent Runs, System Health
   - module-card view with search/group filters
   - persistent favorite-module star pinning and favorites-only filter
-  - workflow checklist and project-status copy helpers
-  - command guide opener
   - command palette for fast module/action launch (`Ctrl+K`)
-  - optional sample workflow runner for onboarding
   - live per-module `Ready/Missing` registry chips
   - recent-run log panel with timestamps
   - in-toolbox help for all 68 algorithms (`shortHelpString` + `helpUrl`)
@@ -115,9 +114,8 @@ PlanX Suitability Lab is a production-ready raster MCDA plugin for QGIS, designe
 ## Notes
 
 - Use aligned 0-100 criteria rasters for best MCDA behavior.
-- For real projects, start with `data_harmonizer` and continue from the dashboard `Guided Flow` tab.
+- For real projects, open `Model Flow`, choose the final deliverable you need, and start at stage 1.
 - Smart output naming: when an algorithm output is left as temporary, PlanX auto-generates readable file names in the pattern `<input>_<operation>_<timestamp>.tif`.
-- Full command details are available in `docs/COMMAND_GUIDE.html`.
 
 ## 🧩 Part of the PlanX ecosystem
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.6.4] - 2026-07-20
+
+- Added a compact, outcome-led `Model Flow` dashboard with three alternatives: Essential Suitability, Robust Decision Map, and Scenario Comparison. Each route exposes its final output up front, locks future stages until the current stage runs, and persists progress independently.
+- Simplified the production UI by replacing the overlapping Workflow, Guided Flow, and Quick Actions tabs with Model Flow. Removed sample/test workflow and standalone command-guide actions from the user-facing dashboard, stopped shipping the obsolete command-guide page, and retained the complete Processing catalog under Modules.
+
 ## [1.6.3] - 2026-07-17
 
 - QGIS Hub review fixes for 1.6.2. Qt6 compatibility: migrated all 296 Qt5-style `QVariant.*` field-type enums across 37 algorithm files to `QMetaType.Type.*` (`Double`/`Int`/`LongLong` map 1:1, `String` → `QString`) — PyQt6 has no `QVariant.Type`, and `QMetaType.Type` is the documented replacement (the `QgsField` QVariant constructor is deprecated since QGIS 3.38); every mapping was probe-verified with a `QgsField` round-trip on QGIS 3.44 LTR and QGIS 4.2 before rewriting (`scratch/qvariant_to_qmetatype.py`).

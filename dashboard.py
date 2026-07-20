@@ -1,12 +1,10 @@
 ﻿# -*- coding: utf-8 -*-
 from __future__ import annotations
 
-import os
 from datetime import datetime
 
 import processing
-from qgis.PyQt.QtCore import QSettings, Qt, QUrl
-from qgis.PyQt.QtGui import QDesktopServices
+from qgis.PyQt.QtCore import QSettings, Qt
 from qgis.PyQt.QtWidgets import (
     QApplication,
     QComboBox,
@@ -34,7 +32,7 @@ ALGO_GROUPS = [
         [
             ("Data Harmonizer", "planx_suitability_lab:data_harmonizer", "Align CRS/extent/resolution and export aligned stack."),
             ("Sample Data Generator (Optional)", "planx_suitability_lab:synthetic_sample_raster", "Create optional sample criteria and hard mask for learning/demo."),
-            ("Sample Workflow Runner (Optional)", "planx_suitability_lab:synthetic_pipeline_runner", "Run optional sample workflow end-to-end on generated data."),
+            ("Sample Workflow Runner (Optional)", "planx_suitability_lab:synthetic_pipeline_runner", "Run an optional end-to-end learning workflow on generated data."),
         ],
     ),
     (
@@ -258,53 +256,45 @@ GROUP_ACCENT = {
     "Report": "#7a4a5f",
 }
 
-CRITICAL_RUN_SEQUENCE = [
-    "planx_suitability_lab:data_harmonizer",
-    "planx_suitability_lab:alignment_audit",
-    "planx_suitability_lab:wlc_suitability",
-    "planx_suitability_lab:owa_suitability",
-    "planx_suitability_lab:topsis_suitability",
-    "planx_suitability_lab:vikor_suitability",
-    "planx_suitability_lab:ensemble_suitability",
-    "planx_suitability_lab:scenario_consensus_zone",
-    "planx_suitability_lab:scenario_disagreement_attention",
-    "planx_suitability_lab:decision_quadrant_map",
-    "planx_suitability_lab:intervention_conflict_matrix",
-    "planx_suitability_lab:risk_opportunity_matrix_map",
-    "planx_suitability_lab:regret_fragility_map",
-    "planx_suitability_lab:priority_zoning_from_suitability",
-    "planx_suitability_lab:montecarlo_suitability",
-    "planx_suitability_lab:weight_consensus_audit",
-    "planx_suitability_lab:criterion_redundancy_diagnostics",
-    "planx_suitability_lab:constraint_impact_audit",
-    "planx_suitability_lab:method_benchmark_leaderboard",
-    "planx_suitability_lab:scenario_dominance_matrix",
-    "planx_suitability_lab:scenario_robustness_leaderboard",
-    "planx_suitability_lab:scenario_governance_audit",
-    "planx_suitability_lab:scenario_portfolio_diversity",
-    "planx_suitability_lab:minimax_regret_selector",
-    "planx_suitability_lab:priority_transition_matrix",
-    "planx_suitability_lab:spatial_fragmentation_audit",
-    "planx_suitability_lab:consensus_zone_area_stats",
-    "planx_suitability_lab:attention_class_area_stats",
-    "planx_suitability_lab:threshold_coverage_curve",
-    "planx_suitability_lab:executive_kpi_snapshot",
-    "planx_suitability_lab:policy_gate_recommender",
-    "planx_suitability_lab:decision_quadrant_area_stats",
-    "planx_suitability_lab:intervention_conflict_area_stats",
-    "planx_suitability_lab:risk_opportunity_area_stats",
-    "planx_suitability_lab:regret_fragility_area_stats",
-    "planx_suitability_lab:actionability_scorecard",
-    "planx_suitability_lab:scenario_selection_recommender",
-    "planx_suitability_lab:implementation_wave_planner",
-    "planx_suitability_lab:deployment_readiness_gate",
-    "planx_suitability_lab:policy_sensitivity_frontier",
-    "planx_suitability_lab:intervention_budget_phasing",
-    "planx_suitability_lab:action_playbook_generator",
-    "planx_suitability_lab:numerical_qa_check",
-    "planx_suitability_lab:suitability_html_report",
-    "planx_suitability_lab:release_narrative_builder",
-    "planx_suitability_lab:beta_evidence_report",
+MODEL_FLOWS = [
+    {
+        "id": "essential",
+        "title": "Essential Suitability",
+        "summary": "A compact, transparent route for one defensible suitability map.",
+        "outcome": "Final output: a 0-100 WLC suitability raster and ranked candidate-site polygons.",
+        "steps": [
+            ("Prepare the grid", "planx_suitability_lab:data_harmonizer", "Align every criterion to one CRS, extent and cell size."),
+            ("Score the criteria", "planx_suitability_lab:normalizer_reclassifier", "Convert each criterion to a comparable 0-100 score. Repeat this stage for every criterion."),
+            ("Set the weights", "planx_suitability_lab:ahp_weights", "Create transparent expert weights and verify the consistency ratio."),
+            ("Build the suitability map", "planx_suitability_lab:wlc_suitability", "Combine criteria, weights and the optional hard-constraint mask."),
+            ("Extract final sites", "planx_suitability_lab:candidate_site_extractor", "Turn high-scoring contiguous cells into ranked candidate polygons."),
+        ],
+    },
+    {
+        "id": "robust",
+        "title": "Robust Decision Map",
+        "summary": "A risk-aware route when weights or evidence are uncertain.",
+        "outcome": "Final output: a conservative suitability raster and implementation-priority zones.",
+        "steps": [
+            ("Prepare the grid", "planx_suitability_lab:data_harmonizer", "Align the criterion stack before any comparison."),
+            ("Score the criteria", "planx_suitability_lab:normalizer_reclassifier", "Convert every criterion to a comparable 0-100 score; repeat as needed."),
+            ("Build the baseline", "planx_suitability_lab:wlc_suitability", "Create the suitability raster that will be stress-tested."),
+            ("Test uncertainty", "planx_suitability_lab:montecarlo_suitability", "Simulate score variation and produce mean, spread and stability rasters."),
+            ("Create the robust score", "planx_suitability_lab:uncertainty_adjusted_suitability", "Penalize unstable locations according to risk appetite."),
+            ("Create priority zones", "planx_suitability_lab:priority_zoning_from_suitability", "Translate robust suitability into action-oriented final zones."),
+        ],
+    },
+    {
+        "id": "scenario",
+        "title": "Scenario Comparison",
+        "summary": "A compact comparison route once two or more completed suitability rasters are ready.",
+        "outcome": "Final output: a decision-quadrant map separating quick wins from contested areas.",
+        "steps": [
+            ("Synthesize scenarios", "planx_suitability_lab:ensemble_suitability", "Create cross-scenario mean, spread and confidence surfaces."),
+            ("Map disagreement", "planx_suitability_lab:scenario_disagreement_attention", "Locate high-value areas where scenarios conflict."),
+            ("Create the final decision map", "planx_suitability_lab:decision_quadrant_map", "Separate quick wins, contested priorities and low-priority areas."),
+        ],
+    },
 ]
 
 
@@ -322,9 +312,9 @@ class SuitabilityDashboard(QDialog):
         super().__init__(parent)
         self.iface = iface
         self.settings = QSettings()
-        self.run_cursor = int(self.settings.value("planx_suitability_lab/run_cursor", 0, type=int) or 0)
         self.recent_runs = []
         self.card_widgets = []
+        self.model_step_widgets = []
         self._current_card_columns = DEFAULT_CARD_COLUMNS
         self.favorites = set(self.settings.value("planx_suitability_lab/favorites", [], type=list) or [])
         self.setWindowTitle("PlanX Suitability Lab - Production Console")
@@ -484,46 +474,51 @@ class SuitabilityDashboard(QDialog):
         self.tabs = QTabWidget()
         root.addWidget(self.tabs, 1)
 
+        model_tab = QWidget()
+        model_layout = QVBoxLayout(model_tab)
+        model_layout.setContentsMargins(section_margin, section_margin, section_margin, section_margin)
+        model_head = QHBoxLayout()
+        model_label = QLabel("Choose a model")
+        model_label.setProperty("classTitle", True)
+        model_head.addWidget(model_label)
+        self.model_flow_combo = QComboBox()
+        for model in MODEL_FLOWS:
+            self.model_flow_combo.addItem(model["title"], model["id"])
+        saved_model = self.settings.value("planx_suitability_lab/model_flow", MODEL_FLOWS[0]["id"])
+        saved_index = self.model_flow_combo.findData(saved_model)
+        self.model_flow_combo.setCurrentIndex(max(0, saved_index))
+        self.model_flow_combo.currentIndexChanged.connect(self._model_flow_changed)
+        model_head.addWidget(self.model_flow_combo, 1)
+        self.model_progress = QLabel()
+        self.model_progress.setObjectName("cardCount")
+        model_head.addWidget(self.model_progress)
+        reset_model = QPushButton("Reset flow")
+        reset_model.setObjectName("ghost")
+        reset_model.clicked.connect(self._reset_model_flow)
+        model_head.addWidget(reset_model)
+        model_layout.addLayout(model_head)
+
+        self.model_summary = QLabel()
+        self.model_summary.setWordWrap(True)
+        self.model_summary.setStyleSheet("color:#35545f;padding:2px 4px;")
+        model_layout.addWidget(self.model_summary)
+        self.model_outcome = QLabel()
+        self.model_outcome.setWordWrap(True)
+        self.model_outcome.setStyleSheet("background:#e5f4ed;color:#174b36;border:1px solid #b7dcc9;border-radius:8px;padding:9px;font-weight:700;")
+        model_layout.addWidget(self.model_outcome)
+
+        model_scroll = QScrollArea()
+        model_scroll.setWidgetResizable(True)
+        self.model_steps_host = QWidget()
+        self.model_steps_layout = QVBoxLayout(self.model_steps_host)
+        self.model_steps_layout.setContentsMargins(4, 4, 4, 4)
+        self.model_steps_layout.setSpacing(grid_spacing)
+        model_scroll.setWidget(self.model_steps_host)
+        model_layout.addWidget(model_scroll, 1)
+        self.tabs.addTab(model_tab, "Model Flow")
+
         self.overview = QTextBrowser()
         self.tabs.addTab(self.overview, "Overview")
-
-        workflow_tab = QWidget()
-        wf = QVBoxLayout(workflow_tab)
-        wf.setContentsMargins(section_margin, section_margin, section_margin, section_margin)
-        top = QHBoxLayout()
-        self.workflow_combo = QComboBox()
-        for group, items in ALGO_GROUPS:
-            for title_txt, aid, desc in items:
-                self.workflow_combo.addItem(f"{group} - {title_txt}", (aid, desc))
-        top.addWidget(self.workflow_combo, 1)
-        run_sel = QPushButton("Run Selected")
-        run_sel.clicked.connect(self._run_selected)
-        top.addWidget(run_sel)
-        wf.addLayout(top)
-        self.workflow_desc = QTextBrowser()
-        self.workflow_desc.setMaximumHeight(95)
-        wf.addWidget(self.workflow_desc)
-        self.workflow_map = QTextBrowser()
-        wf.addWidget(self.workflow_map, 1)
-        self.workflow_combo.currentIndexChanged.connect(self._update_selected_desc)
-        self.tabs.addTab(workflow_tab, "Workflow")
-
-        navigator_tab = QWidget()
-        nl = QVBoxLayout(navigator_tab)
-        nl.setContentsMargins(section_margin, section_margin, section_margin, section_margin)
-        nav_btns = QHBoxLayout()
-        run_next = QPushButton("Run Next Suggested Step")
-        run_next.clicked.connect(self._run_next_critical)
-        nav_btns.addWidget(run_next)
-        copy_runbook = QPushButton("Copy Workflow Checklist")
-        copy_runbook.setObjectName("ghost")
-        copy_runbook.clicked.connect(self._copy_runbook)
-        nav_btns.addWidget(copy_runbook)
-        nav_btns.addStretch(1)
-        nl.addLayout(nav_btns)
-        self.navigator = QTextBrowser()
-        nl.addWidget(self.navigator, 1)
-        self.tabs.addTab(navigator_tab, "Guided Flow")
 
         modules_tab = QWidget()
         ml = QVBoxLayout(modules_tab)
@@ -560,30 +555,6 @@ class SuitabilityDashboard(QDialog):
         ml.addWidget(self.cards_scroll, 1)
         self.tabs.addTab(modules_tab, "Modules")
 
-        quick_tab = QWidget()
-        ql = QGridLayout(quick_tab)
-        ql.setContentsMargins(12, 12, 12, 12)
-        ql.setHorizontalSpacing(grid_spacing)
-        ql.setVerticalSpacing(grid_spacing)
-        quick_buttons = [
-            ("Run Suggested Next Step", self._run_next_critical, False),
-            ("Generate Project Evidence", self._run_release_evidence, False),
-            ("Open Command Palette", self._open_command_palette, False),
-            ("Open Command Guide", self._open_command_guide, True),
-            ("Show Shortcut Help", self._show_shortcuts, True),
-            ("Copy Project Status", self._copy_diagnostics, True),
-            ("Copy Shortcuts", self._copy_shortcuts, True),
-            ("Copy Workflow Checklist", self._copy_runbook, True),
-            ("Run Sample Workflow (Optional)", self._run_synthetic_pipeline, True),
-        ]
-        for i, (txt, fn, ghost) in enumerate(quick_buttons):
-            b = QPushButton(txt)
-            if ghost:
-                b.setObjectName("ghost")
-            b.clicked.connect(fn)
-            ql.addWidget(b, i // 2, i % 2)
-        self.tabs.addTab(quick_tab, "Quick Actions")
-
         runlog_tab = QWidget()
         rl = QVBoxLayout(runlog_tab)
         rl.setContentsMargins(section_margin, section_margin, section_margin, section_margin)
@@ -602,12 +573,116 @@ class SuitabilityDashboard(QDialog):
         refresh = QPushButton("Refresh")
         refresh.clicked.connect(self._refresh)
         footer.addWidget(refresh)
-        hint = QLabel("Shortcuts: Ctrl+K palette | Ctrl+R refresh | Ctrl+D status | Ctrl+H help | Ctrl+G guide | Ctrl+P sample(optional) | Ctrl+N next-step")
+        hint = QLabel("Shortcuts: Ctrl+N current model stage | Ctrl+K module search | Ctrl+R refresh | Ctrl+D status | Ctrl+H help")
         hint.setStyleSheet("color:#35545f;")
         footer.addWidget(hint, 1)
         root.addLayout(footer)
 
         self._build_cards()
+        self._render_model_flow()
+
+    def _current_model(self):
+        model_id = self.model_flow_combo.currentData()
+        return next((model for model in MODEL_FLOWS if model["id"] == model_id), MODEL_FLOWS[0])
+
+    def _model_progress_index(self, model):
+        key = f"planx_suitability_lab/model_progress/{model['id']}"
+        value = int(self.settings.value(key, 0, type=int) or 0)
+        return max(0, min(value, len(model["steps"])))
+
+    def _model_flow_changed(self):
+        model = self._current_model()
+        self.settings.setValue("planx_suitability_lab/model_flow", model["id"])
+        self._render_model_flow()
+
+    def _render_model_flow(self):
+        while self.model_steps_layout.count():
+            item = self.model_steps_layout.takeAt(0)
+            widget = item.widget()
+            if widget is not None:
+                widget.setParent(None)
+                widget.deleteLater()
+        self.model_step_widgets = []
+
+        model = self._current_model()
+        cursor = self._model_progress_index(model)
+        total = len(model["steps"])
+        self.model_summary.setText(model["summary"])
+        self.model_outcome.setText(model["outcome"])
+        self.model_progress.setText(f"Progress: {cursor}/{total}")
+
+        reg = QgsApplication.processingRegistry()
+        for index, (title_txt, algo_id, desc) in enumerate(model["steps"]):
+            card = QFrame()
+            card.setProperty("classCard", True)
+            row = QHBoxLayout(card)
+            row.setContentsMargins(12, 9, 12, 9)
+
+            step_no = QLabel(str(index + 1))
+            step_no.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            step_no.setFixedSize(30, 30)
+            if index < cursor:
+                step_no.setStyleSheet("background:#9fdfbf;color:#174b36;border-radius:15px;font-weight:700;")
+                state = "Complete"
+            elif index == cursor:
+                step_no.setStyleSheet("background:#236e83;color:white;border-radius:15px;font-weight:700;")
+                state = "Current stage"
+            else:
+                step_no.setStyleSheet("background:#dce9ec;color:#4a6871;border-radius:15px;font-weight:700;")
+                state = "Upcoming"
+            row.addWidget(step_no)
+
+            copy = QVBoxLayout()
+            stage_title = QLabel(f"{title_txt}  |  {state}")
+            stage_title.setProperty("classTitle", True)
+            stage_desc = QLabel(desc)
+            stage_desc.setWordWrap(True)
+            stage_desc.setProperty("classMeta", True)
+            copy.addWidget(stage_title)
+            copy.addWidget(stage_desc)
+            row.addLayout(copy, 1)
+
+            run_btn = QPushButton("Run again" if index < cursor else "Run stage")
+            available = reg.algorithmById(algo_id) is not None
+            run_btn.setEnabled(available and index <= cursor)
+            if index > cursor:
+                run_btn.setText("Locked")
+                run_btn.setObjectName("ghost")
+            elif not available:
+                run_btn.setText("Missing")
+                run_btn.setObjectName("ghost")
+            run_btn.clicked.connect(
+                lambda _checked=False, mid=model["id"], pos=index: self._run_model_stage(mid, pos)
+            )
+            row.addWidget(run_btn)
+            self.model_steps_layout.addWidget(card)
+            self.model_step_widgets.append(card)
+        self.model_steps_layout.addStretch(1)
+
+    def _run_model_stage(self, model_id, index):
+        model = next((item for item in MODEL_FLOWS if item["id"] == model_id), None)
+        if model is None or index >= len(model["steps"]):
+            return
+        title_txt, algo_id, _ = model["steps"][index]
+        if not self._run_algorithm(algo_id, title_txt):
+            return
+        cursor = self._model_progress_index(model)
+        if index == cursor:
+            self.settings.setValue(f"planx_suitability_lab/model_progress/{model_id}", cursor + 1)
+        self._render_model_flow()
+
+    def _run_current_model_stage(self):
+        model = self._current_model()
+        cursor = self._model_progress_index(model)
+        if cursor >= len(model["steps"]):
+            QMessageBox.information(self, "PlanX Suitability Lab", model["outcome"])
+            return
+        self._run_model_stage(model["id"], cursor)
+
+    def _reset_model_flow(self):
+        model = self._current_model()
+        self.settings.setValue(f"planx_suitability_lab/model_progress/{model['id']}", 0)
+        self._render_model_flow()
 
     def _build_cards(self):
         for w in self.card_widgets:
@@ -700,23 +775,6 @@ class SuitabilityDashboard(QDialog):
         self.settings.setValue("planx_suitability_lab/favorites", sorted(self.favorites))
         self._filter_cards()
 
-    def _build_workflow_html(self):
-        parts = ["<h2>Operational Map</h2>"]
-        for group, items in ALGO_GROUPS:
-            parts.append(f"<h3>{group}</h3><ul>")
-            for title_txt, aid, desc in items:
-                parts.append(f"<li><b>{title_txt}</b> (<code>{aid}</code>)<br>{desc}</li>")
-            parts.append("</ul>")
-        return "".join(parts)
-
-    def _update_selected_desc(self):
-        data = self.workflow_combo.currentData()
-        if not data:
-            self.workflow_desc.setHtml("")
-            return
-        aid, desc = data
-        self.workflow_desc.setHtml(f"<b>{aid}</b><br>{desc}")
-
     def _track_run(self, algo_id, label):
         ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.recent_runs.insert(0, f"[{ts}] {label} ({algo_id})")
@@ -742,17 +800,12 @@ class SuitabilityDashboard(QDialog):
                 "PlanX Suitability Lab",
                 "Processing provider is not registered yet. Reload the plugin or refresh the Processing toolbox, then try again.",
             )
-            return
-        processing.execAlgorithmDialog(algo_id)
+            return False
+        result = processing.execAlgorithmDialog(algo_id)
+        if not result:
+            return False
         self._track_run(algo_id, label)
-
-    def _run_selected(self):
-        data = self.workflow_combo.currentData()
-        if not data:
-            return
-        aid, _ = data
-        label = self.workflow_combo.currentText()
-        self._run_algorithm(aid, label)
+        return True
 
     def _refresh(self):
         layers = list(QgsProject.instance().mapLayers().values())
@@ -792,12 +845,11 @@ class SuitabilityDashboard(QDialog):
             "<p>Production raster MCDA workflow with hard constraints, uncertainty, explainability, and reporting.</p>"
             + f"<p><b>Loaded layers:</b> {len(layers)} (vector: {len(vectors)}, raster: {len(rasters)})</p>"
             + f"<p><b>System health score:</b> {gov_score:.1f}% ({gov_ok}/{gov_total} checks)</p>"
-            + "<p><b>Tip:</b> Start with <code>Data Harmonizer</code>, then continue from <code>Guided Flow</code>.</p>"
+            + "<p><b>Tip:</b> Choose a goal in <code>Model Flow</code>; the first stage and final output are shown together.</p>"
         )
-        self.workflow_map.setHtml(self._build_workflow_html())
-        self._update_selected_desc()
         self._refresh_runlog()
         self._filter_cards()
+        self._render_model_flow()
 
         gov_table = [
             "<table style='border-collapse:collapse;width:100%'>",
@@ -819,55 +871,10 @@ class SuitabilityDashboard(QDialog):
             + "<h3>What this means</h3>"
             "<ul>"
             "<li>Prepare/Criteria/Weights/Compose/Report pipeline modules are registered.</li>"
-            "<li>You can run modules from Workflow, Modules, or Command Palette.</li>"
+            "<li>You can run guided stages from Model Flow or any individual tool from Modules.</li>"
             "<li>If modules are missing, restart QGIS and refresh this panel.</li>"
             "</ul>"
         )
-        self.navigator.setHtml(self._build_navigator_html(gov_rows, missing))
-
-    def _build_navigator_html(self, gov_rows, missing):
-        title = "Guided Project Flow"
-        lead = "Follow this sequence to run a complete, production suitability workflow in a consistent way."
-        missing_label = "Missing modules"
-        next_step = "Next best action"
-        all_good = "Core modules are active. Continue with the guided flow."
-
-        flow = [
-            "1) Prepare: Data Harmonizer + Alignment Audit to standardize all criteria rasters.",
-            "2) Criteria: Rasterize vectors, build proximity layers, normalize scores, and create hard constraints.",
-            "3) Weights: Run AHP/PCA/Entropy/CRITIC and review consensus before selecting scenarios.",
-            "4) Compose: Build WLC/OWA/TOPSIS/VIKOR, then inspect consensus, disagreement, and priority zoning.",
-            "5) Explain + Report: Monte Carlo, sensitivity, KPI tables, HTML report, and planning narrative.",
-        ]
-
-        gates = [
-            "<table style='border-collapse:collapse;width:100%'>",
-            "<tr><th style='text-align:left;border:1px solid #d7e3e6;padding:6px'>Gate</th><th style='text-align:right;border:1px solid #d7e3e6;padding:6px'>Coverage</th><th style='text-align:right;border:1px solid #d7e3e6;padding:6px'>Score</th></tr>",
-        ]
-        for gname, found, total, pct in gov_rows:
-            gates.append(
-                f"<tr><td style='border:1px solid #d7e3e6;padding:6px'>{gname}</td><td style='text-align:right;border:1px solid #d7e3e6;padding:6px'>{found}/{total}</td><td style='text-align:right;border:1px solid #d7e3e6;padding:6px'>{pct:.1f}%</td></tr>"
-            )
-        gates.append("</table>")
-
-        next_action = all_good if not missing else f"{next_step}: <code>{missing[0]}</code>"
-        miss_text = ", ".join(missing) if missing else "None"
-        seq_id = CRITICAL_RUN_SEQUENCE[self.run_cursor % len(CRITICAL_RUN_SEQUENCE)]
-        seq_hint = f"Suggested next run: <code>{seq_id}</code>"
-
-        html = (
-            f"<h2>{title}</h2>"
-            f"<p>{lead}</p>"
-            "<ol>"
-            + "".join(f"<li>{row}</li>" for row in flow)
-            + "</ol>"
-            f"<p><b>{missing_label}:</b> {miss_text}</p>"
-            f"<p><b>{next_action}</b></p>"
-            f"<p><b>{seq_hint}</b></p>"
-            "<h3>Module Coverage</h3>"
-            + "".join(gates)
-        )
-        return html
 
     def _copy_diagnostics(self):
         layers = list(QgsProject.instance().mapLayers().values())
@@ -889,39 +896,6 @@ class SuitabilityDashboard(QDialog):
         )
         QApplication.clipboard().setText(txt)
 
-    def _copy_shortcuts(self):
-        txt = (
-            "PlanX Suitability Lab Shortcuts\n"
-            "===============================\n"
-            "Ctrl+K : Open command palette\n"
-            "Ctrl+R : Refresh dashboard checks\n"
-            "Ctrl+D : Copy project status\n"
-            "Ctrl+I : Copy workflow checklist\n"
-            "Ctrl+H : Show shortcut help\n"
-            "Ctrl+G : Open command guide\n"
-            "Ctrl+P : Run sample workflow (optional)\n"
-            "Ctrl+N : Run next suggested step\n"
-        )
-        QApplication.clipboard().setText(txt)
-
-    def _copy_runbook(self):
-        txt = (
-            "PlanX Suitability Lab - Workflow Checklist\n"
-            "==========================================\n"
-            "1. Prepare: Harmonize all rasters and run alignment audit.\n"
-            "2. Criteria: Rasterize vectors, create proximity rasters, normalize criteria, build hard constraints.\n"
-            "3. Weights: Compute AHP/PCA/Entropy/CRITIC and review consensus table.\n"
-            "4. Compose: Generate WLC/OWA/TOPSIS/VIKOR and compare scenarios.\n"
-            "5. Explain: Run Monte Carlo and sensitivity/contribution modules.\n"
-            "6. Report: Produce class stats, KPI snapshot, HTML report, and planning narrative.\n"
-        )
-        QApplication.clipboard().setText(txt)
-
-    def _open_command_guide(self):
-        guide_path = os.path.join(os.path.dirname(__file__), "docs", "COMMAND_GUIDE.html")
-        if os.path.exists(guide_path):
-            QDesktopServices.openUrl(QUrl.fromLocalFile(guide_path))
-
     def _show_shortcuts(self):
         popup = QDialog(self)
         popup.setWindowTitle("Shortcut Help")
@@ -934,11 +908,8 @@ class SuitabilityDashboard(QDialog):
             "<li><b>Ctrl+K</b> - Open command palette</li>"
             "<li><b>Ctrl+R</b> - Refresh dashboard checks</li>"
             "<li><b>Ctrl+D</b> - Copy project status</li>"
-            "<li><b>Ctrl+I</b> - Copy workflow checklist</li>"
             "<li><b>Ctrl+H</b> - Show this shortcut help</li>"
-            "<li><b>Ctrl+G</b> - Open full command guide</li>"
-            "<li><b>Ctrl+P</b> - Run sample workflow (optional)</li>"
-            "<li><b>Ctrl+N</b> - Run next suggested step</li>"
+            "<li><b>Ctrl+N</b> - Run the current Model Flow stage</li>"
             "</ul>"
         )
         layout.addWidget(browser, 1)
@@ -961,13 +932,10 @@ class SuitabilityDashboard(QDialog):
         layout.addWidget(listing, 1)
 
         commands = [
-            ("Run Sample Workflow (Optional)", "__action__:run_synthetic", "Optional end-to-end run on sample data", self._run_synthetic_pipeline),
-            ("Run Next Suggested Step", "__action__:next_critical", "Guided project workflow execution", self._run_next_critical),
+            ("Run Current Model Stage", "__action__:model_stage", "Continue the selected compact model flow", self._run_current_model_stage),
             ("Generate Project Evidence", "__action__:release_evidence", "Open consolidated project evidence dialog", self._run_release_evidence),
-            ("Open Command Guide", "__action__:command_guide", "Open detailed command usage guide", self._open_command_guide),
             ("Show Shortcut Help", "__action__:shortcut_help", "Open shortcuts quick help", self._show_shortcuts),
             ("Copy Project Status", "__action__:copy_diag", "Copy layer and module coverage status", self._copy_diagnostics),
-            ("Copy Workflow Checklist", "__action__:copy_runbook", "Copy step-by-step production workflow checklist", self._copy_runbook),
         ]
         for group, items in ALGO_GROUPS:
             for title_txt, aid, desc in items:
@@ -1022,27 +990,8 @@ class SuitabilityDashboard(QDialog):
         query.setFocus()
         popup.exec()
 
-    def _run_synthetic_pipeline(self):
-        self._run_algorithm("planx_suitability_lab:synthetic_pipeline_runner", "Sample Workflow Runner")
-
     def _run_release_evidence(self):
         self._run_algorithm("planx_suitability_lab:beta_evidence_report", "Project Evidence Summary")
-
-    def _run_next_critical(self):
-        reg = QgsApplication.processingRegistry()
-        if not CRITICAL_RUN_SEQUENCE:
-            self._run_synthetic_pipeline()
-            return
-        max_len = len(CRITICAL_RUN_SEQUENCE)
-        for _ in range(max_len):
-            aid = CRITICAL_RUN_SEQUENCE[self.run_cursor % max_len]
-            self.run_cursor = (self.run_cursor + 1) % max_len
-            self.settings.setValue("planx_suitability_lab/run_cursor", self.run_cursor)
-            if reg.algorithmById(aid) is not None:
-                self._run_algorithm(aid, aid.split(":")[-1])
-                self._refresh()
-                return
-        self._run_synthetic_pipeline()
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
@@ -1064,19 +1013,10 @@ class SuitabilityDashboard(QDialog):
         if event.modifiers() == Qt.KeyboardModifier.ControlModifier and event.key() == Qt.Key.Key_D:
             self._copy_diagnostics()
             return
-        if event.modifiers() == Qt.KeyboardModifier.ControlModifier and event.key() == Qt.Key.Key_I:
-            self._copy_runbook()
-            return
         if event.modifiers() == Qt.KeyboardModifier.ControlModifier and event.key() == Qt.Key.Key_H:
             self._show_shortcuts()
             return
-        if event.modifiers() == Qt.KeyboardModifier.ControlModifier and event.key() == Qt.Key.Key_G:
-            self._open_command_guide()
-            return
-        if event.modifiers() == Qt.KeyboardModifier.ControlModifier and event.key() == Qt.Key.Key_P:
-            self._run_synthetic_pipeline()
-            return
         if event.modifiers() == Qt.KeyboardModifier.ControlModifier and event.key() == Qt.Key.Key_N:
-            self._run_next_critical()
+            self._run_current_model_stage()
             return
         super().keyPressEvent(event)
