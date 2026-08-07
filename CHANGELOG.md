@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.6.7] - 2026-08-07
+
+- Added online user manual link (https://yusufeminoglu.github.io/planx_suitability_lab/) and GitHub repository star call-to-action.
+
 ## [1.6.6] - 2026-08-07
 
 - Add floating Save as PDF button to reference manual
