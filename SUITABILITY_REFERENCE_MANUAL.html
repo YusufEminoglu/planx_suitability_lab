@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PlanX Suitability Lab — Comprehensive Reference Manual v1.6.4</title>
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   PlanX Suitability Lab — Reference Manual Design System
+   Palette: Forest green + warm amber on stone gray — land suitability, MCDA rigor
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Primary — forest green family (land, suitability) */
+  --sl-green-900: #0d2818;
+  --sl-green-800: #164723;
+  --sl-green-700: #1e5e2e;
+  --sl-green-600: #26763a;
+  --sl-green-500: #2e8c46;
+  --sl-green-400: #3da85a;
+  --sl-green-300: #6ac47d;
+  --sl-green-200: #95d9a3;
+  --sl-green-100: #bfe9c7;
+  --sl-green-50:  #dff5e3;
+
+  /* Accent — warm amber (decision, action) */
+  --sl-amber-600: #b45309;
+  --sl-amber-500: #d97706;
+  --sl-amber-400: #f59e0b;
+  --sl-amber-300: #fbbf24;
+  --sl-amber-200: #fcd34d;
+  --sl-amber-100: #fde68a;
+  --sl-amber-50:  #fef7e1;
+
+  /* Neutrals — stone/warm gray */
+  --sl-stone-900: #1c1917;
+  --sl-stone-800: #292524;
+  --sl-stone-700: #44403c;
+  --sl-stone-600: #57534e;
+  --sl-stone-500: #78716c;
+  --sl-stone-400: #a8a29e;
+  --sl-stone-300: #c4bfba;
+  --sl-stone-200: #ddd6d0;
+  --sl-stone-100: #ede7e0;
+  --sl-stone-50:  #f7f4f0;
+  --sl-stone-25:  #fcfaf8;
+
+  /* Semantic */
+  --sl-red:    #b91c1c;
+  --sl-blue:   #1e40af;
+  --sl-purple: #6d28d9;
+
+  /* Layout */
+  --sidebar-w: 280px;
+  --content-max: 960px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 3px rgba(28,25,23,.07);
+  --shadow-md: 0 4px 14px rgba(28,25,23,.09);
+  --shadow-lg: 0 12px 40px rgba(28,25,23,.11);
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
+  --font-display: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+
+body {
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--sl-stone-800);
+  background: var(--sl-stone-25);
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ═══════════════════════════ SIDEBAR ═══════════════════════════ */
+nav#sidebar {
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  width: var(--sidebar-w);
+  background: linear-gradient(180deg, var(--sl-green-900) 0%, var(--sl-green-800) 100%);
+  color: #fff;
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 2px 0 24px rgba(13,40,24,.25);
+}
+nav#sidebar::-webkit-scrollbar { width: 5px; }
+nav#sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 3px; }
+
+.sidebar-header { padding: 28px 22px 18px; border-bottom: 1px solid rgba(255,255,255,.10); }
+.sidebar-header .brand { font-family: var(--font-display); font-size: 1.18rem; font-weight: 700; letter-spacing: -0.01em; color: #fff; line-height: 1.25; }
+.sidebar-header .brand span { display: block; font-size: .72rem; font-weight: 500; text-transform: uppercase; letter-spacing: .12em; color: var(--sl-green-200); margin-top: 2px; }
+.sidebar-header .version { font-size: .68rem; color: var(--sl-green-300); margin-top: 6px; font-family: var(--font-mono); }
+
+.sidebar-nav { flex: 1; padding: 10px 0; }
+.sidebar-nav a {
+  display: block; padding: 7px 22px; color: rgba(255,255,255,.70); text-decoration: none;
+  font-size: .83rem; font-weight: 450; transition: all .15s; border-left: 3px solid transparent;
+}
+.sidebar-nav a:hover { color: #fff; background: rgba(255,255,255,.06); border-left-color: var(--sl-green-300); }
+.sidebar-nav a.active { color: #fff; background: rgba(255,255,255,.08); border-left-color: var(--sl-amber-400); font-weight: 600; }
+
+.sidebar-nav .group-label {
+  font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .10em;
+  color: var(--sl-green-200); padding: 16px 22px 4px;
+}
+.sidebar-nav .group-label:first-child { padding-top: 2px; }
+
+.sidebar-footer { padding: 16px 22px; border-top: 1px solid rgba(255,255,255,.10); font-size: .65rem; color: rgba(255,255,255,.36); line-height: 1.6; }
+
+/* ═══════════════════════════ MAIN ═══════════════════════════ */
+main { margin-left: var(--sidebar-w); flex: 1; min-width: 0; }
+
+/* Hero */
+.hero {
+  background: linear-gradient(135deg, var(--sl-green-900) 0%, var(--sl-green-700) 35%, var(--sl-green-600) 100%);
+  color: #fff; padding: 64px 48px 56px; position: relative; overflow: hidden;
+}
+.hero::after {
+  content: ''; position: absolute; top: -50%; right: -10%;
+  width: 460px; height: 460px;
+  background: radial-gradient(circle, rgba(255,255,255,.05) 0%, transparent 70%);
+  border-radius: 50%; pointer-events: none;
+}
+.hero::before {
+  content: ''; position: absolute; bottom: -25%; left: 12%;
+  width: 280px; height: 280px;
+  background: radial-gradient(circle, rgba(245,158,11,.08) 0%, transparent 70%);
+  border-radius: 50%; pointer-events: none;
+}
+.hero-inner { position: relative; z-index: 1; max-width: var(--content-max); }
+.hero h1 { font-family: var(--font-display); font-size: 2.6rem; font-weight: 800; letter-spacing: -0.025em; line-height: 1.15; margin-bottom: 12px; }
+.hero h1 em { font-style: normal; color: var(--sl-amber-400); }
+.hero .tagline { font-size: 1.12rem; font-weight: 400; color: rgba(255,255,255,.76); max-width: 640px; line-height: 1.55; }
+.hero .meta-row { display: flex; gap: 28px; margin-top: 28px; flex-wrap: wrap; }
+.hero .meta-chip { background: rgba(255,255,255,.10); border: 1px solid rgba(255,255,255,.14); border-radius: 100px; padding: 6px 18px; font-size: .78rem; font-weight: 500; color: rgba(255,255,255,.86); font-family: var(--font-mono); letter-spacing: .02em; }
+
+.content-area { max-width: var(--content-max); padding: 40px 48px 80px; }
+
+/* Section intro */
+.section-intro { margin-bottom: 48px; padding-bottom: 32px; border-bottom: 1px solid var(--sl-stone-200); }
+.section-intro h2 { font-family: var(--font-display); font-size: 1.55rem; font-weight: 700; color: var(--sl-stone-900); margin-bottom: 10px; letter-spacing: -0.01em; }
+.section-intro p { color: var(--sl-stone-600); font-size: .94rem; max-width: 720px; line-height: 1.7; }
+
+/* Group header */
+.group-header { margin: 56px 0 28px; padding-bottom: 14px; border-bottom: 2px solid var(--sl-green-100); display: flex; align-items: baseline; gap: 14px; }
+.group-header .group-num { font-family: var(--font-mono); font-size: .78rem; font-weight: 700; color: var(--sl-green-600); background: var(--sl-green-50); padding: 3px 12px; border-radius: 100px; white-space: nowrap; }
+.group-header h3 { font-family: var(--font-display); font-size: 1.32rem; font-weight: 700; color: var(--sl-stone-900); letter-spacing: -0.01em; }
+
+/* Algorithm card */
+.alg-card {
+  background: #fff; border: 1px solid var(--sl-stone-200); border-radius: var(--radius-md);
+  margin-bottom: 30px; box-shadow: var(--shadow-sm); overflow: hidden; transition: box-shadow .2s;
+}
+.alg-card:hover { box-shadow: var(--shadow-md); }
+.alg-card:target { border-color: var(--sl-green-300); box-shadow: 0 0 0 3px rgba(61,168,90,.15); scroll-margin-top: 28px; }
+.alg-card-header { padding: 22px 28px 0; display: flex; align-items: flex-start; gap: 16px; }
+.alg-icon { width: 44px; height: 44px; border-radius: var(--radius-sm); background: linear-gradient(135deg, var(--sl-green-500), var(--sl-green-700)); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #fff; font-size: 1.15rem; }
+.alg-card-header .alg-info { flex: 1; min-width: 0; }
+.alg-card-header h4 { font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; color: var(--sl-stone-900); margin-bottom: 4px; }
+.alg-card-header .alg-id { font-family: var(--font-mono); font-size: .68rem; color: var(--sl-stone-500); letter-spacing: .04em; }
+
+.alg-card-body { padding: 16px 28px 22px; }
+.alg-desc { color: var(--sl-stone-700); font-size: .88rem; line-height: 1.65; margin-bottom: 18px; }
+.alg-card-body h5 { font-family: var(--font-display); font-size: .80rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--sl-green-700); margin: 20px 0 8px; padding-bottom: 5px; border-bottom: 1px solid var(--sl-green-50); }
+
+.params-table { width: 100%; border-collapse: collapse; font-size: .83rem; margin: 8px 0 14px; }
+.params-table th { background: var(--sl-stone-50); color: var(--sl-stone-700); font-size: .67rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; padding: 8px 13px; text-align: left; border-bottom: 2px solid var(--sl-stone-200); }
+.params-table td { padding: 8px 13px; border-bottom: 1px solid var(--sl-stone-100); color: var(--sl-stone-700); vertical-align: top; }
+.params-table tr:last-child td { border-bottom: none; }
+.params-table .param-name { font-family: var(--font-mono); font-size: .80rem; font-weight: 600; color: var(--sl-stone-800); }
+.params-table .param-type { font-family: var(--font-mono); font-size: .74rem; color: var(--sl-green-600); }
+.params-table .param-default { font-family: var(--font-mono); font-size: .76rem; color: var(--sl-stone-500); }
+
+.formula-block { background: var(--sl-stone-50); border-left: 4px solid var(--sl-green-400); padding: 14px 18px; margin: 12px 0; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; font-family: var(--font-mono); font-size: .83rem; color: var(--sl-stone-800); line-height: 1.8; overflow-x: auto; }
+.formula-block .var { color: var(--sl-green-700); font-weight: 600; }
+.formula-block .op { color: var(--sl-stone-500); }
+
+.acad-note { background: linear-gradient(135deg, var(--sl-amber-50), #fff); border: 1px solid var(--sl-amber-200); border-radius: var(--radius-sm); padding: 13px 17px; margin: 12px 0; font-size: .83rem; color: var(--sl-stone-700); line-height: 1.6; }
+.acad-note strong { color: var(--sl-amber-600); }
+
+.interp-box { background: var(--sl-green-50); border: 1px solid var(--sl-green-200); border-radius: var(--radius-sm); padding: 13px 17px; margin: 12px 0; font-size: .83rem; color: var(--sl-stone-700); line-height: 1.6; }
+.interp-box strong { color: var(--sl-green-700); }
+
+.output-fields { font-size: .80rem; line-height: 1.6; color: var(--sl-stone-700); }
+.output-fields code { font-family: var(--font-mono); font-size: .78rem; background: var(--sl-stone-50); padding: 1px 6px; border-radius: 3px; color: var(--sl-green-700); }
+
+.cite { font-size: .76rem; color: var(--sl-stone-500); line-height: 1.5; margin-top: 6px; font-style: italic; }
+
+.callout { border-radius: var(--radius-md); padding: 18px 22px; margin: 26px 0; font-size: .86rem; line-height: 1.65; }
+.callout-tip { background: #f0fdf4; border: 1px solid #bbf7d0; color: #14532d; }
+.callout-tip strong { color: var(--sl-green-700); }
+.callout-warn { background: #fffbeb; border: 1px solid #fde68a; color: #5c3d0b; }
+.callout-info { background: #f0f7fe; border: 1px solid #c4ddf7; color: #1a3650; }
+
+/* Pipeline flow */
+.pipeline-flow { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0; }
+.pipeline-step { background: #fff; border: 1.5px solid var(--sl-stone-200); border-radius: var(--radius-md); padding: 14px 16px; flex: 1 1 140px; min-width: 130px; text-align: center; transition: all .15s; cursor: default; }
+.pipeline-step:hover { border-color: var(--sl-green-300); box-shadow: var(--shadow-md); }
+.pipeline-step .step-num { font-family: var(--font-mono); font-size: .64rem; font-weight: 700; color: var(--sl-green-600); letter-spacing: .08em; margin-bottom: 3px; }
+.pipeline-step .step-name { font-size: .80rem; font-weight: 650; color: var(--sl-stone-800); }
+.pipeline-step .step-tools { font-size: .68rem; color: var(--sl-stone-500); margin-top: 3px; }
+.pipeline-arrow { display: flex; align-items: center; color: var(--sl-green-300); font-size: 1.3rem; font-weight: 300; }
+
+/* Stats grid */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin: 18px 0; }
+.stat-tile { background: #fff; border: 1px solid var(--sl-stone-200); border-radius: var(--radius-sm); padding: 16px; text-align: center; }
+.stat-tile .stat-value { font-family: var(--font-display); font-size: 1.9rem; font-weight: 800; color: var(--sl-green-700); line-height: 1.1; }
+.stat-tile .stat-label { font-size: .70rem; color: var(--sl-stone-500); text-transform: uppercase; letter-spacing: .06em; margin-top: 3px; }
+
+/* MCDA method comparison */
+.method-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin: 20px 0; }
+.method-card { background: #fff; border: 1px solid var(--sl-stone-200); border-radius: var(--radius-md); padding: 20px 22px; }
+.method-card h5 { font-family: var(--font-display); font-size: .95rem; font-weight: 700; color: var(--sl-green-700); margin-bottom: 6px; }
+.method-card p { font-size: .82rem; color: var(--sl-stone-600); line-height: 1.55; }
+
+/* Responsive */
+@media (max-width: 900px) {
+  nav#sidebar { display: none; }
+  main { margin-left: 0; }
+  .hero { padding: 40px 24px 36px; }
+  .hero h1 { font-size: 1.8rem; }
+  .content-area { padding: 24px 20px 60px; }
+}
+
+/* Footer */
+.refman-footer { margin-top: 60px; padding-top: 28px; border-top: 2px solid var(--sl-stone-200); font-size: .76rem; color: var(--sl-stone-500); line-height: 1.7; }
+.refman-footer strong { color: var(--sl-stone-700); }
+
+@keyframes target-flash { from { background: var(--sl-amber-100); } to { background: transparent; } }
+.alg-card:target { animation: target-flash 1.5s ease-out; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ SIDEBAR ═══════════ -->
+<nav id="sidebar">
+<div class="sidebar-header">
+  <div class="brand">PlanX Suitability Lab<span>Raster MCDA Engine</span></div>
+  <div class="version">Reference Manual — v1.6.4</div>
+</div>
+<div class="sidebar-nav">
+  <a href="#overview">Overview &amp; Philosophy</a>
+  <a href="#quick-start">Quick Start</a>
+  <a href="#mcda-pipeline">MCDA Pipeline</a>
+  <a href="#method-comparison">Method Comparison</a>
+
+  <div class="group-label">Core — Data Preparation</div>
+  <a href="#alg-harmonizer">Data Harmonizer</a>
+  <a href="#alg-rasterizer">Rasterizer</a>
+  <a href="#alg-proximity">Proximity Builder</a>
+  <a href="#alg-normalizer">Normalizer</a>
+  <a href="#alg-constraint">Constraint Builder</a>
+  <a href="#alg-synthetic-sample">Synthetic Sample Raster</a>
+  <a href="#alg-synthetic-pipeline">Synthetic Pipeline Runner</a>
+
+  <div class="group-label">Weights — Criterion Weighting</div>
+  <a href="#alg-ahp">AHP Weights</a>
+  <a href="#alg-pca">PCA Weights</a>
+  <a href="#alg-entropy">Entropy Weights</a>
+  <a href="#alg-critic">CRITIC Weights</a>
+  <a href="#alg-consolidator">Weight Consolidator</a>
+  <a href="#alg-scenario-pack">Scenario Weight Pack</a>
+  <a href="#alg-consensus-audit">Weight Consensus Audit</a>
+
+  <div class="group-label">Compose — Suitability Models</div>
+  <a href="#alg-wlc">WLC Suitability</a>
+  <a href="#alg-owa">OWA Suitability</a>
+  <a href="#alg-topsis">TOPSIS Suitability</a>
+  <a href="#alg-vikor">VIKOR Suitability</a>
+  <a href="#alg-ensemble">Ensemble Suitability</a>
+  <a href="#alg-opportunity-loss">Opportunity Loss Map</a>
+  <a href="#alg-candidate-site">Candidate Site Extractor</a>
+  <a href="#alg-priority-zoning">Priority Zoning</a>
+  <a href="#alg-consensus-zone">Scenario Consensus Zone</a>
+  <a href="#alg-disagreement">Scenario Disagreement</a>
+  <a href="#alg-decision-quadrant">Decision Quadrant Map</a>
+  <a href="#alg-intervention-conflict">Intervention Conflict</a>
+  <a href="#alg-risk-opportunity">Risk-Opportunity Matrix</a>
+  <a href="#alg-regret-fragility">Regret Fragility Map</a>
+  <a href="#alg-uncertainty-adjusted">Uncertainty-Adjusted</a>
+  <a href="#alg-scenario-comparator">Scenario Comparator</a>
+
+  <div class="group-label">Uncertainty</div>
+  <a href="#alg-montecarlo">Monte Carlo Suitability</a>
+
+  <div class="group-label">Explainability (XAI)</div>
+  <a href="#alg-global-sensitivity">Global Sensitivity</a>
+  <a href="#alg-local-contribution">Local Contribution</a>
+  <a href="#alg-geoshapley">GeoShapley-lite</a>
+
+  <div class="group-label">Reporting &amp; Decision Support</div>
+  <a href="#alg-suitability-report">Suitability HTML Report</a>
+  <a href="#alg-numerical-qa">Numerical QA Check</a>
+  <a href="#alg-beta-evidence">Beta Evidence Report</a>
+  <a href="#alg-scenario-brief">Scenario Markdown Brief</a>
+  <a href="#alg-executive-kpi">Executive KPI Snapshot</a>
+  <a href="#alg-action-playbook">Action Playbook</a>
+  <a href="#alg-deployment-gate">Deployment Readiness Gate</a>
+  <a href="#alg-actionability">Actionability Scorecard</a>
+  <a href="#alg-scenario-selection">Scenario Selection</a>
+  <a href="#alg-implementation-wave">Implementation Wave Planner</a>
+  <a href="#alg-release-narrative">Release Narrative</a>
+
+  <div class="group-label">Appendices</div>
+  <a href="#methodological-notes">Methodological Notes</a>
+  <a href="#references">Academic References</a>
+</div>
+<div class="sidebar-footer">PlanX Suitability Lab<br>Yusuf Eminoğlu · Dokuz Eylül University<br>Department of City &amp; Regional Planning</div>
+</nav>
+
+<!-- ═══════════ MAIN ═══════════ -->
+<main>
+
+<!-- HERO -->
+<section class="hero">
+<div class="hero-inner">
+  <h1>PlanX <em>Suitability</em> Lab</h1>
+  <p class="tagline">End-to-end raster MCDA pipeline for land suitability modeling — from data harmonization through multi-method weighting and composition to uncertainty quantification, explainability diagnostics, and decision-ready reporting.</p>
+  <div class="meta-row">
+    <span class="meta-chip">v1.6.4</span>
+    <span class="meta-chip">68 algorithms</span>
+    <span class="meta-chip">6 analytical groups</span>
+    <span class="meta-chip">QGIS 3.28 – 4.99</span>
+    <span class="meta-chip">GPL-3.0</span>
+  </div>
+</div>
+</section>
+
+<div class="content-area">
+
+<!-- OVERVIEW -->
+<section id="overview" class="section-intro">
+<h2>Overview &amp; Analytical Philosophy</h2>
+<p><strong>PlanX Suitability Lab</strong> is a raster-based Multi-Criteria Decision Analysis (MCDA) processing provider for QGIS. It implements the complete suitability modeling workflow — from raw data harmonization through criterion weighting, multi-method composition, uncertainty quantification, and explainability diagnostics — as a single, auditable pipeline of Processing Toolbox algorithms.</p>
+
+<div class="stats-grid" style="margin-top:22px;">
+  <div class="stat-tile"><div class="stat-value">68</div><div class="stat-label">Processing Algorithms</div></div>
+  <div class="stat-tile"><div class="stat-value">6</div><div class="stat-label">Analytical Groups</div></div>
+  <div class="stat-tile"><div class="stat-value">4</div><div class="stat-label">Weighting Methods</div></div>
+  <div class="stat-tile"><div class="stat-value">5</div><div class="stat-label">Composition Methods</div></div>
+  <div class="stat-tile"><div class="stat-value">30+</div><div class="stat-label">Reporting Tools</div></div>
+</div>
+
+<p style="margin-top:20px;">Every algorithm operates inside the QGIS Processing framework, making all analyses <strong>deterministic, repeatable, and batch-scriptable</strong>. The plugin produces GeoTIFF rasters with LZW compression and tiling for all spatial outputs, vector tables for weight and diagnostic results, and structured HTML/Markdown/text reports for decision documentation. Methods are selected from the peer-reviewed MCDA literature and implemented with NumPy/GDAL block-wise processing for memory efficiency on large rasters.</p>
+
+<div class="callout callout-info">
+<strong>Design principle.</strong> Suitability Lab follows a <em>prepare → weight → compose → test → explain → decide</em> pipeline. Each stage produces outputs that feed the next, but every stage is also independently usable — an analyst with pre-harmonized rasters and pre-derived weights can enter directly at the composition stage. The Synthetic Pipeline Runner exercises the full pipeline on generated sample data for verification and learning.
+</div>
+</section>
+
+<!-- QUICK START -->
+<section id="quick-start" class="section-intro">
+<h2>Quick Start</h2>
+<div class="callout callout-tip">
+<strong>New user path.</strong> (1) Run <strong>Synthetic Pipeline Runner</strong> to generate sample rasters and exercise the full pipeline automatically. (2) Study the generated outputs to understand the data flow. (3) Replace synthetic inputs with your own rasters, starting from <strong>Data Harmonizer</strong> to align CRS/extent/resolution. (4) Derive weights via <strong>AHP</strong> (expert judgment), <strong>Entropy</strong> (data-driven), or <strong>Weight Consolidator</strong> (combine multiple sources). (5) Compose suitability via <strong>WLC</strong> (baseline), <strong>OWA</strong> (risk-attitude), or <strong>TOPSIS</strong> (benefit/cost criteria). (6) Test stability with <strong>Monte Carlo</strong> and explain drivers with <strong>GeoShapley-lite</strong>.
+</div>
+</section>
+
+<!-- MCDA PIPELINE -->
+<section id="mcda-pipeline" class="section-intro">
+<h2>MCDA Pipeline</h2>
+<div class="pipeline-flow">
+  <div class="pipeline-step"><div class="step-num">1</div><div class="step-name">Core</div><div class="step-tools">Harmonize, Rasterize, Normalize</div></div>
+  <div class="pipeline-arrow">→</div>
+  <div class="pipeline-step"><div class="step-num">2</div><div class="step-name">Weights</div><div class="step-tools">AHP, Entropy, PCA, CRITIC</div></div>
+  <div class="pipeline-arrow">→</div>
+  <div class="pipeline-step"><div class="step-num">3</div><div class="step-name">Compose</div><div class="step-tools">WLC, OWA, TOPSIS, VIKOR, Ensemble</div></div>
+  <div class="pipeline-arrow">→</div>
+  <div class="pipeline-step"><div class="step-num">4</div><div class="step-name">Test</div><div class="step-tools">Monte Carlo, Cross-scenario</div></div>
+  <div class="pipeline-arrow">→</div>
+  <div class="pipeline-step"><div class="step-num">5</div><div class="step-name">Explain</div><div class="step-tools">GeoShapley, Sensitivity, Contribution</div></div>
+  <div class="pipeline-arrow">→</div>
+  <div class="pipeline-step"><div class="step-num">6</div><div class="step-name">Decide</div><div class="step-tools">Reports, Playbooks, Scorecards</div></div>
+</div>
+</section>
+
+<!-- METHOD COMPARISON -->
+<section id="method-comparison" class="section-intro">
+<h2>Composition Method Comparison</h2>
+<div class="method-grid">
+  <div class="method-card"><h5>WLC — Weighted Linear Combination</h5><p>Compensatory, full trade-off between criteria. Best baseline model. Weakness on one criterion can be fully offset by strength on another. Simplest, most widely used MCDA method.</p></div>
+  <div class="method-card"><h5>OWA — Ordered Weighted Averaging</h5><p>Risk-attitude control via order weights. Descending = optimistic (high scores dominate); Ascending = pessimistic (low scores constrain). AND-ness / OR-ness continuum between WLC and min/max.</p></div>
+  <div class="method-card"><h5>TOPSIS — Technique for Order Preference</h5><p>Distance to ideal and anti-ideal points in normalized criterion space. Handles benefit and cost criteria explicitly. Best when the "closest to ideal, farthest from worst" framing matches the decision context.</p></div>
+  <div class="method-card"><h5>VIKOR — Compromise Ranking</h5><p>Group utility and individual regret minimization with a compromise weight v. Produces S (utility), R (regret), and Q (compromise) metrics. Designed for conflicting criteria where a consensus compromise is sought.</p></div>
+  <div class="method-card"><h5>Ensemble — Multi-Method Fusion</h5><p>Arithmetic mean of two or more composition outputs. Reduces method-specific bias. Use when no single method is clearly superior and methodological triangulation strengthens the planning case.</p></div>
+</div>
+</section>
+
+<!-- ═══════════════════════════ CORE ═══════════════════════════ -->
+<div class="group-header"><span class="group-num">Core</span><h3>Data Preparation</h3></div>
+<p style="color:var(--sl-stone-600);font-size:.86rem;margin-bottom:26px;">Foundation tools that harmonize, convert, and normalize input data into analysis-ready raster criterion layers. Every MCDA pipeline starts here — misaligned rasters produce silently wrong suitability scores.</p>
+
+<!-- Harmonizer -->
+<article class="alg-card" id="alg-harmonizer">
+<div class="alg-card-header"><div class="alg-icon">🔧</div><div class="alg-info"><h4>Core: Data Harmonizer</h4><div class="alg-id">data_harmonizer</div></div></div>
+<div class="alg-card-body">
+  <div class="alg-desc">Aligns multiple rasters to a common grid — identical CRS, extent, pixel size, and nodata value. The essential preprocessing step before any multi-criteria overlay. Uses GDAL Warp (gdal:warpreproject) to reproject and resample each input; the first result is duplicated as a preview via gdal:translate. All outputs use Float32 with LZW compression.</div>
+  <h5>Parameters</h5>
+  <table class="params-table">
+    <thead><tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td class="param-name">INPUT_RASTERS</td><td class="param-type">Multiple Rasters</td><td class="param-default">—</td><td>Rasters to align</td></tr>
+      <tr><td class="param-name">SNAP_RASTER</td><td class="param-type">Raster (opt)</td><td class="param-default">—</td><td>Reference for CRS, extent, resolution</td></tr>
+      <tr><td class="param-name">TARGET_EXTENT</td><td class="param-type">Extent (opt)</td><td class="param-default">—</td><td>Override target extent</td></tr>
+      <tr><td class="param-name">TARGET_RES</td><td class="param-type">Double</td><td class="param-default">0.0</td><td>Target resolution; ≤0 inherits from snap/first raster</td></tr>
+      <tr><td class="param-name">RESAMPLING</td><td class="param-type">Enum</td><td class="param-default">Nearest</td><td>Nearest / Bilinear / Cubic</td></tr>
+      <tr><td class="param-name">NODATA</td><td class="param-type">Double</td><td class="param-default">−9999</td><td>Output nodata value</td></tr>
+      <tr><td class="param-name">OUTPUT_RASTER</td><td class="param-type">Raster</td><td class="param-default">—</td><td>Preview of first aligned result</td></tr>
+      <tr><td class="param-name">OUTPUT_DIR</td><td class="param-type">Folder</td><td class="param-default">—</td><td>Directory for all aligned GeoTIFFs</td></tr>
+      <tr><td class="param-name">OUTPUT_MANIFEST</td><td class="param-type">File (txt)</td><td class="param-default">—</td><td>Text manifest listing all outputs</td></tr>
+    </tbody>
+  </table>
+</div>
+</article>
+
+<!-- Rasterizer -->
+<article class="alg-card" id="alg-rasterizer">
+<div class="alg-card-header"><div class="alg-icon">🖼️</div><div class="alg-info"><h4>Core: Rasterizer</h4><div class="alg-id">rasterizer</div></div></div>
+<div class="alg-card-body">
+  <div class="alg-desc">Converts vector layers to raster criterion surfaces. Supports field-based burn values, fixed-value burns, and multi-ring distance buffering. Uses GDAL Rasterize with configurable resolution inherited from a snap raster. Essential when criteria originate as vector data (road networks, water bodies, zoning polygons).</div>
+  <h5>Parameters</h5>
+  <table class="params-table">
+    <thead><tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td class="param-name">INPUT</td><td class="param-type">Vector Layer</td><td class="param-default">—</td><td>Vector to rasterize</td></tr>
+      <tr><td class="param-name">FIELD</td><td class="param-type">Field (opt)</td><td class="param-default">—</td><td>Attribute field for burn value</td></tr>
+      <tr><td class="param-name">SNAP_RASTER</td><td class="param-type">Raster</td><td class="param-default">—</td><td>Grid geometry reference</td></tr>
+      <tr><td class="param-name">OUTPUT</td><td class="param-type">Raster</td><td class="param-default">—</td><td>Output raster</td></tr>
+    </tbody>
+  </table>
+</div>
+</article>
+
+<!-- Proximity Builder -->
+<article class="alg-card" id="alg-proximity">
+<div class="alg-card-header"><div class="alg-icon">📏</div><div class="alg-info"><h4>Core: Proximity Builder</h4><div class="alg-id">proximity_builder</div></div></div>
+<div class="alg-card-body">
+  <div class="alg-desc">Generates Euclidean distance rasters from vector features using GDAL Proximity. Converts discrete features (roads, transit stops, water bodies) into continuous proximity surfaces suitable as MCDA criteria. Supports configurable max distance and fixed-value burn-in for the feature cells themselves.</div>
+  <h5>Parameters</h5>
+  <table class="params-table">
+    <thead><tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td class="param-name">INPUT</td><td class="param-type">Vector Layer</td><td class="param-default">—</td><td>Source features</td></tr>
+      <tr><td class="param-name">SNAP_RASTER</td><td class="param-type">Raster</td><td class="param-default">—</td><td>Grid geometry reference</td></tr>
+      <tr><td class="param-name">MAX_DISTANCE</td><td class="param-type">Double</td><td class="param-default">0</td><td>Max distance (0 = no limit)</td></tr>
+      <tr><td class="param-name">OUTPUT</td><td class="param-type">Raster</td><td class="param-default">—</td><td>Distance raster</td></tr>
+    </tbody>
+  </table>
+</div>
+</article>
+
+<!-- Normalizer -->
+<article class="alg-card" id="alg-normalizer">
+<div class="alg-card-header"><div class="alg-icon">📐</div><div class="alg-info"><h4>Core: Normalizer</h4><div class="alg-id">normalizer</div></div></div>
+<div class="alg-card-body">
+  <div class="alg-desc">Transforms criterion rasters to a common 0–100 scale using min-max or z-score normalization, with optional benefit/cost direction handling. Cost criteria (where lower values are better, e.g., distance to hazard) are inverted so that 100 always represents the most suitable condition. Block-wise processing for memory efficiency.</div>
+  <h5>Parameters</h5>
+  <table class="params-table">
+    <thead><tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td class="param-name">INPUT</td><td class="param-type">Raster</td><td class="param-default">—</td><td>Criterion raster to normalize</td></tr>
+      <tr><td class="param-name">MODE</td><td class="param-type">Enum</td><td class="param-default">Min-Max</td><td>Min-Max (0-100) / Z-Score</td></tr>
+      <tr><td class="param-name">DIRECTION</td><td class="param-type">Enum</td><td class="param-default">Benefit</td><td>Benefit (higher=better) / Cost (lower=better)</td></tr>
+      <tr><td class="param-name">OUTPUT</td><td class="param-type">Raster</td><td class="param-default">—</td><td>Normalized raster</td></tr>
+    </tbody>
+  </table>
+  <div class="formula-block"><span class="var">x<sub>norm</sub></span> <span class="op">=</span> 100 · (<span class="var">x</span> − <span class="var">x<sub>min</sub></span>) / (<span class="var">x<sub>max</sub></span> − <span class="var">x<sub>min</sub></span>)&nbsp;&nbsp; (benefit);&nbsp;&nbsp; <span class="var">x<sub>norm</sub></span> <span class="op">=</span> 100 · (<span class="var">x<sub>max</sub></span> − <span class="var">x</span>) / (<span class="var">x<sub>max</sub></span> − <span class="var">x<sub>min</sub></span>)&nbsp;&nbsp; (cost)</div>
+</div>
+</article>
+
+<!-- Constraint Builder -->
+<article class="alg-card" id="alg-constraint">
+<div class="alg-card-header"><div class="alg-icon">🚫</div><div class="alg-info"><h4>Core: Constraint Builder</h4><div class="alg-id">constraint_builder</div></div></div>
+<div class="alg-card-body">
+  <div class="alg-desc">Creates binary 0/1 constraint masks from vector or raster inputs. Constraint cells (0) exclude areas from suitability scoring — protected areas, water bodies, steep slopes, legal exclusions. Passing cells (1) allow the suitability model to operate. Supports union (any constraint excludes) and intersection (all constraints must pass) logic.</div>
+  <h5>Parameters</h5>
+  <table class="params-table">
+    <thead><tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td class="param-name">INPUT_LAYERS</td><td class="param-type">Multiple Layers</td><td class="param-default">—</td><td>Constraint layers (vector or raster)</td></tr>
+      <tr><td class="param-name">SNAP_RASTER</td><td class="param-type">Raster</td><td class="param-default">—</td><td>Grid geometry reference</td></tr>
+      <tr><td class="param-name">LOGIC</td><td class="param-type">Enum</td><td class="param-default">Union</td><td>Union (any excludes) / Intersection</td></tr>
+      <tr><td class="param-name">OUTPUT</td><td class="param-type">Raster</td><td class="param-default">—</td><td>Binary 0/1 constraint mask</td></tr>
+    </tbody>
+  </table>
+  <div class="acad-note"><strong>MCDA theory.</strong> Constraints differ from criteria: criteria are <em>continuous trade-offs</em> (a worse score on one can be offset by a better score on another), while constraints are <em>binary exclusions</em> (no trade-off is possible). The Constraint Builder enforces this distinction by producing a strict 0/1 mask that multiplies the suitability score to zero in excluded cells.</div>
+</div>
+</article>
+
+<!-- Synthetic Sample Raster + Pipeline Runner -->
+<article class="alg-card" id="alg-synthetic-sample">
+<div class="alg-card-header"><div class="alg-icon">🧪</div><div class="alg-info"><h4>Core: Synthetic Sample Raster</h4><div class="alg-id">synthetic_sample_raster</div></div></div>
+<div class="alg-card-body">
+  <div class="alg-desc">Generates a single synthetic criterion raster with controlled spatial structure (random noise + distance-decay gradient from a corner) for testing and demonstration. Configurable size (rows/cols), resolution, and random seed for reproducibility.</div>
+</div>
+</article>
+
+<article class="alg-card" id="alg-synthetic-pipeline">
+<div class="alg-card-header"><div class="alg-icon">⚙️</div><div class="alg-info"><h4>Core: Synthetic Pipeline Runner</h4><div class="alg-id">synthetic_pipeline_runner</div></div></div>
+<div class="alg-card-body">
+  <div class="alg-desc">Exercises the full Suitability Lab pipeline on auto-generated synthetic data: creates sample rasters, normalizes them, derives weights via Entropy and AHP, consolidates weights, runs WLC/OWA/TOPSIS/VIKOR/Ensemble composition, and produces reports. The fastest way to verify that the plugin is working correctly and to understand the data flow between stages. All outputs are placed in a configurable output directory.</div>
+  <div class="interp-box"><strong>Educational use.</strong> Designed for workshops and self-paced learning. Run this first, study the outputs, then replace each stage with your own data. The pipeline is transparent — every intermediate file is saved and can be inspected.</div>
+</div>
+</article>
+
+<!-- ═══════════════════════════ WEIGHTS ═══════════════════════════ -->
+<div class="group-header"><span class="group-num">Weights</span><h3>Criterion Weighting</h3></div>
+<p style="color:var(--sl-stone-600);font-size:.86rem;margin-bottom:26px;">Methods for deriving criterion importance weights. The choice of weighting method is often more consequential than the choice of composition method — different weight sets can produce qualitatively different suitability maps from the same criteria.</p>
+
+<article class="alg-card" id="alg-ahp">
+<div class="alg-card-header"><div class="alg-icon">⚖️</div><div class="alg-info"><h4>Weights: AHP Weights</h4><div class="alg-id">ahp_weights</div></div></div>
+<div class="alg-card-body">
+  <div class="alg-desc">Computes criterion weights from pairwise comparisons using Saaty's Analytic Hierarchy Process eigenvalue method. Accepts a square reciprocal matrix in JSON format with Saaty's 1–9 scale. Returns weights (summing to 1), consistency ratio (CR), and a CR acceptability flag (CR ≤ 0.10).</div>
+  <h5>Parameters</h5>
+  <table class="params-table">
+    <thead><tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td class="param-name">MATRIX_JSON</td><td class="param-type">String (multi-line)</td><td class="param-default">[[1,2,3],[0.5,1,2],[0.333,0.5,1]]</td><td>Pairwise comparison matrix (Saaty scale)</td></tr>
+      <tr><td class="param-name">OUTPUT</td><td class="param-type">Vector Table</td><td class="param-default">—</td><td>Weights table (criterion_id, weight, cr, cr_ok)</td></tr>
+    </tbody>
+  </table>
+  <div class="formula-block"><span class="var">A w</span> <span class="op">=</span> <span class="var">λ<sub>max</sub> w</span>&nbsp;&nbsp;&nbsp; <span class="var">CI</span> <span class="op">=</span> (<span class="var">λ<sub>max</sub></span> − <span class="var">n</span>) / (<span class="var">n</span> − 1)&nbsp;&nbsp;&nbsp; <span class="var">CR</span> <span class="op">=</span> <span class="var">CI</span> / <span class="var">RI(n)</span></div>
+  <div class="acad-note"><strong>Saaty scale:</strong> 1=equal, 3=moderate, 5=strong, 7=very strong, 9=extreme importance. Reciprocals (1/3, 1/5, etc.) for inverse judgments. CR ≤ 0.10 indicates acceptable consistency; higher values suggest the expert judgments contain contradictions that should be reviewed.</div>
+  <div class="cite">Saaty, T.L. (1980). <em>The Analytic Hierarchy Process.</em> McGraw-Hill. · Saaty, T.L. (2008). "Decision making with the analytic hierarchy process." <em>International Journal of Services Sciences</em> 1(1): 83–98.</div>
+</div>
+</article>
+
+<article class="alg-card" id="alg-pca">
+<div class="alg-card-header"><div class="alg-icon">📊</div><div class="alg-info"><h4>Weights: PCA Weights</h4><div class="alg-id">pca_weights</div></div></div>
+<div class="alg-card-body">
+  <div class="alg-desc">Derives weights from Principal Component Analysis of the criterion correlation structure. The first principal component's loadings are used as weights — criteria that covary strongly with the dominant axis of variation receive higher weight. Handles degenerate (constant) criteria gracefully.</div>
+  <div class="formula-block"><span class="var">w<sub>i</sub></span> <span class="op">=</span> |<span class="var">loading<sub>i,PC1</sub></span>| / Σ<sub>j</sub> |<span class="var">loading<sub>j,PC1</sub></span>|</div>
+  <div class="interp-box"><strong>When to use.</strong> PCA weights are data-driven and objective — they reflect which criteria carry the most variance in your study area. Use when you want the data structure to drive weights, not expert judgment. Caveat: PCA weights depend on the study area extent; a different boundary may produce different weights.</div>
+</div>
+</article>
+
+<article class="alg-card" id="alg-entropy">
+<div class="alg-card-header"><div class="alg-icon">📈</div><div class="alg-info"><h4>Weights: Entropy Weights</h4><div class="alg-id">entropy_weights</div></div></div>
+<div class="alg-card-body">
+  <div class="alg-desc">Computes objective criterion weights using Shannon information entropy. Criteria with greater value contrast (more discriminating power) receive higher weight; near-uniform criteria are down-weighted. Samples up to ~8,000 cells on a regular grid for computational efficiency.</div>
+  <div class="formula-block"><span class="var">e<sub>j</sub></span> <span class="op">=</span> −<span class="var">k</span> Σ<sub>i</sub> <span class="var">p<sub>ij</sub></span> ln(<span class="var">p<sub>ij</sub></span>)&nbsp;&nbsp;&nbsp; <span class="var">d<sub>j</sub></span> <span class="op">=</span> 1 − <span class="var">e<sub>j</sub></span>&nbsp;&nbsp;&nbsp; <span class="var">w<sub>j</sub></span> <span class="op">=</span> <span class="var">d<sub>j</sub></span> / Σ <span class="var">d<sub>j</sub></span></div>
+  <div class="cite">Shannon, C.E. (1948). "A Mathematical Theory of Communication." <em>Bell System Technical Journal</em> 27(3): 379–423. · Hwang, C.L. &amp; Yoon, K. (1981). <em>Multiple Attribute Decision Making.</em> Springer.</div>
+</div>
+</article>
+
+<article class="alg-card" id="alg-critic">
+<div class="alg-card-header"><div class="alg-icon">🔬</div><div class="alg-info"><h4>Weights: CRITIC Weights</h4><div class="alg-id">critic_weights</div></div></div>
+<div class="alg-card-body">
+  <div class="alg-desc">CRiteria Importance Through Intercriteria Correlation (CRITIC). Derives weights from both the contrast intensity (standard deviation) of each criterion and the conflict (1 − correlation) between criteria. Criteria with high variance AND low correlation with other criteria receive the highest weights — they contribute unique, discriminating information.</div>
+  <div class="formula-block"><span class="var">C<sub>j</sub></span> <span class="op">=</span> <span class="var">σ<sub>j</sub></span> · Σ<sub>k</sub> (1 − <span class="var">r<sub>jk</sub></span>)&nbsp;&nbsp;&nbsp; <span class="var">w<sub>j</sub></span> <span class="op">=</span> <span class="var">C<sub>j</sub></span> / Σ <span class="var">C<sub>j</sub></span></div>
+  <div class="cite">Diakoulaki, D., Mavrotas, G. &amp; Papayannakis, L. (1995). "Determining objective weights in multiple criteria problems: The CRITIC method." <em>Computers &amp; Operations Research</em> 22(7): 763–770.</div>
+</div>
+</article>
+
+<article class="alg-card" id="alg-consolidator">
+<div class="alg-card-header"><div class="alg-icon">🔗</div><div class="alg-info"><h4>Weights: Weight Consolidator</h4><div class="alg-id">weight_consolidator</div></div></div>
+<div class="alg-card-body">
+  <div class="alg-desc">Combines multiple weight sets (e.g., AHP from stakeholder group A, Entropy from the data, PCA from regional variation) into a single consolidated weight vector using configurable aggregation: arithmetic mean, geometric mean, or weighted average with user-specified source weights. Produces a table with individual source weights and the consolidated result.</div>
+  <div class="interp-box"><strong>Stakeholder reconciliation.</strong> When different expert groups produce different AHP matrices, the Consolidator can average their weight vectors (arithmetic mean) or find a compromise (geometric mean, which is the proper method for ratio-scale judgments per Saaty).</div>
+</div>
+</article>
+
+<article class="alg-card" id="alg-scenario-pack">
+<div class="alg-card-header"><div class="alg-icon">📦</div><div class="alg-info"><h4>Weights: Scenario Weight Pack</h4><div class="alg-id">scenario_weight_pack</div></div></div>
+<div class="alg-card-body">
+  <div class="alg-desc">Bundles multiple weight configurations into a scenario pack for systematic comparison. Define up to N scenarios, each with its own weight vector, label, and description. The pack output feeds directly into the Compose tools for parallel suitability modeling under different weighting assumptions — essential for sensitivity analysis and stakeholder negotiation.</div>
+</div>
+</article>
+
+<article class="alg-card" id="alg-consensus-audit">
+<div class="alg-card-header"><div class="alg-icon">📋</div><div class="alg-info"><h4>Weights: Weight Consensus Audit</h4><div class="alg-id">weight_consensus_audit</div></div></div>
+<div class="alg-card-body">
+  <div class="alg-desc">Measures the agreement between multiple weight vectors using rank correlation (Spearman), Euclidean distance, and cosine similarity. Identifies which criteria drive disagreement between weighting approaches or stakeholder groups. Produces an HTML report with a pairwise agreement matrix and per-criterion variance analysis.</div>
+</div>
+</article>
+
+<!-- ═══════════════════════════ COMPOSE ═══════════════════════════ -->
+<div class="group-header"><span class="group-num">Compose</span><h3>Suitability Models</h3></div>
+<p style="color:var(--sl-stone-600);font-size:.86rem;margin-bottom:26px;">Multi-criteria composition engines that combine weighted, normalized criterion rasters into a single suitability score surface. Each method embodies a different decision philosophy. Run multiple methods and compare outputs — convergence across methods strengthens the planning case; divergence signals criteria or weights that need closer inspection.</p>
+
+<article class="alg-card" id="alg-wlc">
+<div class="alg-card-header"><div class="alg-icon">➕</div><div class="alg-info"><h4>Compose: WLC Suitability</h4><div class="alg-id">wlc_suitability</div></div></div>
+<div class="alg-card-body">
+  <div class="alg-desc">Weighted Linear Combination — the foundational MCDA composition method. Each normalized criterion raster (0–100) is multiplied by its weight and summed. An optional binary constraint mask zeroes excluded cells. Chunk-aware block processing for memory efficiency on arbitrarily large rasters. Output: Float32 GeoTIFF, 0–100, LZW compressed.</div>
+  <h5>Parameters</h5>
+  <table class="params-table">
+    <thead><tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td class="param-name">INPUT_RASTERS</td><td class="param-type">Multiple Rasters</td><td class="param-default">—</td><td>Criterion rasters (max 6, normalized 0–100)</td></tr>
+      <tr><td class="param-name">WEIGHTS_CSV</td><td class="param-type">String</td><td class="param-default">—</td><td>Weights as CSV (e.g. 0.4,0.3,0.3)</td></tr>
+      <tr><td class="param-name">CONSTRAINT</td><td class="param-type">Raster (opt)</td><td class="param-default">—</td><td>Binary 0/1 constraint mask</td></tr>
+      <tr><td class="param-name">BLOCK</td><td class="param-type">Integer</td><td class="param-default">256</td><td>Block size in pixels (64–2048)</td></tr>
+      <tr><td class="param-name">OUTPUT</td><td class="param-type">Raster</td><td class="param-default">—</td><td>WLC suitability raster (Float32, 0–100)</td></tr>
+    </tbody>
+  </table>
+  <div class="formula-block"><span class="var">S<sub>i</sub></span> <span class="op">=</span> <span class="var">C<sub>i</sub></span> · Σ<sub>j</sub> <span class="var">w<sub>j</sub></span> · <span class="var">x<sub>ij</sub></span>&nbsp;&nbsp;&nbsp; where <span class="var">C<sub>i</sub></span> ∈ {0,1} is the constraint mask</div>
+  <div class="acad-note"><strong>Compensatory nature.</strong> WLC allows full trade-off: a very poor score on one criterion can be fully offset by excellent scores on others. This is appropriate when criteria are genuinely substitutable. When a minimum threshold must be met on every criterion, use OWA with ascending order weights instead.</div>
+  <div class="cite">Malczewski, J. (2000). "On the Use of Weighted Linear Combination Method in GIS." <em>International Journal of Geographical Information Science</em> 14(6): 567–590.</div>
+</div>
+</article>
+
+<article class="alg-card" id="alg-owa">
+<div class="alg-card-header"><div class="alg-icon">🎚️</div><div class="alg-info"><h4>Compose: OWA Suitability</h4><div class="alg-id">owa_suitability</div></div></div>
+<div class="alg-card-body">
+  <div class="alg-desc">Ordered Weighted Averaging — extends WLC with a second weight vector (order weights) that controls risk attitude. Per cell, criterion values are sorted; criteria weights are reordered to match; the result is the weighted combination of sorted values. Descending order → optimistic (high scores dominate); Ascending → pessimistic (low scores constrain). The AND-ness/OR-ness continuum spans from WLC (neutral) to MIN (fully risk-averse) to MAX (fully risk-taking).</div>
+  <h5>Parameters</h5>
+  <table class="params-table">
+    <thead><tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td class="param-name">INPUT_RASTERS</td><td class="param-type">Multiple Rasters</td><td class="param-default">—</td><td>Criterion rasters (max 6, normalized 0–100)</td></tr>
+      <tr><td class="param-name">CRITERIA_WEIGHTS</td><td class="param-type">String</td><td class="param-default">—</td><td>Criteria weights CSV</td></tr>
+      <tr><td class="param-name">ORDER_WEIGHTS</td><td class="param-type">String</td><td class="param-default">—</td><td>Order weights CSV</td></tr>
+      <tr><td class="param-name">SORT_MODE</td><td class="param-type">Enum</td><td class="param-default">Descending</td><td>Descending (optimistic) / Ascending (pessimistic)</td></tr>
+      <tr><td class="param-name">CONSTRAINT</td><td class="param-type">Raster (opt)</td><td class="param-default">—</td><td>Binary constraint mask</td></tr>
+      <tr><td class="param-name">BLOCK</td><td class="param-type">Integer</td><td class="param-default">256</td><td>Block size (64–2048)</td></tr>
+      <tr><td class="param-name">OUTPUT</td><td class="param-type">Raster</td><td class="param-default">—</td><td>OWA suitability raster</td></tr>
+    </tbody>
+  </table>
+  <div class="cite">Yager, R.R. (1988). "On Ordered Weighted Averaging Aggregation Operators in Multicriteria Decisionmaking." <em>IEEE Transactions on Systems, Man, and Cybernetics</em> 18(1): 183–190. · Malczewski, J. (2006). "Ordered weighted averaging with fuzzy quantifiers: GIS-based multicriteria evaluation." <em>Computers, Environment and Urban Systems</em> 30(4): 437–455.</div>
+</div>
+</article>
+
+<article class="alg-card" id="alg-topsis">
+<div class="alg-card-header"><div class="alg-icon">🎯</div><div class="alg-info"><h4>Compose: TOPSIS Suitability</h4><div class="alg-id">topsis_suitability</div></div></div>
+<div class="alg-card-body">
+  <div class="alg-desc">Technique for Order Preference by Similarity to Ideal Solution. Three-pass algorithm: (1) vector normalization across all valid cells, (2) identify ideal-best and ideal-worst points per criterion (benefit criteria: max=ideal; cost criteria: min=ideal), (3) per-cell Euclidean distances d⁺ and d⁻, closeness coefficient = d⁻/(d⁺+d⁻) scaled to 0–100. Handles benefit and cost criteria explicitly via the impacts CSV.</div>
+  <div class="formula-block"><span class="var">C<sub>i</sub></span> <span class="op">=</span> <span class="var">d<sub>i</sub><sup>−</sup></span> / (<span class="var">d<sub>i</sub><sup>+</sup></span> + <span class="var">d<sub>i</sub><sup>−</sup></span>)&nbsp;&nbsp;&nbsp; <span class="var">d<sub>i</sub><sup>+</sup></span> <span class="op">=</span> √Σ<sub>j</sub> <span class="var">w<sub>j</sub></span>(<span class="var">v<sub>ij</sub></span> − <span class="var">v<sub>j</sub><sup>+</sup></span>)²</div>
+  <div class="cite">Hwang, C.L. &amp; Yoon, K. (1981). <em>Multiple Attribute Decision Making: Methods and Applications.</em> Springer. · Opricovic, S. &amp; Tzeng, G.H. (2004). "Compromise solution by MCDM methods." <em>European Journal of Operational Research</em> 156(2): 445–455.</div>
+</div>
+</article>
+
+<article class="alg-card" id="alg-vikor">
+<div class="alg-card-header"><div class="alg-icon">🤝</div><div class="alg-info"><h4>Compose: VIKOR Suitability</h4><div class="alg-id">vikor_suitability</div></div></div>
+<div class="alg-card-body">
+  <div class="alg-desc">VIseKriterijumska Optimizacija I Kompromisno Resenje — compromise ranking method that balances group utility (majority rule) against individual regret (minority protection). Produces three metrics: S (weighted Manhattan distance = group utility), R (maximum weighted Chebyshev distance = individual regret), and Q (compromise index with weight v, default 0.5). Lower values are better for all three.</div>
+  <div class="formula-block"><span class="var">S<sub>i</sub></span> <span class="op">=</span> Σ<sub>j</sub> <span class="var">w<sub>j</sub></span>(<span class="var">x<sub>j</sub><sup>*</sup></span> − <span class="var">x<sub>ij</sub></span>)/(<span class="var">x<sub>j</sub><sup>*</sup></span> − <span class="var">x<sub>j</sub><sup>−</sup></span>)&nbsp;&nbsp;&nbsp; <span class="var">R<sub>i</sub></span> <span class="op">=</span> max<sub>j</sub> [<span class="var">w<sub>j</sub></span>(<span class="var">x<sub>j</sub><sup>*</sup></span> − <span class="var">x<sub>ij</sub></span>)/(<span class="var">x<sub>j</sub><sup>*</sup></span> − <span class="var">x<sub>j</sub><sup>−</sup></span>)]</div>
+  <div class="cite">Opricovic, S. (1998). <em>Multicriteria Optimization of Civil Engineering Systems.</em> PhD Thesis, University of Belgrade.</div>
+</div>
+</article>
+
+<article class="alg-card" id="alg-ensemble">
+<div class="alg-card-header"><div class="alg-icon">🔀</div><div class="alg-info"><h4>Compose: Ensemble Suitability</h4><div class="alg-id">ensemble_suitability</div></div></div>
+<div class="alg-card-body">
+  <div class="alg-desc">Fuses two or more suitability rasters (e.g., WLC + TOPSIS + VIKOR) into a single ensemble surface via arithmetic mean. Reduces method-specific bias — if WLC, TOPSIS, and VIKOR all score a cell highly, confidence is higher than if only one method does. Output is a consensus suitability raster (0–100) with disagreement metrics.</div>
+  <div class="interp-box"><strong>Methodological triangulation.</strong> Ensemble suitability is not "averaging away uncertainty" — it's surfacing areas where methods <em>agree</em> (robust zones) vs. where they <em>disagree</em> (fragile zones). Use the Scenario Disagreement Attention tool to map the disagreement explicitly.</div>
+</div>
+</article>
+
+<article class="alg-card" id="alg-opportunity-loss">
+<div class="alg-card-header"><div class="alg-icon">📉</div><div class="alg-info"><h4>Compose: Opportunity Loss Map</h4><div class="alg-id">opportunity_loss_map</div></div></div>
+<div class="alg-card-body">
+  <div class="alg-desc">Computes the per-cell difference between the maximum possible suitability score (given the criteria and constraints) and the achieved score under the chosen weights. Identifies locations where a different weighting scheme could substantially improve the suitability rating — candidate zones for sensitivity testing or stakeholder negotiation.</div>
+  <div class="formula-block"><span class="var">L<sub>i</sub></span> <span class="op">=</span> <span class="var">S<sub>i</sub><sup>max</sup></span> − <span class="var">S<sub>i</sub></span>&nbsp;&nbsp;&nbsp; where <span class="var">S<sub>i</sub><sup>max</sup></span> is the best possible score at cell i under any weight vector</div>
+</div>
+</article>
+
+<article class="alg-card" id="alg-candidate-site">
+<div class="alg-card-header"><div class="alg-icon">📍</div><div class="alg-info"><h4>Compose: Candidate Site Extractor</h4><div class="alg-id">candidate_site_extractor</div></div></div>
+<div class="alg-card-body">
+  <div class="alg-desc">Extracts contiguous zones of high suitability as candidate site polygons. Applies a suitability threshold (e.g., ≥75), minimum area filter, and optional constraint overlay. Output is a vector polygon layer with mean suitability, area, and perimeter metrics per candidate site — ready for field verification or stakeholder review.</div>
+</div>
+</article>
+
+<article class="alg-card" id="alg-priority-zoning">
+<div class="alg-card-header"><div class="alg-icon">🗺️</div><div class="alg-info"><h4>Compose: Priority Zoning from Suitability</h4><div class="alg-id">priority_zoning_from_suitability</div></div></div>
+<div class="alg-card-body">
+  <div class="alg-desc">Classifies a continuous suitability raster into discrete priority zones (e.g., Tier 1/2/3/Excluded) using user-defined thresholds or quantile breaks. Produces a categorized integer raster and a zone-area summary table. Bridges the gap between continuous suitability scores and the discrete zoning categories that planning decisions require.</div>
+</div>
+</article>
+
+<article class="alg-card" id="alg-consensus-zone">
+<div class="alg-card-header"><div class="alg-icon">✅</div><div class="alg-info"><h4>Compose: Scenario Consensus Zone</h4><div class="alg-id">scenario_consensus_zone</div></div></div>
+<div class="alg-card-body">
+  <div class="alg-desc">Identifies spatial zones where multiple scenarios agree on high suitability — the "no-regret" areas that are robust to weighting assumptions. Also identifies zones of persistent low suitability and zones where scenarios diverge. Essential for defensible planning: actions in consensus zones are easier to justify than actions in contested zones.</div>
+</div>
+</article>
+
+<article class="alg-card" id="alg-disagreement">
+<div class="alg-card-header"><div class="alg-icon">⚠️</div><div class="alg-info"><h4>Compose: Scenario Disagreement Attention</h4><div class="alg-id">scenario_disagreement_attention</div></div></div>
+<div class="alg-card-body">
+  <div class="alg-desc">Maps the per-cell standard deviation, range, or coefficient of variation across multiple scenario suitability rasters. High disagreement flags areas where the suitability rating is sensitive to weighting assumptions — these are priority zones for stakeholder dialogue, additional data collection, or conservative decision thresholds.</div>
+</div>
+</article>
+
+<article class="alg-card" id="alg-decision-quadrant">
+<div class="alg-card-header"><div class="alg-icon">➕</div><div class="alg-info"><h4>Compose: Decision Quadrant Map</h4><div class="alg-id">decision_quadrant_map</div></div></div>
+<div class="alg-card-body">
+  <div class="alg-desc">Classifies every cell into a 2×2 decision quadrant based on two suitability dimensions (e.g., environmental suitability × economic suitability, or suitability × feasibility). Quadrants: High-High (priority action), High-Low (trade-off zone), Low-High (trade-off zone), Low-Low (exclusion). Produces a 4-class categorical raster with area statistics.</div>
+</div>
+</article>
+
+<article class="alg-card" id="alg-intervention-conflict">
+<div class="alg-card-header"><div class="alg-icon">⚡</div><div class="alg-info"><h4>Compose: Intervention Conflict Matrix</h4><div class="alg-id">intervention_conflict_matrix</div></div></div>
+<div class="alg-card-body">
+  <div class="alg-desc">Evaluates spatial conflicts between competing land-use interventions by overlaying their suitability rasters. Produces a conflict intensity raster and a pairwise conflict matrix showing where high suitability for intervention A coincides with high suitability for intervention B — zones requiring strategic trade-off decisions.</div>
+</div>
+</article>
+
+<article class="alg-card" id="alg-risk-opportunity">
+<div class="alg-card-header"><div class="alg-icon">🔴</div><div class="alg-info"><h4>Compose: Risk-Opportunity Matrix Map</h4><div class="alg-id">risk_opportunity_matrix_map</div></div></div>
+<div class="alg-card-body">
+  <div class="alg-desc">Combines a suitability (opportunity) surface with an uncertainty or hazard (risk) surface into a 4-class risk-opportunity matrix: High Opportunity / Low Risk (safe investment), High / High (risky investment), Low / Low (low priority), Low / High (avoid). Standard decision-support visualization for planning under uncertainty.</div>
+</div>
+</article>
+
+<article class="alg-card" id="alg-regret-fragility">
+<div class="alg-card-header"><div class="alg-icon">💔</div><div class="alg-info"><h4>Compose: Regret Fragility Map</h4><div class="alg-id">regret_fragility_map</div></div></div>
+<div class="alg-card-body">
+  <div class="alg-desc">Computes the minimax regret — how much suitability is "left on the table" if the chosen scenario turns out to be suboptimal — per cell. For each cell, regret = max score across scenarios − score under the chosen scenario. High-regret zones are fragile to scenario choice; low-regret zones are robust. Essential for decisions under deep uncertainty.</div>
+  <div class="cite">Loomes, G. &amp; Sugden, R. (1982). "Regret Theory: An Alternative Theory of Rational Choice Under Uncertainty." <em>The Economic Journal</em> 92(368): 805–824.</div>
+</div>
+</article>
+
+<article class="alg-card" id="alg-uncertainty-adjusted">
+<div class="alg-card-header"><div class="alg-icon">🛡️</div><div class="alg-info"><h4>Compose: Uncertainty-Adjusted Suitability</h4><div class="alg-id">uncertainty_adjusted_suitability</div></div></div>
+<div class="alg-card-body">
+  <div class="alg-desc">Down-weights suitability scores by their Monte Carlo stability index. Cells with high suitability but low stability (high uncertainty) receive a penalty; cells with high suitability AND high stability retain their score. Produces a risk-adjusted suitability surface suitable for conservative planning decisions.</div>
+  <div class="formula-block"><span class="var">S<sub>adj</sub></span> <span class="op">=</span> <span class="var">S</span> · (<span class="var">stability</span> / 100)&nbsp;&nbsp;&nbsp; or equivalently: suitability scaled by confidence</div>
+</div>
+</article>
+
+<article class="alg-card" id="alg-scenario-comparator">
+<div class="alg-card-header"><div class="alg-icon">🔍</div><div class="alg-info"><h4>Compose: Scenario Comparator</h4><div class="alg-id">scenario_comparator</div></div></div>
+<div class="alg-card-body">
+  <div class="alg-desc">Side-by-side comparison of up to 6 suitability scenarios with difference rasters, transition matrices (how cells change class between scenarios), and per-scenario area statistics. The comprehensive scenario comparison workbench — use this to understand how weighting assumptions reshape the suitability landscape before committing to a recommendation.</div>
+</div>
+</article>
+
+<!-- ═══════════════════════════ UNCERTAINTY ═══════════════════════════ -->
+<div class="group-header"><span class="group-num">Uncertainty</span><h3>Uncertainty Quantification</h3></div>
+
+<article class="alg-card" id="alg-montecarlo">
+<div class="alg-card-header"><div class="alg-icon">🎲</div><div class="alg-info"><h4>Uncertainty: Monte Carlo Suitability</h4><div class="alg-id">montecarlo_suitability</div></div></div>
+<div class="alg-card-body">
+  <div class="alg-desc">Quantifies suitability uncertainty through chunk-based Monte Carlo simulation with Gaussian perturbation. Each cell's base suitability value is perturbed over N iterations (default 300) with configurable noise sigma (default 0.08 relative). Produces <strong>six output rasters</strong>: mean, standard deviation, 5th percentile, median, 95th percentile, and stability index (100 minus the P95–P05 spread). Fixed random seed (42) ensures reproducibility.</div>
+  <h5>Parameters</h5>
+  <table class="params-table">
+    <thead><tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td class="param-name">INPUT</td><td class="param-type">Raster</td><td class="param-default">—</td><td>Suitability raster (0–100)</td></tr>
+      <tr><td class="param-name">ITER</td><td class="param-type">Integer</td><td class="param-default">300</td><td>Simulation iterations (≥20)</td></tr>
+      <tr><td class="param-name">SIGMA</td><td class="param-type">Double</td><td class="param-default">0.08</td><td>Noise sigma (0–0.5, relative to value)</td></tr>
+      <tr><td class="param-name">BLOCK</td><td class="param-type">Integer</td><td class="param-default">256</td><td>Block size in pixels (64–2048)</td></tr>
+      <tr><td class="param-name">OUT_MEAN</td><td class="param-type">Raster</td><td class="param-default">—</td><td>Mean suitability across iterations</td></tr>
+      <tr><td class="param-name">OUT_STD</td><td class="param-type">Raster</td><td class="param-default">—</td><td>Standard deviation</td></tr>
+      <tr><td class="param-name">OUT_P05</td><td class="param-type">Raster</td><td class="param-default">—</td><td>5th percentile</td></tr>
+      <tr><td class="param-name">OUT_P50</td><td class="param-type">Raster</td><td class="param-default">—</td><td>Median (50th percentile)</td></tr>
+      <tr><td class="param-name">OUT_P95</td><td class="param-type">Raster</td><td class="param-default">—</td><td>95th percentile</td></tr>
+      <tr><td class="param-name">OUT_STAB</td><td class="param-type">Raster</td><td class="param-default">—</td><td>Stability index (0–100, higher = more stable)</td></tr>
+    </tbody>
+  </table>
+  <div class="formula-block"><span class="var">sim<sub>t</sub></span> <span class="op">=</span> <span class="var">base</span> · (1 + <span class="var">N</span>(0, <span class="var">σ</span>))&nbsp;&nbsp; clipped to [0, 100]&nbsp;&nbsp;&nbsp; <span class="var">stability</span> <span class="op">=</span> 100 − (<span class="var">P95</span> − <span class="var">P05</span>)</div>
+  <div class="interp-box"><strong>Interpretation.</strong> Stability ≥ 90: highly robust (perturbation barely changes the score). Stability 70–90: moderately robust. Stability &lt; 70: fragile — the suitability score is sensitive to small changes in criteria values or weights. Fragile high-suitability cells are risky for irreversible land-use commitments.</div>
+</div>
+</article>
+
+<!-- ═══════════════════════════ XAI ═══════════════════════════ -->
+<div class="group-header"><span class="group-num">XAI</span><h3>Explainability</h3></div>
+<p style="color:var(--sl-stone-600);font-size:.86rem;margin-bottom:26px;">Explainable AI tools that decompose suitability scores to show <em>which criteria drive the result</em> at each location. Essential for transparent planning: a suitability map without explanation is a black box; with per-criterion contribution maps, every pixel's score can be justified.</p>
+
+<article class="alg-card" id="alg-global-sensitivity">
+<div class="alg-card-header"><div class="alg-icon">📊</div><div class="alg-info"><h4>XAI: Global Sensitivity Analysis</h4><div class="alg-id">global_sensitivity</div></div></div>
+<div class="alg-card-body">
+  <div class="alg-desc">One-at-a-time (OAT) sensitivity analysis: varies each criterion weight by ±Δ (default ±20%) while holding others constant, recomputes the suitability surface, and measures the spatial correlation (Spearman) and mean absolute deviation between original and perturbed outputs. Identifies which criteria the suitability model is most sensitive to — those with the highest influence on the output.</div>
+  <div class="interp-box"><strong>Interpretation.</strong> If perturbing criterion A's weight by ±20% changes the suitability map dramatically (low Spearman correlation, high MAD), criterion A is a <em>critical driver</em> — its weight must be defended with strong evidence. If criterion B's perturbation barely changes the output, its weight is less consequential and can be set with less precision.</div>
+</div>
+</article>
+
+<article class="alg-card" id="alg-local-contribution">
+<div class="alg-card-header"><div class="alg-icon">🔍</div><div class="alg-info"><h4>XAI: Local Contribution Map</h4><div class="alg-id">local_contribution</div></div></div>
+<div class="alg-card-body">
+  <div class="alg-desc">Decomposes each cell's suitability score into per-criterion contributions: contribution<sub>j</sub> = w<sub>j</sub> × x<sub>ij</sub>. Produces one raster per criterion showing that criterion's contribution to the total score at every cell. The dominant criterion (highest contribution) can be mapped as a categorical raster showing "which criterion most drives the suitability score here."</div>
+  <div class="formula-block"><span class="var">S<sub>i</sub></span> <span class="op">=</span> Σ<sub>j</sub> <span class="var">c<sub>ij</sub></span>&nbsp;&nbsp;&nbsp; where <span class="var">c<sub>ij</sub></span> = <span class="var">w<sub>j</sub></span> · <span class="var">x<sub>ij</sub></span> is criterion j's contribution at cell i</div>
+</div>
+</article>
+
+<article class="alg-card" id="alg-geoshapley">
+<div class="alg-card-header"><div class="alg-icon">🧮</div><div class="alg-info"><h4>XAI: GeoShapley-lite Approximation</h4><div class="alg-id">xai_geoshapley_lite</div></div></div>
+<div class="alg-card-body">
+  <div class="alg-desc">Per-cell linear attribution of suitability deviation from a sampled global baseline, approximating a first-order Shapley decomposition. A global baseline (mean) is estimated per criterion from a random sample of valid overlapping cells (default 2,000). Each cell's attribution = Σ<sub>i</sub> weight<sub>i</sub> × (criterion<sub>i</sub> − baseline<sub>i</sub>). Output raster: −100 to +100; positive = local conditions exceed the regional average, negative = they fall below. Avoids the exponential cost (2ⁿ) of exact Shapley computation while preserving marginal-contribution interpretability.</div>
+  <div class="acad-note"><strong>Shapley connection.</strong> In cooperative game theory, Shapley values fairly allocate a coalition's total payoff to individual players based on their marginal contributions across all possible coalitions. GeoShapley-lite treats each criterion as a "player" and the suitability score as the "payoff," using the global mean as the baseline coalition value. The first-order approximation (linear around the mean) captures the dominant attribution structure at a fraction of the computational cost.</div>
+  <div class="cite">Shapley, L.S. (1953). "A Value for n-Person Games." In <em>Contributions to the Theory of Games II</em>, Princeton, 307–317. · Lundberg, S.M. &amp; Lee, S.-I. (2017). "A Unified Approach to Interpreting Model Predictions." <em>NeurIPS</em> 30.</div>
+</div>
+</article>
+
+<!-- ═══════════════════════════ REPORTING ═══════════════════════════ -->
+<div class="group-header"><span class="group-num">Reporting</span><h3>Reporting &amp; Decision Support</h3></div>
+<p style="color:var(--sl-stone-600);font-size:.86rem;margin-bottom:26px;">Comprehensive reporting, auditing, and decision-support tools that transform raster suitability outputs into structured evidence for planning decisions. These tools bridge the gap between analytical outputs and the documents, scorecards, and narratives that planning processes require.</p>
+
+<article class="alg-card" id="alg-suitability-report">
+<div class="alg-card-header"><div class="alg-icon">📄</div><div class="alg-info"><h4>Reporting: Suitability HTML Report</h4><div class="alg-id">suitability_html_report</div></div></div>
+<div class="alg-card-body"><div class="alg-desc">Generates a comprehensive HTML diagnostic report for a suitability raster: class-area distribution, descriptive statistics, spatial fragmentation metrics, constraint-impact summary, and per-criterion contribution breakdown. The primary reporting artifact for a single suitability model run.</div></div>
+</article>
+
+<article class="alg-card" id="alg-numerical-qa">
+<div class="alg-card-header"><div class="alg-icon">✅</div><div class="alg-info"><h4>Reporting: Numerical QA Check</h4><div class="alg-id">numerical_qa_check</div></div></div>
+<div class="alg-card-body"><div class="alg-desc">Validates raster numerical integrity: checks for valid data types (Float32), nodata consistency, value range compliance (0–100 for normalized criteria), and statistical summary coherence. Catches silent data corruption before it propagates into suitability models.</div></div>
+</article>
+
+<article class="alg-card" id="alg-beta-evidence">
+<div class="alg-card-header"><div class="alg-icon">📊</div><div class="alg-info"><h4>Reporting: Beta Evidence Report</h4><div class="alg-id">beta_evidence_report</div></div></div>
+<div class="alg-card-body"><div class="alg-desc">Produces a structured evidence table linking each criterion to its data source, normalization method, weight derivation, and sensitivity rank. Designed to support the "evidence base" section of planning reports — every modeling choice is documented and traceable.</div></div>
+</article>
+
+<article class="alg-card" id="alg-scenario-brief">
+<div class="alg-card-header"><div class="alg-icon">📝</div><div class="alg-info"><h4>Reporting: Scenario Markdown Brief</h4><div class="alg-id">scenario_markdown_brief</div></div></div>
+<div class="alg-card-body"><div class="alg-desc">Generates a Markdown briefing document per scenario: scenario name, weight vector, composition method, suitability class distribution, top candidate sites, uncertainty summary, and one-paragraph narrative interpretation. Ready for inclusion in planning documents or stakeholder packets.</div></div>
+</article>
+
+<article class="alg-card" id="alg-executive-kpi">
+<div class="alg-card-header"><div class="alg-icon">📋</div><div class="alg-info"><h4>Reporting: Executive KPI Snapshot</h4><div class="alg-id">executive_kpi_snapshot</div></div></div>
+<div class="alg-card-body"><div class="alg-desc">Condenses multi-scenario suitability results into a one-page executive summary: total suitable area, top-5 candidate sites, method agreement score, stability index, dominant criteria, and a plain-language recommendation flag. Designed for decision-maker briefings.</div></div>
+</article>
+
+<article class="alg-card" id="alg-action-playbook">
+<div class="alg-card-header"><div class="alg-icon">📘</div><div class="alg-info"><h4>Reporting: Action Playbook Generator</h4><div class="alg-id">action_playbook_generator</div></div></div>
+<div class="alg-card-body"><div class="alg-desc">Translates suitability analysis into a phased action plan: Tier 1 zones → immediate action (0–2 years), Tier 2 → medium-term (2–5 years), Tier 3 → monitoring (5+ years). Includes implementation considerations, data confidence notes, and monitoring indicators per phase. The bridge from analysis to implementation.</div></div>
+</article>
+
+<article class="alg-card" id="alg-deployment-gate">
+<div class="alg-card-header"><div class="alg-icon">🚦</div><div class="alg-info"><h4>Reporting: Deployment Readiness Gate</h4><div class="alg-id">deployment_readiness_gate</div></div></div>
+<div class="alg-card-body"><div class="alg-desc">Go/no-go checklist for suitability model deployment: data completeness, weight consensus, uncertainty thresholds, constraint coverage, method agreement, and documentation completeness. Each gate is scored pass/partial/fail with remediation suggestions. Prevents premature or under-documented models from reaching decision stages.</div></div>
+</article>
+
+<article class="alg-card" id="alg-actionability">
+<div class="alg-card-header"><div class="alg-icon">🎯</div><div class="alg-info"><h4>Reporting: Actionability Scorecard</h4><div class="alg-id">actionability_scorecard</div></div></div>
+<div class="alg-card-body"><div class="alg-desc">Scores each candidate site on actionability dimensions: suitability score, stability, parcel contiguity, infrastructure proximity, constraint clearance, and stakeholder alignment (when provided). Produces a ranked table with a composite actionability index — which sites are not just suitable, but <em>ready to act on</em>.</div></div>
+</article>
+
+<article class="alg-card" id="alg-scenario-selection">
+<div class="alg-card-header"><div class="alg-icon">🏆</div><div class="alg-info"><h4>Reporting: Scenario Selection Recommender</h4><div class="alg-id">scenario_selection_recommender</div></div></div>
+<div class="alg-card-body"><div class="alg-desc">Recommends a preferred scenario from a set of alternatives using multi-metric ranking: suitability coverage, stability, regret minimization, method agreement, and policy alignment. Applies configurable weights to each metric and produces a ranked recommendation with justification text.</div></div>
+</article>
+
+<article class="alg-card" id="alg-implementation-wave">
+<div class="alg-card-header"><div class="alg-icon">🌊</div><div class="alg-info"><h4>Reporting: Implementation Wave Planner</h4><div class="alg-id">implementation_wave_planner</div></div></div>
+<div class="alg-card-body"><div class="alg-desc">Structures candidate sites into sequential implementation waves based on suitability, contiguity, and infrastructure proximity. Wave 1 = highest suitability + lowest uncertainty + best connected. Wave 2 = high suitability + moderate uncertainty. Wave 3 = monitoring zone. Produces a wave map and phased timeline table.</div></div>
+</article>
+
+<article class="alg-card" id="alg-release-narrative">
+<div class="alg-card-header"><div class="alg-icon">📖</div><div class="alg-info"><h4>Reporting: Release Narrative Builder</h4><div class="alg-id">release_narrative_builder</div></div></div>
+<div class="alg-card-body"><div class="alg-desc">Generates a structured narrative document explaining the suitability analysis in plain language: what was analyzed, which methods were used, what the results show, where the certain and uncertain zones are, and what the recommended next steps are. Designed for public consultation and non-technical stakeholder communication.</div></div>
+</article>
+
+<!-- ═══════════════════════════ METHODOLOGICAL NOTES ═══════════════════════════ -->
+<section id="methodological-notes" class="section-intro" style="margin-top:40px;">
+<h2>Methodological Notes</h2>
+
+<h5 style="margin-top:18px;">Raster Alignment Requirement</h5>
+<p style="font-size:.86rem;color:var(--sl-stone-700);">All MCDA composition methods require <strong>perfectly aligned input rasters</strong> — identical CRS, extent, pixel size, and origin. A single misaligned raster will produce silently wrong suitability scores because GDAL reads values at offset locations. The <strong>Data Harmonizer</strong> enforces alignment; always run it before composing. The Numerical QA Check verifies alignment post-hoc.</p>
+
+<h5 style="margin-top:18px;">Normalization and Direction</h5>
+<p style="font-size:.86rem;color:var(--sl-stone-700);">All criteria must be normalized to a common 0–100 scale before composition, with consistent direction: 100 = most suitable, 0 = least suitable. For cost criteria (distance to hazard, slope steepness, pollution concentration), the <strong>Normalizer</strong> inverts values so that low raw values → high normalized scores. Failing to invert a cost criterion will create a suitability map where hazardous areas appear "most suitable."</p>
+
+<h5 style="margin-top:18px;">Weights vs. Order Weights</h5>
+<p style="font-size:.86rem;color:var(--sl-stone-700);">In OWA, <strong>criteria weights</strong> (w<sub>j</sub>) express the <em>relative importance</em> of each criterion (they sum to 1 and attach to specific criteria). <strong>Order weights</strong> (v<sub>k</sub>) express <em>risk attitude</em> (they sum to 1 and attach to sorted criterion values, not to specific criteria). The OWA operator nests WLC as a special case: when all order weights equal 1/n, OWA = WLC. When order weights = [1,0,0,...], OWA = MAX (fully optimistic). When order weights = [0,0,...,1], OWA = MIN (fully pessimistic).</p>
+
+<h5 style="margin-top:18px;">Block-Wise Processing</h5>
+<p style="font-size:.86rem;color:var(--sl-stone-700);">All composition tools use configurable block-wise processing (default 256×256 pixel blocks) via GDAL's ReadAsArray/WriteArray. This keeps memory usage constant regardless of raster size — a 50,000×50,000 cell raster uses the same RAM as a 500×500 raster. Increase block size for faster processing on machines with ample RAM; decrease for memory-constrained environments.</p>
+
+<h5 style="margin-top:18px;">The Constraint vs. Criterion Distinction</h5>
+<p style="font-size:.86rem;color:var(--sl-stone-700);">This is the most important conceptual distinction in MCDA for land suitability. <strong>Criteria</strong> are continuous: a lower score on one can be compensated by a higher score on another. <strong>Constraints</strong> are binary: no compensation is possible. A protected forest is not "less suitable" for development — it is <em>excluded</em>. The Constraint Builder enforces this by producing a strict 0/1 mask. Never include constraint layers as criteria with zero weight — they will still allow non-zero suitability in excluded cells due to the compensatory math.</p>
+
+<h5 style="margin-top:18px;">Reproducibility</h5>
+<p style="font-size:.86rem;color:var(--sl-stone-700);">All stochastic tools (Monte Carlo, GeoShapley-lite sampling, K-Means initialization in PCA) use fixed random seeds. Monte Carlo uses seed 42. GeoShapley-lite uses seed 42 for its random sample. This ensures that re-running the same tool on the same inputs produces bitwise-identical outputs — essential for auditable planning evidence. To vary the stochastic component (e.g., for a different Monte Carlo draw), change the seed by adjusting the sigma or sample size slightly, or modify the source code seed constant.</p>
+</section>
+
+<!-- ═══════════════════════════ REFERENCES ═══════════════════════════ -->
+<section id="references" class="section-intro" style="margin-top:40px;">
+<h2>Academic References</h2>
+<p style="font-size:.83rem;color:var(--sl-stone-600);">The following works inform the methodological choices in PlanX Suitability Lab. Each algorithm cites the specific references most relevant to its implementation.</p>
+
+<div style="font-size:.80rem;color:var(--sl-stone-700);line-height:2.0;margin-top:14px;">
+<p><strong>Diakoulaki, D., Mavrotas, G. &amp; Papayannakis, L.</strong> (1995). "Determining objective weights in multiple criteria problems: The CRITIC method." <em>Computers &amp; Operations Research</em> 22(7): 763–770.</p>
+<p><strong>Eastman, J.R.</strong> (2012). <em>IDRISI Selva Manual.</em> Clark Labs, Clark University.</p>
+<p><strong>Hwang, C.L. &amp; Yoon, K.</strong> (1981). <em>Multiple Attribute Decision Making: Methods and Applications.</em> Springer.</p>
+<p><strong>Jankowski, P. &amp; Richard, L.</strong> (1994). "Integration of GIS-based suitability analysis and multicriteria evaluation in a spatial decision support system." <em>Environment and Planning B</em> 21(3): 323–340.</p>
+<p><strong>Lundberg, S.M. &amp; Lee, S.-I.</strong> (2017). "A Unified Approach to Interpreting Model Predictions." <em>Advances in Neural Information Processing Systems</em> 30.</p>
+<p><strong>Malczewski, J.</strong> (1999). <em>GIS and Multicriteria Decision Analysis.</em> Wiley.</p>
+<p><strong>Malczewski, J.</strong> (2000). "On the Use of Weighted Linear Combination Method in GIS." <em>International Journal of Geographical Information Science</em> 14(6): 567–590.</p>
+<p><strong>Malczewski, J.</strong> (2006). "GIS-based multicriteria decision analysis: a survey of the literature." <em>International Journal of Geographical Information Science</em> 20(7): 703–726.</p>
+<p><strong>Malczewski, J. &amp; Rinner, C.</strong> (2015). <em>Multicriteria Decision Analysis in Geographic Information Science.</em> Springer.</p>
+<p><strong>Opricovic, S.</strong> (1998). <em>Multicriteria Optimization of Civil Engineering Systems.</em> PhD Thesis, University of Belgrade.</p>
+<p><strong>Opricovic, S. &amp; Tzeng, G.H.</strong> (2004). "Compromise solution by MCDM methods: A comparative analysis of VIKOR and TOPSIS." <em>European Journal of Operational Research</em> 156(2): 445–455.</p>
+<p><strong>Saaty, T.L.</strong> (1980). <em>The Analytic Hierarchy Process.</em> McGraw-Hill.</p>
+<p><strong>Saaty, T.L.</strong> (2008). "Decision making with the analytic hierarchy process." <em>International Journal of Services Sciences</em> 1(1): 83–98.</p>
+<p><strong>Shannon, C.E.</strong> (1948). "A Mathematical Theory of Communication." <em>Bell System Technical Journal</em> 27(3): 379–423.</p>
+<p><strong>Shapley, L.S.</strong> (1953). "A Value for n-Person Games." In <em>Contributions to the Theory of Games II</em>, Princeton University Press, 307–317.</p>
+<p><strong>Yager, R.R.</strong> (1988). "On Ordered Weighted Averaging Aggregation Operators in Multicriteria Decisionmaking." <em>IEEE Transactions on Systems, Man, and Cybernetics</em> 18(1): 183–190.</p>
+<p><strong>Yoon, K.</strong> (1987). "A Reconciliation Among Discrete Compromise Solutions." <em>Journal of the Operational Research Society</em> 38(3): 277–286.</p>
+</div>
+</section>
+
+<footer class="refman-footer">
+  <strong>PlanX Suitability Lab — Comprehensive Reference Manual v1.6.4.</strong><br>
+  Developed by Yusuf Eminoğlu with feedback from educational workflows at Dokuz Eylül University, Department of City and Regional Planning.<br>
+  Licensed under GPL-3.0. Source repository: <a href="https://github.com/YusufEminoglu/planx_suitability_lab" style="color:var(--sl-green-600);">github.com/YusufEminoglu/planx_suitability_lab</a>.<br>
+  <em>All MCDA methods are implemented with NumPy/GDAL block-wise processing for memory efficiency. Stochastic tools use fixed random seeds for reproducibility.</em>
+</footer>
+
+</div>
+</main>
+
+<!-- SIDEBAR SCROLL SPY -->
+<script>
+(function() {
+  const links = document.querySelectorAll('#sidebar a[href^="#"]');
+  if (!links.length) return;
+  const sections = [];
+  links.forEach(a => { const el = document.getElementById(a.getAttribute('href').slice(1)); if (el) sections.push({ el, link: a }); });
+  function update() {
+    const scrollY = window.scrollY + 100;
+    let current = sections[0];
+    for (const s of sections) { if (s.el.offsetTop <= scrollY) current = s; }
+    links.forEach(a => a.classList.remove('active'));
+    if (current) current.link.classList.add('active');
+  }
+  window.addEventListener('scroll', update, { passive: true });
+  update();
+  const active = document.querySelector('#sidebar a.active');
+  if (active) active.scrollIntoView({ block: 'center', behavior: 'instant' });
+})();
+</script>
+
+
+<!-- PDF PRINT BUTTON -->
+<style>
+#print-pdf-btn {
+  position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+  background: #13a0a0; color: white; border: none; border-radius: 8px;
+  padding: 10px 18px; font-size: 14px; font-weight: 600; cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0,0,0,.2); transition: all .2s;
+  display: flex; align-items: center; gap: 8px;
+}
+#print-pdf-btn:hover { background: #0d7a7a; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.25); }
+@media print { #print-pdf-btn { display: none !important; } }
+@media (max-width: 768px) { #print-pdf-btn { bottom: 12px; right: 12px; padding: 8px 14px; font-size: 12px; } }
+</style>
+<button id="print-pdf-btn" onclick="window.print()" title="Save as PDF / Print">🖨️ Save as PDF</button>
+
+</body>
+</html>
