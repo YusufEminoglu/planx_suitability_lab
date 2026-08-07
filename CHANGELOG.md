@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.6.5] - 2026-08-07
+
+- Add comprehensive academic reference manual: 68 algorithms, 45 equations, DOI-verified refs
+
 ## [1.6.4] - 2026-07-20
 
 - Added a compact, outcome-led `Model Flow` dashboard with three alternatives: Essential Suitability, Robust Decision Map, and Scenario Comparison. Each route exposes its final output up front, locks future stages until the current stage runs, and persists progress independently.
