@@ -3,7 +3,7 @@ name=PlanX Suitability Lab
 qgisMinimumVersion=3.28
 qgisMaximumVersion=4.99
 description=Raster-based MCDA land suitability workflows with explainable analytics and uncertainty.
-version=1.6.5
+version=1.6.6
 author=Yusuf Eminoglu
 email=yusuf.eminoglu@deu.edu.tr
 

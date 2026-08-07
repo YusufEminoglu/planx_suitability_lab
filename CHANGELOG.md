@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.6.6] - 2026-08-07
+
+- Add floating Save as PDF button to reference manual
+
 ## [1.6.5] - 2026-08-07
 
 - Add comprehensive academic reference manual: 68 algorithms, 45 equations, DOI-verified refs
