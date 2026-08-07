@@ -18,6 +18,11 @@
 
 PlanX Suitability Lab is a production-ready raster MCDA plugin for QGIS, designed for land suitability studies with strong reproducibility, uncertainty tracking, and explainability.
 
+## 📖 Documentation
+
+**[Comprehensive Academic Reference Manual](https://yusufeminoglu.github.io/planx_suitability_lab/)** — complete documentation of every feature, parameter, and workflow. Hosted on GitHub Pages.
+
+
 ## Module catalog
 
 - Core preparation:
