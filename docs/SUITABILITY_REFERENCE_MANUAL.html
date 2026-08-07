@@ -1,0 +1,1593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PlanX Suitability Lab &mdash; Academic Reference Manual</title>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+:root {
+  --bg: #ffffff; --fg: #1a1a1a; --hd: #2c3e50; --ac: #2563eb;
+  --side-bg: #f8fafc; --side-fg: #1e293b; --border: #e2e8f0;
+  --code-bg: #f1f5f9; --th-bg: #eff6ff; --th-fg: #1e40af;
+  --tag-bg: #dbeafe; --tag-fg: #1e40af; --toc-active: #bfdbfe;
+  --shadow: 0 2px 8px rgba(0,0,0,0.08);
+  --ref-bg: #f9fafb;
+}
+.dark {
+  --bg: #0f172a; --fg: #e2e8f0; --hd: #94a3b8; --ac: #60a5fa;
+  --side-bg: #1e293b; --side-fg: #cbd5e1; --border: #334155;
+  --code-bg: #1e293b; --th-bg: #1e3a5f; --th-fg: #93c5fd;
+  --tag-bg: #1e3a5f; --tag-fg: #93c5fd; --toc-active: #1e40af;
+  --shadow: 0 2px 8px rgba(0,0,0,0.4);
+  --ref-bg: #1e293b;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--fg); line-height: 1.7; }
+a { color: var(--ac); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Layout */
+#layout { display: flex; min-height: 100vh; }
+#sidebar { width: 300px; min-width: 300px; background: var(--side-bg); border-right: 1px solid var(--border); position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 1.2rem; display: flex; flex-direction: column; z-index: 10; }
+#main { flex: 1; max-width: 960px; padding: 2rem 3rem; overflow-x: hidden; }
+
+/* Sidebar widgets */
+#sidebar h2 { font-size: 1rem; font-weight: 700; color: var(--hd); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+#search-box { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--fg); font-size: 0.85rem; margin-bottom: 1rem; }
+#mode-toggle { padding: 0.35rem 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--fg); cursor: pointer; font-size: 0.8rem; margin-bottom: 1rem; }
+#toc { list-style: none; font-size: 0.82rem; flex: 1; overflow-y: auto; }
+#toc li { margin-bottom: 0.15rem; }
+#toc li a { display: block; padding: 0.2rem 0.4rem; border-radius: 4px; color: var(--side-fg); }
+#toc li a:hover, #toc li a.active { background: var(--toc-active); text-decoration: none; }
+#toc .cat { font-weight: 700; margin-top: 0.6rem; margin-bottom: 0.2rem; color: var(--ac); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; }
+
+/* Content */
+h1 { font-size: 2rem; color: var(--ac); border-bottom: 3px solid var(--ac); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+h2 { font-size: 1.5rem; color: var(--hd); border-bottom: 2px solid var(--border); padding-bottom: 0.4rem; margin: 2.5rem 0 1rem; }
+h3 { font-size: 1.15rem; color: var(--ac); margin: 1.8rem 0 0.6rem; }
+h4 { font-size: 1rem; color: var(--hd); margin: 1.2rem 0 0.4rem; }
+p { margin-bottom: 0.8rem; }
+ul, ol { margin: 0.5rem 0 0.8rem 1.5rem; }
+li { margin-bottom: 0.3rem; }
+
+/* Tables */
+table { width: 100%; border-collapse: collapse; margin: 1rem 0 1.5rem; font-size: 0.88rem; box-shadow: var(--shadow); }
+th { background: var(--th-bg); color: var(--th-fg); padding: 0.5rem 0.75rem; text-align: left; font-weight: 600; border: 1px solid var(--border); }
+td { padding: 0.45rem 0.75rem; border: 1px solid var(--border); }
+tr:nth-child(even) { background: var(--code-bg); }
+
+/* Code / equations */
+code { font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace; font-size: 0.88em; background: var(--code-bg); padding: 0.1em 0.35em; border-radius: 4px; }
+pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x: auto; margin: 1rem 0; border: 1px solid var(--border); font-size: 0.85rem; }
+.eq-block { margin: 1.2rem 0; text-align: center; }
+.eq-label { font-weight: 600; color: var(--ac); margin-right: 0.5rem; }
+
+/* Tags & badges */
+.tag { display: inline-block; padding: 0.15em 0.55em; border-radius: 12px; font-size: 0.72rem; font-weight: 600; background: var(--tag-bg); color: var(--tag-fg); margin-right: 0.3rem; }
+.section-tag { margin-bottom: 0.6rem; }
+
+/* Key box */
+.key-box { background: var(--code-bg); border-left: 4px solid var(--ac); padding: 0.8rem 1.2rem; margin: 1rem 0; border-radius: 0 6px 6px 0; }
+
+/* References */
+.ref-list { font-size: 0.82rem; background: var(--ref-bg); padding: 0.8rem 1.2rem; border-radius: 6px; border: 1px solid var(--border); }
+.ref-list ol { margin-left: 1.2rem; }
+.ref-list li { margin-bottom: 0.5rem; }
+.doi-ok { color: #16a34a; font-size: 0.75rem; }
+.doi-fail { color: #dc2626; font-size: 0.75rem; }
+
+/* Summary block for 1-page algos */
+.algo-compact { border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.3rem; margin: 1.2rem 0; background: var(--code-bg); }
+.algo-compact h3 { margin-top: 0; font-size: 1.05rem; }
+.algo-compact h4 { font-size: 0.92rem; margin-top: 0.7rem; }
+
+/* Algo divider */
+.algo-divider { border: none; border-top: 2px solid var(--border); margin: 2rem 0; }
+
+/* On this page */
+#on-this-page { font-size: 0.8rem; margin-bottom: 0.5rem; color: var(--hd); }
+
+@media (max-width: 900px) {
+  #layout { flex-direction: column; }
+  #sidebar { width: 100%; min-width: auto; height: auto; position: static; border-right: none; border-bottom: 1px solid var(--border); max-height: 40vh; }
+  #main { padding: 1.5rem; }
+}
+</style>
+</head>
+<body>
+<div id="layout">
+<nav id="sidebar">
+  <h2>PlanX Suitability Lab</h2>
+  <p style="font-size:0.78rem;color:var(--hd);margin-bottom:0.8rem;">Reference Manual &bull; v1.6.x &bull; 68 Algorithms</p>
+  <input type="text" id="search-box" placeholder="Search algorithms..." oninput="filterTOC()">
+  <button id="mode-toggle" onclick="toggleDark()">Dark Mode</button>
+  <ul id="toc">
+    <li class="cat">Core (7)</li>
+    <li><a href="#core-harmonizer">Data Harmonizer</a></li>
+    <li><a href="#core-rasterizer">Vector Rasterizer</a></li>
+    <li><a href="#core-proximity">Proximity Builder</a></li>
+    <li><a href="#core-normalizer">Normalizer / Reclassifier</a></li>
+    <li><a href="#core-constraint">Constraint Builder</a></li>
+    <li><a href="#core-synthetic-sample">Synthetic Sample Raster Pack</a></li>
+    <li><a href="#core-synthetic-pipeline">End-to-End Pipeline Runner</a></li>
+    <li class="cat">Weights (7)</li>
+    <li><a href="#w-ahp">AHP Weights</a></li>
+    <li><a href="#w-pca">PCA-derived Weights</a></li>
+    <li><a href="#w-entropy">Entropy Weights</a></li>
+    <li><a href="#w-critic">CRITIC Objective Weights</a></li>
+    <li><a href="#w-consolidator">Weight Consolidator</a></li>
+    <li><a href="#w-pack">Scenario Weight Pack</a></li>
+    <li><a href="#w-consensus-audit">Weight Consensus Audit</a></li>
+    <li class="cat">Compose (16)</li>
+    <li><a href="#c-wlc">WLC Suitability</a></li>
+    <li><a href="#c-owa">OWA Suitability</a></li>
+    <li><a href="#c-topsis">TOPSIS Suitability</a></li>
+    <li><a href="#c-vikor">VIKOR Suitability</a></li>
+    <li><a href="#c-ensemble">Ensemble Suitability</a></li>
+    <li><a href="#c-opp-loss">Opportunity Loss Map</a></li>
+    <li><a href="#c-candidate-site">Candidate Site Extractor</a></li>
+    <li><a href="#c-priority-zoning">Priority Zoning</a></li>
+    <li><a href="#c-consensus-zone">Scenario Consensus Zone</a></li>
+    <li><a href="#c-disagreement">Scenario Disagreement Attention</a></li>
+    <li><a href="#c-decision-quadrant">Decision Quadrant Map</a></li>
+    <li><a href="#c-intervention-conflict">Intervention Conflict Matrix</a></li>
+    <li><a href="#c-risk-opportunity">Risk-Opportunity Matrix Map</a></li>
+    <li><a href="#c-regret-fragility">Regret Fragility Map</a></li>
+    <li><a href="#c-uncertainty-adjusted">Uncertainty-Adjusted Suitability</a></li>
+    <li><a href="#c-scenario-comparator">Scenario Comparator</a></li>
+    <li class="cat">Uncertainty (1)</li>
+    <li><a href="#u-montecarlo">Monte Carlo Suitability</a></li>
+    <li class="cat">Explainability (3)</li>
+    <li><a href="#xai-global-sensitivity">Global Sensitivity</a></li>
+    <li><a href="#xai-local-contribution">Local Contribution Decomposition</a></li>
+    <li><a href="#xai-geoshapley">GeoShapley Lite</a></li>
+    <li class="cat">Reporting (34)</li>
+    <li><a href="#r-suitability-html">Suitability HTML Report</a></li>
+    <li><a href="#r-numerical-qa">Numerical QA Check</a></li>
+    <li><a href="#r-beta-evidence">Beta Evidence Report</a></li>
+    <li><a href="#r-scenario-brief">Scenario Markdown Brief</a></li>
+    <li><a href="#r-class-stats">Suitability Class Area Stats</a></li>
+    <li><a href="#r-similarity">Scenario Similarity Matrix</a></li>
+    <li><a href="#r-dominance">Scenario Dominance Matrix</a></li>
+    <li><a href="#r-robustness">Scenario Robustness Leaderboard</a></li>
+    <li><a href="#r-governance">Scenario Governance Audit</a></li>
+    <li><a href="#r-method-benchmark">Method Benchmark Leaderboard</a></li>
+    <li><a href="#r-portfolio-diversity">Scenario Portfolio Diversity</a></li>
+    <li><a href="#r-minimax-regret">Minimax Regret Selector</a></li>
+    <li><a href="#r-policy-frontier">Policy Sensitivity Frontier</a></li>
+    <li><a href="#r-action-playbook">Action Playbook Generator</a></li>
+    <li><a href="#r-budget-phasing">Intervention Budget Phasing</a></li>
+    <li><a href="#r-release-narrative">Release Narrative Builder</a></li>
+    <li><a href="#r-criterion-redundancy">Criterion Redundancy Diagnostics</a></li>
+    <li><a href="#r-constraint-impact">Constraint Impact Audit</a></li>
+    <li><a href="#r-alignment">Alignment Audit</a></li>
+    <li><a href="#r-priority-transition">Priority Transition Matrix</a></li>
+    <li><a href="#r-spatial-fragmentation">Spatial Fragmentation Audit</a></li>
+    <li><a href="#r-consensus-zone-stats">Consensus Zone Area Stats</a></li>
+    <li><a href="#r-threshold-coverage">Threshold Coverage Curve</a></li>
+    <li><a href="#r-attention-class-stats">Attention Class Area Stats</a></li>
+    <li><a href="#r-executive-kpi">Executive KPI Snapshot</a></li>
+    <li><a href="#r-policy-gate">Policy Gate Recommender</a></li>
+    <li><a href="#r-decision-quadrant-stats">Decision Quadrant Area Stats</a></li>
+    <li><a href="#r-intervention-conflict-stats">Intervention Conflict Area Stats</a></li>
+    <li><a href="#r-risk-opportunity-stats">Risk Opportunity Area Stats</a></li>
+    <li><a href="#r-regret-fragility-stats">Regret Fragility Area Stats</a></li>
+    <li><a href="#r-scenario-selection">Scenario Selection Recommender</a></li>
+    <li><a href="#r-implementation-wave">Implementation Wave Planner</a></li>
+    <li><a href="#r-deployment-readiness">Deployment Readiness Gate</a></li>
+    <li><a href="#r-actionability-scorecard">Actionability Scorecard</a></li>
+  </ul>
+</nav>
+
+<main id="main">
+
+<!-- ═══════════════════════════════════════════════ -->
+<h1>PlanX Suitability Lab<br><span style="font-size:1rem;font-weight:400;color:var(--hd);">Academic Reference Manual</span></h1>
+
+<p><strong>PlanX Suitability Lab</strong> is a QGIS processing plugin providing 68 raster-based multi-criteria decision analysis (MCDA) algorithms for land suitability modelling. It spans the full decision workflow: data harmonisation, criterion weighting (subjective and objective), compensatory and non-compensatory composite scoring, uncertainty quantification, explainable AI diagnostics, scenario comparison, and decision reporting. All algorithms operate on single-band raster layers aligned to a common grid. Outputs are GeoTIFF (Float32 or Int16/Byte) and GeoPackage vector tables.</p>
+
+<div class="section-tag">
+<span class="tag">raster MCDA</span> <span class="tag">QGIS processing</span> <span class="tag">68 algorithms</span> <span class="tag">WLC + OWA + TOPSIS + VIKOR</span> <span class="tag">Monte Carlo</span> <span class="tag">AHP / Entropy / CRITIC / PCA</span> <span class="tag">GeoShapley</span>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<hr class="algo-divider">
+<h2 id="sec-core">1. Core Preprocessing Algorithms</h2>
+<p>The Core group provides seven algorithms for raster data preparation: alignment, vector-to-raster conversion, proximity computation, value normalisation, constraint masking, synthetic test-data generation, and end-to-end pipeline verification.</p>
+
+<!-- ─── CORE: Data Harmonizer (DEEP) ─── -->
+<h3 id="core-harmonizer">1.1 Data Harmonizer</h3>
+<p><span class="tag">GDAL Warp</span> <span class="tag">grid alignment</span> <span class="tag">preprocessing</span></p>
+
+<h4>Theoretical Background</h4>
+<p>Multi-criteria raster analysis requires all input layers to share identical spatial reference systems, pixel resolution, extent, and nodata conventions. Misaligned rasters cause resampling-on-the-fly during overlay operations, introducing positional error and artefacts. The Data Harmonizer applies GDAL's <code>gdalwarp</code> reprojection engine to enforce strict grid conformity, which is a prerequisite for any cell-by-cell MCDA combination. The algorithm serves the role of the &ldquo;harmonisation&rdquo; step described in Malczewski (1999) as the foundational preprocessing phase without which weighted linear combination yields meaningless results.</p>
+
+<h4>Mathematical Formulation</h4>
+<p>Let \(\mathcal{R} = \{R_1, R_2, \ldots, R_m\}\) be the set of input rasters. A snap raster \(S\) or explicit parameters define the target grid \(G = (\text{CRS}_G, \text{Extent}_G, \Delta x_G, \Delta y_G, \nu_G)\) where:</p>
+
+<div class="eq-block">
+$$R_i^{\text{aligned}}(x, y) = \mathcal{W}\big(R_i, \; G, \; \text{method}\big)$$
+</div>
+
+<p>The warp operator \(\mathcal{W}\) performs coordinate transformation, resampling (nearest-neighbour, bilinear, or cubic convolution), and nodata filling. Outputs share identical grid geometry, guaranteeing \(R_i^{\text{aligned}}[c, r]\) and \(R_j^{\text{aligned}}[c, r]\) refer to the same geographic location for any column-row index pair \((c, r)\).</p>
+
+<div class="eq-block">
+<span class="eq-label">(1)</span> \(\text{CRS}(R_i^{\text{aligned}}) = \text{CRS}_G \quad \forall i\)
+</div>
+<div class="eq-block">
+<span class="eq-label">(2)</span> \(\Delta x(R_i^{\text{aligned}}) = \Delta y(R_i^{\text{aligned}}) = \Delta x_G \quad \forall i\)
+</div>
+<div class="eq-block">
+<span class="eq-label">(3)</span> \(\text{Extent}(R_i^{\text{aligned}}) = \text{Extent}_G \quad \forall i\)
+</div>
+
+<h4>Parameters</h4>
+<table>
+<tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr>
+<tr><td>Input rasters</td><td>Multiple raster layers</td><td>&mdash;</td><td>Raster layers to align</td></tr>
+<tr><td>Snap raster</td><td>Raster layer (optional)</td><td>None</td><td>Reference for CRS, extent, and resolution</td></tr>
+<tr><td>Target extent</td><td>Extent (optional)</td><td>None</td><td>Override output bounding box</td></tr>
+<tr><td>Target resolution</td><td>Double</td><td>0.0</td><td>Pixel size in map units; &le;0 inherits from snap or first raster</td></tr>
+<tr><td>Resampling</td><td>Enum</td><td>Nearest</td><td>Nearest / Bilinear / Cubic</td></tr>
+<tr><td>Output nodata</td><td>Double</td><td>-9999.0</td><td>Nodata fill value</td></tr>
+<tr><td>Preview aligned raster</td><td>Raster destination</td><td>&mdash;</td><td>Copy of first aligned result</td></tr>
+<tr><td>Aligned raster folder</td><td>Folder</td><td>&mdash;</td><td>Directory for all aligned GeoTIFFs</td></tr>
+<tr><td>Alignment manifest</td><td>File (.txt)</td><td>&mdash;</td><td>Text log of alignment parameters and outputs</td></tr>
+</table>
+
+<h4>Output Description</h4>
+<p>Produces \(m\) aligned GeoTIFF files named <code>aligned_NN_safename.tif</code> in the output folder, a preview copy of the first aligned raster, and a plain-text manifest documenting the target CRS, resolution, extent, resampling method, and nodata value used.</p>
+
+<h4>Interpretation Guide</h4>
+<ul>
+  <li><strong>Identical grids confirmed:</strong> Open any two aligned rasters in QGIS; they should overlay perfectly with no shift.</li>
+  <li><strong>Resampling artefacts:</strong> Nearest-neighbour preserves categorical boundaries; bilinear/cubic smooths continuous fields. Use Nearest for land-cover classes, Bilinear for DEM-derived criteria.</li>
+  <li><strong>Nodata propagation:</strong> Cells outside the original raster extent receive the specified nodata value. Verify the manifest confirms expected coverage.</li>
+</ul>
+
+<div class="key-box"><strong>Key insight:</strong> This step is not optional. Stacking misaligned rasters in any MCDA method produces spatially biased results. The harmonizer guarantees all criterion rasters share identical geometry, a precondition for valid cell-wise algebra.</div>
+
+<h4>References</h4>
+<div class="ref-list"><ol>
+  <li>Malczewski, J. (1999). <em>GIS and Multicriteria Decision Analysis</em>. Wiley. <span class="doi-ok">[ISBN 978-0-471-32944-2]</span></li>
+  <li>GDAL/OGR Contributors (2024). GDAL Warp documentation. <em>GDAL Documentation</em>. <span class="doi-ok">[https://gdal.org/programs/gdalwarp.html]</span></li>
+  <li>Eastman, J.R. (2012). <em>IDRISI Selva Manual</em>. Clark Labs, Clark University.</li>
+  <li>Tomlin, C.D. (1990). <em>Geographic Information Systems and Cartographic Modeling</em>. Prentice Hall.</li>
+  <li>Longley, P.A. et al. (2015). <em>Geographic Information Science and Systems</em>, 4th ed. Wiley.</li>
+  <li>Neteler, M. &amp; Mitasova, H. (2008). <em>Open Source GIS: A GRASS GIS Approach</em>, 3rd ed. Springer. DOI: <a href="https://doi.org/10.1007/978-0-387-68574-8" target="_blank">10.1007/978-0-387-68574-8</a></li>
+  <li>Kennedy, H. (Ed.) (2016). <em>QGIS 2 Cookbook</em>. Packt Publishing.</li>
+</ol></div>
+
+<hr class="algo-divider">
+
+<!-- ─── CORE: Vector Rasterizer (compact) ─── -->
+<div class="algo-compact" id="core-rasterizer">
+<h3>1.2 Vector Rasterizer</h3>
+<p><span class="tag">GDAL Rasterize</span> <span class="tag">vector-to-raster</span> <span class="tag">attribute burn</span></p>
+<h4>Theory &amp; Method</h4>
+<p>Converts vector features (points, lines, polygons) to a single-band Float32 raster via GDAL's <code>gdal_rasterize</code>. A specified attribute field or constant burn value is assigned to cells whose centre falls within a feature. This is the primary bridge from vector GIS data to the raster MCDA domain.</p>
+<div class="eq-block">
+$$V(x, y) = \begin{cases} A_f & \text{if } (x, y) \text{ intersects feature } f \\ 0 & \text{otherwise (nodata)} \end{cases}$$
+</div>
+<table><tr><th>Parameter</th><th>Default</th><th>Role</th></tr>
+<tr><td>Vector input</td><td>&mdash;</td><td>Any geometry type</td></tr>
+<tr><td>Value field</td><td>optional</td><td>Attribute to burn; overrides burn value</td></tr>
+<tr><td>Burn value</td><td>1.0</td><td>Constant value when no field is specified</td></tr>
+<tr><td>Pixel size</td><td>10.0</td><td>Cell size in map units</td></tr></table>
+<p><strong>Interpretation:</strong> Output extent matches the input vector layer bounds. Cells not covered by any feature are nodata (0). For categorical land-use data, use the field containing the suitability score directly.</p>
+<div class="ref-list"><ol>
+  <li>GDAL/OGR Contributors (2024). gdal_rasterize. <em>GDAL Documentation</em>.</li>
+  <li>Burrough, P.A. &amp; McDonnell, R.A. (1998). <em>Principles of Geographical Information Systems</em>. Oxford.</li>
+  <li>De Smith, M.J., Goodchild, M.F. &amp; Longley, P.A. (2018). <em>Geospatial Analysis</em>, 6th ed. <span class="doi-ok">[https://www.spatialanalysisonline.com/]</span></li>
+</ol></div>
+</div>
+
+<!-- ─── CORE: Proximity Builder (compact) ─── -->
+<div class="algo-compact" id="core-proximity">
+<h3>1.3 Proximity Builder</h3>
+<p><span class="tag">GDAL Proximity</span> <span class="tag">Euclidean distance</span> <span class="tag">continuous surface</span></p>
+<h4>Theory &amp; Method</h4>
+<p>Computes Euclidean distance from every cell to the nearest target pixel (cells whose band-1 value matches user-specified integer targets). The algorithm uses the two-pass chamfer distance transform internal to GDAL Proximity with Euclidean metric, producing a continuous proximity surface.</p>
+<div class="eq-block">
+$$D(p) = \min_{q \in T} \| p - q \|_2 \quad \text{where } T = \{q : R(q) \in \text{target\_values}\}$$
+</div>
+<table><tr><th>Parameter</th><th>Default</th><th>Role</th></tr>
+<tr><td>Input raster</td><td>&mdash;</td><td>Single-band source</td></tr>
+<tr><td>Target pixel values</td><td>"1"</td><td>Comma-separated integers; cells to measure from</td></tr>
+<tr><td>Distance units</td><td>Georeferenced</td><td>Map units or Pixels</td></tr>
+<tr><td>Max distance</td><td>0.0</td><td>0 = unlimited; caps distance values</td></tr></table>
+<p><strong>Typical use:</strong> Distance to roads, transit stops, water bodies, or hazard zones &mdash; as normalisable suitability criteria.</p>
+<div class="ref-list"><ol>
+  <li>Danielsson, P.-E. (1980). Euclidean distance mapping. <em>Computer Graphics and Image Processing</em>, 14(3), 227&ndash;248. DOI: <a href="https://doi.org/10.1016/0146-664X(80)90054-4" target="_blank">10.1016/0146-664X(80)90054-4</a></li>
+  <li>Borgefors, G. (1986). Distance transformations in digital images. <em>Computer Vision, Graphics, and Image Processing</em>, 34(3), 344&ndash;371. DOI: <a href="https://doi.org/10.1016/S0734-189X(86)80047-0" target="_blank">10.1016/S0734-189X(86)80047-0</a></li>
+  <li>GDAL/OGR Contributors (2024). gdal_proximity. <em>GDAL Documentation</em>.</li>
+</ol></div>
+</div>
+
+<!-- ─── CORE: Normalizer (DEEP) ─── -->
+<h3 id="core-normalizer">1.4 Normalizer / Reclassifier</h3>
+<p><span class="tag">fuzzy membership</span> <span class="tag">min-max</span> <span class="tag">sigmoid</span> <span class="tag">gaussian</span></p>
+
+<h4>Theoretical Background</h4>
+<p>Multi-criteria evaluation requires commensurate criterion scales. Raw environmental variables (elevation in metres, distance in kilometres, land value in currency) cannot be directly combined. The Normalizer transforms each raw criterion raster to the standardised \([0, 100]\) suitability scale through a membership function \(\mu: \mathbb{R} \to [0, 100]\). The choice of function encodes the decision-maker's value judgment about how desirability changes with the raw measurement. Following Zadeh's fuzzy set theory, the membership grade represents the degree to which a cell belongs to the &ldquo;suitable&rdquo; set. Seven functions are provided, spanning both crisp (min-max linear) and fuzzy (sigmoid, Gaussian) forms, with benefit (higher is better) and cost (lower is better) orientations.</p>
+
+<h4>Mathematical Formulation</h4>
+<p>Let \(x_{i,j}\) be the raw criterion value at cell \((i,j)\), and let parameters \(L\) (low), \(H\) (high), \(M\) (midpoint), and \(\sigma\) (spread) be user-specified.</p>
+
+<div class="eq-block">
+<span class="eq-label">(4)</span> <strong>Min-Max Benefit:</strong> \(\mu_B(x) = 100 \cdot \dfrac{x - L}{H - L}, \quad x \in [L, H]\)
+</div>
+
+<div class="eq-block">
+<span class="eq-label">(5)</span> <strong>Min-Max Cost:</strong> \(\mu_C(x) = 100 \cdot \dfrac{H - x}{H - L}, \quad x \in [L, H]\)
+</div>
+
+<div class="eq-block">
+<span class="eq-label">(6)</span> <strong>Sigmoid Benefit:</strong> \(\mu_S(x) = \dfrac{100}{1 + e^{-z}}, \quad z = \dfrac{x - M}{\sigma}, \quad z \in [-60, 60]\)
+</div>
+
+<div class="eq-block">
+<span class="eq-label">(7)</span> <strong>Sigmoid Cost:</strong> \(\mu_{SC}(x) = 100\left(1 - \dfrac{1}{1 + e^{-z}}\right), \quad z = \dfrac{x - M}{\sigma}\)
+</div>
+
+<div class="eq-block">
+<span class="eq-label">(8)</span> <strong>Gaussian Benefit:</strong> \(\mu_G(x) = 100 \cdot \exp\left(-\dfrac{1}{2}\left(\dfrac{x - M}{\sigma}\right)^2\right)\)
+</div>
+
+<p>The sigmoid midpoint \(M\) defines the inflection point (50% membership). The spread \(\sigma\) controls steepness: smaller \(\sigma\) produces sharper transitions, modelling stricter thresholds. The Gaussian function is symmetric about \(M\) and is appropriate when an optimal range exists with declining suitability on both sides (e.g., optimal temperature or elevation). Output is clamped to \([0, 100]\) and original nodata cells are preserved.</p>
+
+<h4>Parameters</h4>
+<table>
+<tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr>
+<tr><td>Input raster</td><td>Raster layer</td><td>&mdash;</td><td>Single-band raw criterion</td></tr>
+<tr><td>Method</td><td>Enum (0&ndash;6)</td><td>0 (Min-Max Benefit)</td><td>One of seven normalisation functions</td></tr>
+<tr><td>Low bound</td><td>Double</td><td>0.0</td><td>Minimum raw value or lower breakpoint</td></tr>
+<tr><td>High bound</td><td>Double</td><td>100.0</td><td>Maximum raw value or upper breakpoint (must &gt; Low)</td></tr>
+<tr><td>Midpoint</td><td>Double</td><td>50.0</td><td>Inflection point for sigmoid/Gaussian</td></tr>
+<tr><td>Spread</td><td>Double</td><td>10.0</td><td>Steepness parameter (&gt;0) for sigmoid/Gaussian</td></tr>
+<tr><td>Output raster</td><td>Raster destination</td><td>&mdash;</td><td>Normalised GeoTIFF (Float32, LZW, 0&ndash;100)</td></tr>
+</table>
+
+<h4>Output Description</h4>
+<p>Single-band Float32 LZW-compressed GeoTIFF with values in \([0, 100]\). Nodata cells from the input are preserved with their original nodata value. The data type and compression ensure compatibility with downstream NumPy-based processing.</p>
+
+<h4>Interpretation Guide</h4>
+<ul>
+  <li><strong>0 = completely unsuitable, 100 = ideal:</strong> A value of 50 represents the midpoint of desirability.</li>
+  <li><strong>Linearity assumption (min-max):</strong> Implies constant marginal change in suitability per unit change in the raw value. This is the most common but least behaviourally nuanced choice.</li>
+  <li><strong>Sigmoid:</strong> Models threshold behaviour: little change in suitability at extremes, rapid change near the midpoint. Suitable for regulatory thresholds (e.g., minimum distance to protected areas).</li>
+  <li><strong>Gaussian:</strong> Penalises deviation from an optimum. Use when both &ldquo;too little&rdquo; and &ldquo;too much&rdquo; are undesirable (e.g., slope for agriculture: too flat = poor drainage; too steep = erosion risk).</li>
+</ul>
+
+<div class="key-box"><strong>Key insight:</strong> The normalisation function is a value judgment, not a data transformation. Different functions for the same criterion produce different suitability maps. Sensitivity analysis across normalisation forms is recommended (see Global Sensitivity, Sec. 5.1).</div>
+
+<h4>References</h4>
+<div class="ref-list"><ol>
+  <li>Zadeh, L.A. (1965). Fuzzy sets. <em>Information and Control</em>, 8(3), 338&ndash;353. DOI: <a href="https://doi.org/10.1016/S0019-9958(65)90241-X" target="_blank">10.1016/S0019-9958(65)90241-X</a></li>
+  <li>Jiang, H. &amp; Eastman, J.R. (2000). Application of fuzzy measures in multi-criteria evaluation in GIS. <em>IJGIS</em>, 14(2), 173&ndash;184. DOI: <a href="https://doi.org/10.1080/136588100240903" target="_blank">10.1080/136588100240903</a></li>
+  <li>Malczewski, J. (2006). GIS-based multicriteria decision analysis: a survey of the literature. <em>IJGIS</em>, 20(7), 703&ndash;726. DOI: <a href="https://doi.org/10.1080/13658810600661508" target="_blank">10.1080/13658810600661508</a></li>
+  <li>Eastman, J.R. &amp; Jiang, H. (1996). Fuzzy measures in multi-criteria evaluation. <em>Proceedings, 2nd Int. Symposium on Spatial Accuracy Assessment</em>, 527&ndash;534.</li>
+  <li>Zimmermann, H.-J. (2001). <em>Fuzzy Set Theory and Its Applications</em>, 4th ed. Springer. DOI: <a href="https://doi.org/10.1007/978-94-010-0646-0" target="_blank">10.1007/978-94-010-0646-0</a></li>
+  <li>Gorsevski, P.V. et al. (2012). Integrating multi-criteria evaluation techniques with GIS for landfill site selection. <em>Waste Management</em>, 32(2), 287&ndash;296. DOI: <a href="https://doi.org/10.1016/j.wasman.2011.09.011" target="_blank">10.1016/j.wasman.2011.09.011</a></li>
+  <li>Rashed, T. &amp; Weeks, J. (2003). Assessing vulnerability to earthquake hazards through spatial multicriteria analysis. <em>Geographical Analysis</em>, 35(4), 305&ndash;325.</li>
+</ol></div>
+
+<hr class="algo-divider">
+
+<!-- ─── CORE: Constraint Builder (compact) ─── -->
+<div class="algo-compact" id="core-constraint">
+<h3>1.5 Constraint Builder (0/1 Mask)</h3>
+<p><span class="tag">Boolean mask</span> <span class="tag">thresholding</span> <span class="tag">exclusion</span></p>
+<h4>Theory &amp; Method</h4>
+<p>Applies a Boolean threshold \(R(x,y) \ge \tau\) to a criterion raster, producing a binary mask where 1 = suitable (passes constraint) and 0 = excluded (fails constraint). This implements the &ldquo;hard constraint&rdquo; layer in GIS-MCDA: areas that are absolutely infeasible regardless of other criteria scores (e.g., protected areas, water bodies, slopes exceeding regulatory limits).</p>
+<div class="eq-block">
+$$C(x,y) = \begin{cases} 1 & \text{if } R(x,y) \ge \tau \\ 0 & \text{otherwise} \end{cases}$$
+</div>
+<table><tr><th>Parameter</th><th>Default</th><th>Role</th></tr>
+<tr><td>Input criterion raster</td><td>&mdash;</td><td>Single-band</td></tr>
+<tr><td>Threshold</td><td>50.0</td><td>Cells &ge; threshold become 1</td></tr></table>
+<p>Multiple constraint masks can be multiplied to create a composite exclusion layer. Constraint-failing cells in MCDA scoring are forced to 0.</p>
+<div class="ref-list"><ol>
+  <li>Malczewski, J. (1999). <em>GIS and Multicriteria Decision Analysis</em>. Wiley.</li>
+  <li>Eastman, J.R. et al. (1995). Raster procedures for MCE. <em>Photogrammetric Engineering &amp; Remote Sensing</em>, 61(5), 539&ndash;547.</li>
+  <li>Geneletti, D. (2010). Combining stakeholder analysis and spatial MCA. <em>Land Use Policy</em>, 27(2), 550&ndash;559. DOI: <a href="https://doi.org/10.1016/j.landusepol.2009.07.009" target="_blank">10.1016/j.landusepol.2009.07.009</a></li>
+</ol></div>
+</div>
+
+<!-- ─── CORE: Synthetic Sample (compact) ─── -->
+<div class="algo-compact" id="core-synthetic-sample">
+<h3>1.6 Synthetic Sample Raster Pack</h3>
+<p><span class="tag">test data</span> <span class="tag">smoke test</span> <span class="tag">synthetic</span></p>
+<h4>Theory &amp; Method</h4>
+<p>Generates five synthetic Float32 GeoTIFFs (four criteria rasters with controlled spatial patterns and one binary constraint mask) for pipeline testing without real data. Each criterion is computed from normalised coordinate grids with distinct spatial structures: eastward decay, northward increase, diagonal ridge, and radial hotspot, all with Gaussian noise (seed = 7). The constraint mask excludes the bottom-left 15% by 10% of the study area. All rasters are EPSG:3857, clipped 0&ndash;100, nodata -9999.</p>
+<table><tr><th>Parameter</th><th>Default</th><th>Role</th></tr>
+<tr><td>Study extent</td><td>&mdash;</td><td>Bounding box</td></tr>
+<tr><td>Pixel size</td><td>30.0</td><td>Cell size in map units</td></tr></table>
+<p><strong>Output files:</strong> <code>criterion_1.tif</code> through <code>criterion_4.tif</code> and <code>constraint_mask.tif</code>.</p>
+<div class="ref-list"><ol>
+  <li>Beinat, E. (1997). <em>Value Functions for Environmental Management</em>. Springer. DOI: <a href="https://doi.org/10.1007/978-94-015-8885-0" target="_blank">10.1007/978-94-015-8885-0</a></li>
+</ol></div>
+</div>
+
+<!-- ─── CORE: Synthetic Pipeline Runner (compact) ─── -->
+<div class="algo-compact" id="core-synthetic-pipeline">
+<h3>1.7 Synthetic End-to-End Pipeline Runner</h3>
+<p><span class="tag">integration test</span> <span class="tag">smoke test</span> <span class="tag">verification</span></p>
+<h4>Theory &amp; Method</h4>
+<p>Chain-runs 35+ sub-algorithms in deterministic sequence: synthetic data generation, four MCDA methods (WLC, OWA, TOPSIS, VIKOR) with equal weights, Monte Carlo uncertainty (120 iterations, sigma 0.08), AHP/PCA/Entropy/CRITIC weight derivation, ensemble synthesis, scenario consensus/disagreement/quadrant/intervention mapping, risk-opportunity matrix, regret fragility, opportunity loss, priority zoning (baseline + refined), multi-scenario benchmarking, robustness ranking, budget phasing, deployment readiness gating, and the full reporting suite (HTML report, Markdown brief, beta evidence HTML). Produces 70+ output files.</p>
+<table><tr><th>Parameter</th><th>Default</th><th>Role</th></tr>
+<tr><td>Study extent</td><td>&mdash;</td><td>Bounding box</td></tr>
+<tr><td>Pixel size</td><td>30.0</td><td>Cell size in map units</td></tr></table>
+<p><strong>Typical use:</strong> One-click verification that every algorithm executes correctly after installation or dependency updates.</p>
+<div class="ref-list"><ol>
+  <li>Meyer, B. (2008). Seven principles of software testing. <em>IEEE Computer</em>, 41(8), 99&ndash;101. DOI: <a href="https://doi.org/10.1109/MC.2008.306" target="_blank">10.1109/MC.2008.306</a></li>
+</ol></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<hr class="algo-divider">
+<h2 id="sec-weights">2. Weight Derivation Algorithms</h2>
+<p>The Weights group provides seven algorithms spanning subjective pairwise comparison (AHP), data-driven objective methods (PCA, Entropy, CRITIC), and weight management (consolidation, scenario packaging, cross-method consensus auditing).</p>
+
+<!-- ─── AHP (DEEP) ─── -->
+<h3 id="w-ahp">2.1 AHP Weights</h3>
+<p><span class="tag">Saaty eigenvalue</span> <span class="tag">pairwise comparison</span> <span class="tag">consistency ratio</span></p>
+
+<h4>Theoretical Background</h4>
+<p>The Analytic Hierarchy Process (AHP), developed by Saaty (1977, 1980), is the most widely used subjective weighting method in GIS-MCDA. It derives criterion weights from a pairwise comparison matrix \(A = [a_{ij}]_{n \times n}\) where each element \(a_{ij}\) expresses the decision-maker's judgment of how many times more important criterion \(i\) is relative to criterion \(j\), using Saaty's fundamental 1&ndash;9 scale. The matrix is reciprocal (\(a_{ji} = 1/a_{ij}\)) with unit diagonal (\(a_{ii} = 1\)). The priority vector \(\mathbf{w}\) is the principal right eigenvector of \(A\), normalised to sum to unity. A consistency check ensures judgments are not randomly contradictory.</p>
+
+<h4>Mathematical Formulation</h4>
+<div class="eq-block">
+<span class="eq-label">(9)</span> \(A\mathbf{w} = \lambda_{\max}\mathbf{w}, \quad \sum_{i=1}^n w_i = 1, \quad w_i > 0\)
+</div>
+
+<div class="eq-block">
+<span class="eq-label">(10)</span> Consistency Index: \(CI = \dfrac{\lambda_{\max} - n}{n - 1}\)
+</div>
+
+<div class="eq-block">
+<span class="eq-label">(11)</span> Consistency Ratio: \(CR = \dfrac{CI}{RI_n}\)
+</div>
+
+<p>Where \(RI_n\) is Saaty's Random Index for matrix size \(n\): RI(1)=0.00, RI(2)=0.00, RI(3)=0.58, RI(4)=0.90, RI(5)=1.12, RI(6)=1.24, RI(7)=1.32, RI(8)=1.41. Judgments are considered acceptably consistent when \(CR \le 0.10\); otherwise, the analyst should revisit the pairwise comparisons.</p>
+
+<div class="eq-block">
+<span class="eq-label">(12)</span> The pairwise matrix has the structure: \(A = \begin{bmatrix} 1 & a_{12} & \cdots & a_{1n} \\ 1/a_{12} & 1 & \cdots & a_{2n} \\ \vdots & \vdots & \ddots & \vdots \\ 1/a_{1n} & 1/a_{2n} & \cdots & 1 \end{bmatrix}\)
+</div>
+
+<h4>Parameters</h4>
+<table>
+<tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr>
+<tr><td>Pairwise matrix JSON</td><td>String (multiline)</td><td>[[1,2,3],[0.5,1,2],[0.3333,0.5,1]]</td><td>Square reciprocal matrix of Saaty-scale judgments</td></tr>
+<tr><td>Output table</td><td>Vector destination</td><td>&mdash;</td><td>GeoPackage with criterion_id, weight, cr, cr_ok</td></tr>
+</table>
+
+<h4>Output Description</h4>
+<p>A GeoPackage attribute table (no geometry) with columns: <code>criterion_id</code> (integer), <code>weight</code> (0&ndash;1, sum = 1), <code>cr</code> (consistency ratio), <code>cr_ok</code> (1 if CR &le; 0.10, else 0). A warning is emitted when CR exceeds the threshold.</p>
+
+<h4>Interpretation Guide</h4>
+<ul>
+  <li><strong>CR &le; 0.10:</strong> Judgments are coherent; weights can be used with confidence.</li>
+  <li><strong>CR &gt; 0.10 but &lt; 0.20:</strong> Borderline. Consider revising the most inconsistent pairwise comparisons.</li>
+  <li><strong>CR &ge; 0.20:</strong> Judgments are effectively random. Restructure the hierarchy or re-elicit comparisons.</li>
+  <li><strong>Weight distribution:</strong> If one weight dominates (&gt;0.50), verify that criterion truly outweighs all others 2:1+.</li>
+</ul>
+
+<div class="key-box"><strong>Key insight:</strong> AHP's strength is its ability to decompose complex trade-offs into manageable pairwise judgments. Its weakness is the exponential growth of comparisons (\(n(n-1)/2\) pairs for \(n\) criteria). For more than 7&ndash;9 criteria, consider grouping into a hierarchy or using a data-driven method (Entropy, CRITIC) as a complement.</div>
+
+<h4>References</h4>
+<div class="ref-list"><ol>
+  <li>Saaty, T.L. (1977). A scaling method for priorities in hierarchical structures. <em>Journal of Mathematical Psychology</em>, 15(3), 234&ndash;281. DOI: <a href="https://doi.org/10.1016/0022-2496(77)90033-5" target="_blank">10.1016/0022-2496(77)90033-5</a></li>
+  <li>Saaty, T.L. (1980). <em>The Analytic Hierarchy Process</em>. McGraw-Hill.</li>
+  <li>Saaty, T.L. (2008). Decision making with the analytic hierarchy process. <em>Int. J. Services Sciences</em>, 1(1), 83&ndash;98. DOI: <a href="https://doi.org/10.1504/IJSSCI.2008.017590" target="_blank">10.1504/IJSSCI.2008.017590</a></li>
+  <li>Malczewski, J. (2006). GIS-based multicriteria decision analysis: a survey of the literature. <em>IJGIS</em>, 20(7), 703&ndash;726. DOI: <a href="https://doi.org/10.1080/13658810600661508" target="_blank">10.1080/13658810600661508</a></li>
+  <li>Forman, E.H. &amp; Gass, S.I. (2001). The analytic hierarchy process&mdash;an exposition. <em>Operations Research</em>, 49(4), 469&ndash;486. DOI: <a href="https://doi.org/10.1287/opre.49.4.469.11231" target="_blank">10.1287/opre.49.4.469.11231</a></li>
+  <li>Vaidya, O.S. &amp; Kumar, S. (2006). Analytic hierarchy process: an overview of applications. <em>EJOR</em>, 169(1), 1&ndash;29. DOI: <a href="https://doi.org/10.1016/j.ejor.2004.04.028" target="_blank">10.1016/j.ejor.2004.04.028</a></li>
+  <li>Boroushaki, S. &amp; Malczewski, J. (2008). Implementing an extension of AHP using OWA operators with fuzzy quantifiers. <em>Computers &amp; Geosciences</em>, 34(4), 399&ndash;410. DOI: <a href="https://doi.org/10.1016/j.cageo.2007.04.003" target="_blank">10.1016/j.cageo.2007.04.003</a></li>
+</ol></div>
+
+<hr class="algo-divider">
+
+<!-- ─── PCA (compact) ─── -->
+<div class="algo-compact" id="w-pca">
+<h3>2.2 PCA-derived Weights (Variance Proxy)</h3>
+<p><span class="tag">eigendecomposition</span> <span class="tag">PC1 loading</span> <span class="tag">data-driven</span></p>
+<h4>Theory &amp; Method</h4>
+<p>Samples up to ~8000 cells from the aligned raster stack, standardises (z-score), and computes the covariance matrix. Eigendecomposition yields principal components; the absolute loadings of PC1, scaled by its explained variance ratio, become the weights. This <em>variance-proxy</em> approach assigns higher weight to criteria driving the largest spatial differences. If fewer than 3 valid sample cells exist, equal weights are returned.</p>
+<div class="eq-block">
+$$w_i = |\ell_{i,1}| \cdot \frac{\lambda_1}{\sum_k \lambda_k}, \quad \text{normalised so } \sum w_i = 1$$
+</div>
+<table><tr><th>Parameter</th><th>Default</th><th>Role</th></tr>
+<tr><td>Criterion rasters</td><td>&mdash;</td><td>Multiple aligned rasters</td></tr></table>
+<p><strong>Interpretation:</strong> High weight = criterion strongly loads on the dominant spatial-variance axis. Low weight = criterion is spatially uniform or anti-correlated with the dominant pattern. This method rewards criteria with high spatial variability, which may not always align with decision relevance.</p>
+<div class="ref-list"><ol>
+  <li>Jolliffe, I.T. (2002). <em>Principal Component Analysis</em>, 2nd ed. Springer. DOI: <a href="https://doi.org/10.1007/b98835" target="_blank">10.1007/b98835</a></li>
+  <li>Abdi, H. &amp; Williams, L.J. (2010). Principal component analysis. <em>WIREs Computational Statistics</em>, 2(4), 433&ndash;459. DOI: <a href="https://doi.org/10.1002/wics.101" target="_blank">10.1002/wics.101</a></li>
+  <li>Zhu, X. &amp; Dale, A.P. (2001). JavaAHP: a web-based decision tool. <em>Environmental Modelling &amp; Software</em>, 16(3), 251&ndash;260.</li>
+</ol></div>
+</div>
+
+<!-- ─── Entropy (DEEP) ─── -->
+<h3 id="w-entropy">2.3 Entropy Weights</h3>
+<p><span class="tag">Shannon entropy</span> <span class="tag">information theory</span> <span class="tag">discriminating power</span></p>
+
+<h4>Theoretical Background</h4>
+<p>Entropy-based weighting originates in information theory (Shannon, 1948) and was adapted to MCDM by Zeleny (1982) and Hwang &amp; Yoon (1981). The principle is that a criterion with greater value dispersion across alternatives carries more <em>decision information</em> and should therefore receive higher weight. A criterion that is nearly constant across the study area contributes little to differentiating suitable from unsuitable locations and is down-weighted. Entropy weights are purely data-driven and require no subjective judgment.</p>
+
+<h4>Mathematical Formulation</h4>
+<p>For a raster stack with \(n\) criteria and \(K\) sampled cells, the min-max normalised value for criterion \(i\) at cell \(k\) is:</p>
+
+<div class="eq-block">
+<span class="eq-label">(13)</span> \(p_{ik} = \dfrac{x_{ik}}{\sum_{k=1}^K x_{ik}}, \quad x_{ik} \in [0, 1]\)
+</div>
+
+<div class="eq-block">
+<span class="eq-label">(14)</span> Entropy: \(e_i = -\dfrac{1}{\ln K}\sum_{k=1}^K p_{ik} \ln(p_{ik}), \quad p_{ik} > 0\)
+</div>
+
+<div class="eq-block">
+<span class="eq-label">(15)</span> Degree of diversification: \(d_i = 1 - e_i\)
+</div>
+
+<div class="eq-block">
+<span class="eq-label">(16)</span> Objective weight: \(w_i = \dfrac{d_i}{\sum_{j=1}^n d_j}\)
+</div>
+
+<p>Higher entropy \(e_i \to 1\) means the criterion is uniform (all cells have similar values). Low entropy means distinctive, concentrated values. The weight \(w_i\) is proportional to \(d_i\): criteria with concentrated, discriminating value distributions receive larger weights.</p>
+
+<h4>Parameters</h4>
+<table>
+<tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr>
+<tr><td>Criterion rasters</td><td>Multiple raster layers</td><td>&mdash;</td><td>Aligned single-band rasters</td></tr>
+<tr><td>Output table</td><td>Vector destination</td><td>&mdash;</td><td>GeoPackage with criterion_id, weight</td></tr>
+</table>
+
+<h4>Interpretation Guide</h4>
+<ul>
+  <li><strong>Near-zero weight:</strong> The criterion is spatially homogeneous. It adds no discriminating power. Consider removing it to simplify the model.</li>
+  <li><strong>Dominant weight (&gt;0.50):</strong> One criterion has vastly more contrast than others. Verify this is meaningful, not an artefact of scale or outliers.</li>
+  <li><strong>Complementary role:</strong> Entropy weights are best used alongside subjective weights (AHP) to identify discrepancies between &ldquo;what experts think matters&rdquo; and &ldquo;what the data says varies.&rdquo;</li>
+</ul>
+
+<div class="key-box"><strong>Key insight:</strong> Entropy weights measure <em>contrast</em>, not <em>importance</em>. A highly variable but irrelevant criterion (e.g., measurement noise) will receive high entropy weight. Always screen criteria for domain relevance before applying entropy.</div>
+
+<h4>References</h4>
+<div class="ref-list"><ol>
+  <li>Shannon, C.E. (1948). A mathematical theory of communication. <em>Bell System Technical Journal</em>, 27(3), 379&ndash;423. DOI: <a href="https://doi.org/10.1002/j.1538-7305.1948.tb01338.x" target="_blank">10.1002/j.1538-7305.1948.tb01338.x</a></li>
+  <li>Zeleny, M. (1982). <em>Multiple Criteria Decision Making</em>. McGraw-Hill.</li>
+  <li>Hwang, C.L. &amp; Yoon, K. (1981). <em>Multiple Attribute Decision Making: Methods and Applications</em>. Springer. DOI: <a href="https://doi.org/10.1007/978-3-642-48318-9" target="_blank">10.1007/978-3-642-48318-9</a></li>
+  <li>Lotfi, F.H. &amp; Fallahnejad, R. (2010). Imprecise Shannon's entropy and multi-attribute decision making. <em>Entropy</em>, 12(1), 53&ndash;62. DOI: <a href="https://doi.org/10.3390/e12010053" target="_blank">10.3390/e12010053</a></li>
+  <li>Wang, T.C. &amp; Lee, H.D. (2009). Developing a fuzzy TOPSIS approach. <em>Expert Systems with Applications</em>, 36(5), 8980&ndash;8985. DOI: <a href="https://doi.org/10.1016/j.eswa.2008.11.035" target="_blank">10.1016/j.eswa.2008.11.035</a></li>
+  <li>Deng, H., Yeh, C.H. &amp; Willis, R.J. (2000). Inter-company comparison using modified TOPSIS. <em>Computers &amp; Operations Research</em>, 27(10), 963&ndash;973. DOI: <a href="https://doi.org/10.1016/S0305-0548(99)00069-6" target="_blank">10.1016/S0305-0548(99)00069-6</a></li>
+  <li>Malczewski, J. &amp; Rinner, C. (2015). <em>Multicriteria Decision Analysis in Geographic Information Science</em>. Springer. DOI: <a href="https://doi.org/10.1007/978-3-540-74757-4" target="_blank">10.1007/978-3-540-74757-4</a></li>
+</ol></div>
+
+<hr class="algo-divider">
+
+<!-- ─── CRITIC (DEEP) ─── -->
+<h3 id="w-critic">2.4 CRITIC Objective Weights</h3>
+<p><span class="tag">contrast intensity</span> <span class="tag">inter-criterion correlation</span> <span class="tag">penalises redundancy</span></p>
+
+<h4>Theoretical Background</h4>
+<p>The CRITIC (CRiteria Importance Through Intercriteria Correlation) method, proposed by Diakoulaki, Mavrotas, and Papayannakis (1995), derives objective weights by combining two information-theoretic properties: (1) <em>contrast intensity</em>, measured by the standard deviation of each criterion, and (2) <em>conflict</em>, measured by the sum of (1 &minus; correlation) with all other criteria. A criterion that is both high-variance and uncorrelated with others receives the highest weight; a criterion that is redundant with others (high correlation) is penalised. This distinguishes CRITIC from pure entropy weighting, which does not consider inter-criterion relationships.</p>
+
+<h4>Mathematical Formulation</h4>
+<p>Let \(\mathbf{x}_i\) be the normalised values of criterion \(i\) across \(K\) sampled cells, with \(\bar{x}_i\) and \(\sigma_i\) as the mean and standard deviation. Let \(\rho_{ij}\) be the Pearson correlation between criteria \(i\) and \(j\).</p>
+
+<div class="eq-block">
+<span class="eq-label">(17)</span> Contrast intensity: \(C_i = \sigma_i\)
+</div>
+
+<div class="eq-block">
+<span class="eq-label">(18)</span> Conflict index: \(\Psi_i = \sum_{j=1}^n (1 - |\rho_{ij}|)\)
+</div>
+
+<div class="eq-block">
+<span class="eq-label">(19)</span> Information content: \(I_i = C_i \cdot \Psi_i = \sigma_i \cdot \sum_{j=1}^n (1 - |\rho_{ij}|)\)
+</div>
+
+<div class="eq-block">
+<span class="eq-label">(20)</span> CRITIC weight: \(w_i = \dfrac{I_i}{\sum_{k=1}^n I_k}\)
+</div>
+
+<h4>Parameters</h4>
+<table>
+<tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr>
+<tr><td>Criterion rasters</td><td>Multiple raster layers</td><td>&mdash;</td><td>Aligned single-band rasters</td></tr>
+<tr><td>Impacts CSV</td><td>String</td><td>"" (all benefit)</td><td>B/C or +/-1 per criterion</td></tr>
+<tr><td>Output table</td><td>Vector destination</td><td>&mdash;</td><td>GeoPackage with criterion_id, weight, std_dev, contrast, critic_score</td></tr>
+</table>
+
+<h4>Interpretation Guide</h4>
+<ul>
+  <li><strong>High CRITIC score:</strong> Criterion is both high-contrast and uncorrelated &mdash; it contributes unique discriminating information.</li>
+  <li><strong>Low CRITIC score:</strong> Either the criterion is spatially uniform (low std) or strongly correlated with other criteria (redundant).</li>
+  <li><strong>Redundancy penalty:</strong> Two criteria with \(\rho > 0.90\) will both be penalised. This is the method's key advantage over entropy alone.</li>
+</ul>
+
+<h4>References</h4>
+<div class="ref-list"><ol>
+  <li>Diakoulaki, D., Mavrotas, G. &amp; Papayannakis, L. (1995). Determining objective weights in multiple criteria problems: the CRITIC method. <em>Computers &amp; Operations Research</em>, 22(7), 763&ndash;770. DOI: <a href="https://doi.org/10.1016/0305-0548(94)00059-H" target="_blank">10.1016/0305-0548(94)00059-H</a></li>
+  <li>Krishnan, A.R. et al. (2021). A modified CRITIC method... <em>Sustainability</em>, 13(3), 1492. DOI: <a href="https://doi.org/10.3390/su13031492" target="_blank">10.3390/su13031492</a></li>
+  <li>Jahan, A. et al. (2012). A comprehensive VIKOR method for material selection. <em>Materials &amp; Design</em>, 39, 262&ndash;268. DOI: <a href="https://doi.org/10.1016/j.matdes.2012.02.043" target="_blank">10.1016/j.matdes.2012.02.043</a></li>
+  <li>Zardari, N.H. et al. (2015). <em>Weighting Methods and Their Effects on MCDM Outcomes</em>. Springer. DOI: <a href="https://doi.org/10.1007/978-3-319-12586-2" target="_blank">10.1007/978-3-319-12586-2</a></li>
+  <li>Mukhametzyanov, I. (2021). Specific character of objective methods. <em>Procedia Computer Science</em>, 182, 99&ndash;106.</li>
+</ol></div>
+
+<hr class="algo-divider">
+
+<!-- ─── Weights: Consolidator, Scenario Weight Pack, Weight Consensus Audit (compact) ─── -->
+<div class="algo-compact" id="w-consolidator">
+<h3>2.5 Weight Consolidator</h3>
+<p><span class="tag">normalisation</span> <span class="tag">activation step</span></p>
+<p>Reads any weight table (from AHP, PCA, Entropy, or CRITIC) and re-normalises all weights to sum to 1. This is a pass-through activation step: relative proportions are preserved, but the output is guaranteed ready for downstream MCDA scoring. Guards against zero-sum edges by substituting a divisor of 1.0 when the total sum is zero. Output: <code>criterion_id</code>, <code>weight</code>. <strong>Reference:</strong> Malczewski (1999).</p>
+</div>
+
+<div class="algo-compact" id="w-pack">
+<h3>2.6 Scenario Weight Pack</h3>
+<p><span class="tag">multi-method merge</span> <span class="tag">blended average</span> <span class="tag">sensitivity analysis</span></p>
+<p>Merges AHP, PCA, Entropy, and CRITIC weight tables into a unified scenario pack. Each method's weights are independently normalised to sum to 1. An additional BLENDED_AVG scenario computes the per-criterion arithmetic mean of normalised weights across all supplied methods, creating a simple ensemble that balances subjective and objective approaches. Output columns: <code>method</code>, <code>criterion_id</code>, <code>weight_raw</code>, <code>weight_norm</code>. <strong>Use:</strong> Prepare multi-scenario weight sets for sensitivity analysis or consensus auditing.</p>
+<div class="ref-list"><ol>
+  <li>Roy, B. (1996). <em>Multicriteria Methodology for Decision Aiding</em>. Springer. DOI: <a href="https://doi.org/10.1007/978-1-4757-2500-1" target="_blank">10.1007/978-1-4757-2500-1</a></li>
+  <li>Belton, V. &amp; Stewart, T.J. (2002). <em>Multiple Criteria Decision Analysis: An Integrated Approach</em>. Springer. DOI: <a href="https://doi.org/10.1007/978-1-4615-1495-4" target="_blank">10.1007/978-1-4615-1495-4</a></li>
+</ol></div>
+</div>
+
+<div class="algo-compact" id="w-consensus-audit">
+<h3>2.7 Weight Consensus Audit</h3>
+<p><span class="tag">coefficient of variation</span> <span class="tag">cross-method agreement</span> <span class="tag">robustness</span></p>
+<p>Computes per-criterion descriptive statistics (mean, median, min, max, range, population std) and the coefficient of variation \(CV = \sigma / \bar{w} \times 100\%\) across all weighting methods in a Scenario Weight Pack. Agreement labels: HIGH (CV &le; 10%), MEDIUM (CV &le; 25%), LOW (CV &gt; 25%). Identifies robust criteria (weight stable regardless of method) vs. contested criteria (weight depends strongly on the method), guiding stakeholder discussion.</p>
+<div class="ref-list"><ol>
+  <li>Saltelli, A. et al. (2004). <em>Sensitivity Analysis in Practice</em>. Wiley. DOI: <a href="https://doi.org/10.1002/0470870958" target="_blank">10.1002/0470870958</a></li>
+  <li>Butler, J., Jia, J. &amp; Dyer, J. (1997). Simulation techniques for the sensitivity analysis of MCDM. <em>EJOR</em>, 103(3), 537&ndash;548. DOI: <a href="https://doi.org/10.1016/S0377-2217(96)00304-9" target="_blank">10.1016/S0377-2217(96)00304-9</a></li>
+  <li>Chen, Y. et al. (2010). Sensitivity analysis of MCDA weights. <em>IJGIS</em>, 24(7), 1077&ndash;1100.</li>
+</ol></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<hr class="algo-divider">
+<h2 id="sec-compose">3. Composite Scoring (Compose) Algorithms</h2>
+<p>The Compose group contains 16 algorithms spanning the core MCDA methods (WLC, OWA, TOPSIS, VIKOR, Ensemble), post-hoc spatial diagnostics (opportunity loss, consensus/disagreement mapping, decision quadrants, risk-opportunity matrices, regret fragility, intervention conflict), scenario comparison, and derived action products (candidate site extraction, priority zoning, uncertainty-adjusted suitability).</p>
+
+<!-- ─── WLC (DEEP) ─── -->
+<h3 id="c-wlc">3.1 WLC Suitability</h3>
+<p><span class="tag">weighted linear combination</span> <span class="tag">compensatory</span> <span class="tag">additive</span></p>
+
+<h4>Theoretical Background</h4>
+<p>Weighted Linear Combination (WLC) is the most widely used MCDA method in GIS (Malczewski, 1999). It is a fully compensatory additive model: a low score on one criterion can be offset by high scores on others. The method assumes mutual preferential independence of criteria and a linear value function. WLC is computationally simple, transparent, and easy to explain to stakeholders, making it the de facto baseline for many land-suitability studies.</p>
+
+<h4>Mathematical Formulation</h4>
+<p>For \(n\) criterion rasters \(X_i(x,y)\) normalised to \([0,100]\), and weights \(w_i\) with \(\sum w_i = 1\):</p>
+
+<div class="eq-block">
+<span class="eq-label">(21)</span> \(S(x,y) = \sum_{i=1}^n w_i \cdot X_i(x,y), \quad S(x,y) \in [0, 100]\)
+</div>
+
+<p>With a Boolean constraint mask \(C(x,y) \in \{0,1\}\):</p>
+
+<div class="eq-block">
+<span class="eq-label">(22)</span> \(S_C(x,y) = \begin{cases} S(x,y) & \text{if } C(x,y) > 0.5 \\ 0 & \text{otherwise} \end{cases}\)
+</div>
+
+<p>The algorithm processes the raster in configurable pixel blocks (default 256&times;256) for memory efficiency. Constraint-failing cells are set to 0; cells where any criterion is nodata are propagated as nodata.</p>
+
+<h4>Parameters</h4>
+<table>
+<tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr>
+<tr><td>Criterion rasters</td><td>Multiple raster (max 6)</td><td>&mdash;</td><td>Normalised 0&ndash;100, same grid</td></tr>
+<tr><td>Weights CSV</td><td>String</td><td>"" (equal)</td><td>Comma-separated, e.g. "0.4,0.3,0.3"</td></tr>
+<tr><td>Constraint mask</td><td>Raster (optional)</td><td>None</td><td>0/1 binary; cells &gt;0.5 pass</td></tr>
+<tr><td>Block size</td><td>Integer 64&ndash;2048</td><td>256</td><td>Processing chunk size in pixels</td></tr>
+<tr><td>Output raster</td><td>Raster destination</td><td>&mdash;</td><td>suitability_wlc.tif (Float32, LZW)</td></tr>
+</table>
+
+<h4>Interpretation Guide</h4>
+<ul>
+  <li><strong>0&ndash;100 scale:</strong> Values near 0 indicate the least suitable cells; values near 100 indicate the most suitable.</li>
+  <li><strong>Compensatory bias:</strong> A cell scoring 0 on three criteria but 100 on one with weight 0.25 scores 25. WLC cannot express the idea that <em>one bad criterion disqualifies</em> a site. For non-compensatory logic, use OWA with ascending order weights or the Constraint Builder.</li>
+  <li><strong>Spatial smoothness:</strong> If input criteria are smooth (proximity surfaces, DEM), WLC output is smooth. If criteria are patchy (land cover classes), the output may show sharp boundaries.</li>
+</ul>
+
+<h4>References</h4>
+<div class="ref-list"><ol>
+  <li>Malczewski, J. (1999). <em>GIS and Multicriteria Decision Analysis</em>. Wiley.</li>
+  <li>Malczewski, J. (2000). On the use of WLC in GIS. <em>IJGIS</em>, 14(4), 365&ndash;382. DOI: <a href="https://doi.org/10.1080/13658810050024328" target="_blank">10.1080/13658810050024328</a></li>
+  <li>Malczewski, J. (2006). Ordered weighted averaging with fuzzy quantifiers: GIS-based MCE. <em>Applied Geography</em>, 26(1), 40&ndash;57. DOI: <a href="https://doi.org/10.1016/j.apgeog.2005.09.003" target="_blank">10.1016/j.apgeog.2005.09.003</a></li>
+  <li>Jiang, H. &amp; Eastman, J.R. (2000). Application of fuzzy measures in MCE in GIS. <em>IJGIS</em>, 14(2), 173&ndash;184. DOI: <a href="https://doi.org/10.1080/136588100240903" target="_blank">10.1080/136588100240903</a></li>
+  <li>Drobne, S. &amp; Lisec, A. (2009). Multi-attribute decision analysis in GIS: WLC and OWA. <em>Informatica</em>, 33(4), 459&ndash;474.</li>
+  <li>Feick, R.D. &amp; Hall, G.B. (2004). A method for examining the spatial dimension of multi-criteria weight sensitivity. <em>IJGIS</em>, 18(8), 815&ndash;840. DOI: <a href="https://doi.org/10.1080/13658810412331280185" target="_blank">10.1080/13658810412331280185</a></li>
+  <li>Greene, R. et al. (2011). GIS-based MCDA: a survey. <em>Computers, Environment and Urban Systems</em>, 35(6), 463&ndash;473.</li>
+</ol></div>
+
+<hr class="algo-divider">
+
+<!-- ─── OWA (DEEP) ─── -->
+<h3 id="c-owa">3.2 OWA Suitability</h3>
+<p><span class="tag">ordered weighted averaging</span> <span class="tag">risk attitude</span> <span class="tag">Yager operator</span></p>
+
+<h4>Theoretical Background</h4>
+<p>Ordered Weighted Averaging (OWA), introduced by Yager (1988), extends WLC by adding a second set of weights (order weights) that are applied to criterion values after sorting them at each cell. This decouples <em>criterion importance</em> (the standard weights) from <em>risk attitude</em> (the order weights). By adjusting order weights, the analyst can span the continuum from fully optimistic (OR-like, favouring the highest-scoring criterion at each cell) to fully pessimistic (AND-like, the lowest score dominates). This makes OWA the most flexible compensatory/non-compensatory bridge in the plugin.</p>
+
+<h4>Mathematical Formulation</h4>
+<p>Let \(c_i(x,y)\) be the criterion values at cell \((x,y)\), sorted in descending (or ascending) order. Let \(v_i\) be the criterion weights (reordered to match the sorted values) and \(u_j\) be the order weights (fixed, applied to sorted positions). The OWA operator is:</p>
+
+<div class="eq-block">
+<span class="eq-label">(23)</span> \(S_{\text{OWA}}(x,y) = \dfrac{\sum_{i=1}^n (v_i \cdot u_i) \cdot c_{(i)}(x,y)}{\sum_{i=1}^n (v_i \cdot u_i)}\)
+</div>
+
+<p>Where \(c_{(i)}\) denotes the \(i\)-th sorted criterion value. The combined weight \(\alpha_i = v_i \cdot u_i / \sum(v_j \cdot u_j)\) ensures normalisation. Descending sort (high values first) paired with descending order weights produces optimistic aggregation; descending sort with ascending order weights produces pessimistic (AND-like) aggregation.</p>
+
+<p>The OWA operator's <em>orness</em> measure quantifies risk attitude:</p>
+
+<div class="eq-block">
+<span class="eq-label">(24)</span> \(\text{orness}(\mathbf{u}) = \dfrac{1}{n-1}\sum_{i=1}^n (n-i) \cdot u_i, \quad \text{orness} \in [0, 1]\)
+</div>
+
+<p><strong>orness = 1:</strong> Pure OR (optimistic, max); <strong>orness = 0:</strong> Pure AND (pessimistic, min); <strong>orness = 0.5:</strong> Neutral (equivalent to WLC).</p>
+
+<h4>Parameters</h4>
+<table>
+<tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr>
+<tr><td>Criterion rasters (max 6)</td><td>Multiple raster</td><td>&mdash;</td><td>Normalised 0&ndash;100</td></tr>
+<tr><td>Criteria weights CSV</td><td>String</td><td>""</td><td>Standard importance weights</td></tr>
+<tr><td>Order weights CSV</td><td>String</td><td>""</td><td>Risk-attitude weights</td></tr>
+<tr><td>Ordering mode</td><td>Enum</td><td>Descending</td><td>High score first (optimistic) or Ascending</td></tr>
+<tr><td>Constraint mask</td><td>Raster (optional)</td><td>None</td><td>0/1 binary</td></tr>
+<tr><td>Block size</td><td>Integer</td><td>256</td><td>64&ndash;2048 pixels</td></tr>
+<tr><td>Output raster</td><td>Raster destination</td><td>&mdash;</td><td>Float32 0&ndash;100</td></tr>
+</table>
+
+<h4>Interpretation Guide</h4>
+<ul>
+  <li><strong>Descending + uniform order weights = WLC:</strong> If order weights are all equal, OWA reduces to WLC.</li>
+  <li><strong>Descending + front-loaded order weights:</strong> High-scoring criteria dominate; optimistic risk posture. Use for opportunity scanning.</li>
+  <li><strong>Descending + back-loaded order weights:</strong> Low-scoring criteria dominate; pessimistic. Use for conservative screening where no criterion can <em>fail badly</em>.</li>
+  <li><strong>Map OWA&minus;WLC delta:</strong> Run Scenario Comparator to visualise where and how much risk attitude changes the outcome.</li>
+</ul>
+
+<h4>References</h4>
+<div class="ref-list"><ol>
+  <li>Yager, R.R. (1988). On ordered weighted averaging aggregation operators in MCDM. <em>IEEE Trans. Systems, Man, and Cybernetics</em>, 18(1), 183&ndash;190. DOI: <a href="https://doi.org/10.1109/21.87068" target="_blank">10.1109/21.87068</a></li>
+  <li>Malczewski, J. (2006). Ordered weighted averaging with fuzzy quantifiers: GIS-based multicriteria evaluation for land-use suitability analysis. <em>Int. J. Applied Earth Observation and Geoinformation</em>, 8(4), 270&ndash;277. DOI: <a href="https://doi.org/10.1016/j.jag.2006.01.003" target="_blank">10.1016/j.jag.2006.01.003</a></li>
+  <li>Boroushaki, S. &amp; Malczewski, J. (2008). Implementing an extension of AHP using OWA operators with fuzzy quantifiers. <em>Computers &amp; Geosciences</em>, 34(4), 399&ndash;410. DOI: <a href="https://doi.org/10.1016/j.cageo.2007.04.003" target="_blank">10.1016/j.cageo.2007.04.003</a></li>
+  <li>Yager, R.R. (1996). Quantifier guided aggregation using OWA operators. <em>IJIS</em>, 11(1), 49&ndash;73.</li>
+  <li>Malczewski, J. &amp; Rinner, C. (2005). Exploring multicriteria decision strategies in GIS with linguistic quantifiers. <em>Journal of Geographical Systems</em>, 7(2), 249&ndash;268. DOI: <a href="https://doi.org/10.1007/s10109-005-0159-2" target="_blank">10.1007/s10109-005-0159-2</a></li>
+  <li>Xu, Z. (2005). An overview of methods for determining OWA weights. <em>Int. J. Intelligent Systems</em>, 20(8), 843&ndash;865. DOI: <a href="https://doi.org/10.1002/int.20097" target="_blank">10.1002/int.20097</a></li>
+</ol></div>
+
+<hr class="algo-divider">
+
+<!-- ─── TOPSIS (DEEP) ─── -->
+<h3 id="c-topsis">3.3 TOPSIS Suitability</h3>
+<p><span class="tag">vector normalisation</span> <span class="tag">ideal/anti-ideal distance</span> <span class="tag">benefit-cost</span></p>
+
+<h4>Theoretical Background</h4>
+<p>TOPSIS (Technique for Order Preference by Similarity to Ideal Solution), developed by Hwang &amp; Yoon (1981), ranks alternatives by their Euclidean distance to a hypothetical ideal point (best value on every criterion) and anti-ideal point (worst on every criterion). The best alternative is simultaneously closest to the ideal and farthest from the anti-ideal. In spatial MCDA, each cell is treated as an independent alternative. TOPSIS requires vector normalisation, which preserves the relative ordering and ratio properties of the data, and explicitly handles benefit and cost criteria.</p>
+
+<h4>Mathematical Formulation</h4>
+<p><strong>Pass 1: Vector normalisation denominator</strong></p>
+<div class="eq-block">
+<span class="eq-label">(25)</span> \(D_j = \sqrt{\sum_{(x,y) \in \text{valid}} [X_j(x,y)]^2}\)
+</div>
+
+<p><strong>Pass 2: Weighted normalised matrix and ideal points</strong></p>
+<div class="eq-block">
+<span class="eq-label">(26)</span> \(v_j(x,y) = w_j \cdot \dfrac{X_j(x,y)}{D_j}\)
+</div>
+<div class="eq-block">
+<span class="eq-label">(27)</span> \(A_j^+ = \begin{cases} \max_{(x,y)} v_j(x,y) & \text{benefit} \\ \min_{(x,y)} v_j(x,y) & \text{cost} \end{cases}\)
+</div>
+<div class="eq-block">
+<span class="eq-label">(28)</span> \(A_j^- = \begin{cases} \min_{(x,y)} v_j(x,y) & \text{benefit} \\ \max_{(x,y)} v_j(x,y) & \text{cost} \end{cases}\)
+</div>
+
+<p><strong>Pass 3: Separation measures and closeness coefficient</strong></p>
+<div class="eq-block">
+<span class="eq-label">(29)</span> \(d^+(x,y) = \sqrt{\sum_{j=1}^n \left[v_j(x,y) - A_j^+\right]^2}\)
+</div>
+<div class="eq-block">
+<span class="eq-label">(30)</span> \(d^-(x,y) = \sqrt{\sum_{j=1}^n \left[v_j(x,y) - A_j^-\right]^2}\)
+</div>
+<div class="eq-block">
+<span class="eq-label">(31)</span> \(C(x,y) = \dfrac{d^-(x,y)}{d^+(x,y) + d^-(x,y)} \times 100, \quad C \in [0, 100]\)
+</div>
+
+<h4>Parameters</h4>
+<table>
+<tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr>
+<tr><td>Criterion rasters (max 6)</td><td>Multiple raster</td><td>&mdash;</td><td>Normalised 0&ndash;100</td></tr>
+<tr><td>Weights CSV</td><td>String</td><td>""</td><td>Criteria weights</td></tr>
+<tr><td>Impacts CSV</td><td>String</td><td>"" (all B)</td><td>B/C or +/-1 per criterion</td></tr>
+<tr><td>Constraint mask</td><td>Raster (optional)</td><td>None</td><td>0/1</td></tr>
+<tr><td>Block size</td><td>Integer</td><td>256</td><td>64&ndash;2048</td></tr>
+<tr><td>Output raster</td><td>Raster destination</td><td>&mdash;</td><td>Closeness coefficient 0&ndash;100</td></tr>
+</table>
+
+<h4>Interpretation Guide</h4>
+<ul>
+  <li><strong>\(C \approx 100\):</strong> Cell is very close to the ideal and far from the anti-ideal &mdash; excellent on all criteria.</li>
+  <li><strong>\(C \approx 50\):</strong> Cell is equidistant from ideal and anti-ideal &mdash; mediocre.</li>
+  <li><strong>\(C \approx 0\):</strong> Near the anti-ideal on most criteria.</li>
+  <li><strong>Comparison with WLC:</strong> TOPSIS is <em>non-compensatory</em> in the sense that a large deficit on one criterion cannot be completely offset by strengths on others; the Euclidean distance penalises extreme deviations non-linearly.</li>
+</ul>
+
+<h4>References</h4>
+<div class="ref-list"><ol>
+  <li>Hwang, C.L. &amp; Yoon, K. (1981). <em>Multiple Attribute Decision Making</em>. Springer. DOI: <a href="https://doi.org/10.1007/978-3-642-48318-9" target="_blank">10.1007/978-3-642-48318-9</a></li>
+  <li>Behzadian, M. et al. (2012). A state-of-the-art survey of TOPSIS applications. <em>Expert Systems with Applications</em>, 39(17), 13051&ndash;13069. DOI: <a href="https://doi.org/10.1016/j.eswa.2012.05.056" target="_blank">10.1016/j.eswa.2012.05.056</a></li>
+  <li>Malczewski, J. &amp; Rinner, C. (2015). <em>Multicriteria Decision Analysis in Geographic Information Science</em>. Springer.</li>
+  <li>Chen, S.J. &amp; Hwang, C.L. (1992). <em>Fuzzy Multiple Attribute Decision Making</em>. Springer. DOI: <a href="https://doi.org/10.1007/978-3-642-46768-4" target="_blank">10.1007/978-3-642-46768-4</a></li>
+  <li>Yoon, K. (1987). A reconciliation among discrete compromise solutions. <em>JORS</em>, 38(3), 277&ndash;286. DOI: <a href="https://doi.org/10.1057/jors.1987.44" target="_blank">10.1057/jors.1987.44</a></li>
+  <li>Shih, H.S., Shyur, H.J. &amp; Lee, E.S. (2007). An extension of TOPSIS for group decision making. <em>Mathematical and Computer Modelling</em>, 45(7-8), 801&ndash;813. DOI: <a href="https://doi.org/10.1016/j.mcm.2006.03.023" target="_blank">10.1016/j.mcm.2006.03.023</a></li>
+</ol></div>
+
+<hr class="algo-divider">
+
+<!-- ─── VIKOR (DEEP) ─── -->
+<h3 id="c-vikor">3.4 VIKOR Suitability</h3>
+<p><span class="tag">compromise ranking</span> <span class="tag">group utility</span> <span class="tag">individual regret</span></p>
+
+<h4>Theoretical Background</h4>
+<p>VIKOR (VlseKriterijumska Optimizacija I Kompromisno Resenje, meaning &ldquo;multi-criteria optimisation and compromise solution&rdquo;), developed by Opricovic (1998), focuses on ranking and selecting from a set of alternatives in the presence of conflicting criteria. Unlike TOPSIS, which seeks the alternative closest to the ideal, VIKOR seeks a <em>compromise</em> solution that balances (i) maximum group utility (overall performance across all criteria) and (ii) minimum individual regret (the worst-criterion gap). The compromise weight \(v\) controls the balance: \(v = 1\) emphasises group utility (majority rule), \(v = 0\) emphasises individual regret (veto/minimax).</p>
+
+<h4>Mathematical Formulation</h4>
+<p><strong>Pass 1: Best/worst per criterion</strong></p>
+<div class="eq-block">
+<span class="eq-label">(32)</span> \(f_j^* = \begin{cases} \max_{(x,y)} X_j(x,y) & \text{benefit} \\ \min_{(x,y)} X_j(x,y) & \text{cost} \end{cases}\!\!\!, \quad f_j^- = \text{opposite}\)
+</div>
+
+<p><strong>Pass 2: Group utility \(S\) and individual regret \(R\)</strong></p>
+<div class="eq-block">
+<span class="eq-label">(33)</span> \(S(x,y) = \sum_{j=1}^n w_j \cdot \dfrac{|f_j^* - X_j(x,y)|}{|f_j^* - f_j^-|}\)
+</div>
+<div class="eq-block">
+<span class="eq-label">(34)</span> \(R(x,y) = \max_j \left[ w_j \cdot \dfrac{|f_j^* - X_j(x,y)|}{|f_j^* - f_j^-|} \right]\)
+</div>
+
+<p><strong>Pass 3: Compromise measure and suitability score</strong></p>
+<div class="eq-block">
+<span class="eq-label">(35)</span> \(Q(x,y) = v \cdot \dfrac{S(x,y) - S^*}{S^- - S^*} + (1-v) \cdot \dfrac{R(x,y) - R^*}{R^- - R^*}\)
+</div>
+<div class="eq-block">
+<span class="eq-label">(36)</span> \(\text{Suitability}_{\text{VIKOR}}(x,y) = 100 \cdot (1 - Q(x,y)), \quad \in [0, 100]\)
+</div>
+
+<p>Where \(S^* = \min S\), \(S^- = \max S\); \(R^* = \min R\), \(R^- = \max R\). The transformation \(100(1-Q)\) converts the compromise measure (lower is better) to a suitability score (higher is better).</p>
+
+<h4>Parameters</h4>
+<table>
+<tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr>
+<tr><td>Criterion rasters (max 6)</td><td>Multiple raster</td><td>&mdash;</td><td>Normalised 0&ndash;100</td></tr>
+<tr><td>Weights CSV</td><td>String</td><td>""</td><td>Criteria weights</td></tr>
+<tr><td>Impacts CSV</td><td>String</td><td>""</td><td>B/C or +/-1 per criterion</td></tr>
+<tr><td>Compromise weight \(v\)</td><td>Double 0&ndash;1</td><td>0.5</td><td>2/3=&gt;majority; smaller=&gt;veto</td></tr>
+<tr><td>Constraint mask</td><td>Raster (optional)</td><td>None</td><td>0/1</td></tr>
+<tr><td>Block size</td><td>Integer</td><td>256</td><td>64&ndash;2048</td></tr>
+<tr><td>Output raster</td><td>Raster destination</td><td>&mdash;</td><td>100(1&minus;Q) 0&ndash;100</td></tr>
+</table>
+
+<h4>Interpretation Guide</h4>
+<ul>
+  <li><strong>\(v = 0.5\) (default):</strong> Balanced compromise. Most appropriate when neither group consensus nor individual veto is prioritised.</li>
+  <li><strong>\(v > 0.5\):</strong> Favours majority opinion. A cell that scores well on most criteria is ranked highly even if it fails badly on one.</li>
+  <li><strong>\(v < 0.5\):</strong> Favours veto. A single poor criterion can severely penalise the cell. Use when regulatory minima must be respected.</li>
+  <li><strong>VIKOR vs. TOPSIS:</strong> VIKOR explicitly models the &ldquo;worst-criterion regret&rdquo; through \(R\), while TOPSIS treats all deviations equally in the Euclidean sum. VIKOR is preferred when the decision-maker wants to guard against catastrophic single-criterion failure.</li>
+</ul>
+
+<h4>References</h4>
+<div class="ref-list"><ol>
+  <li>Opricovic, S. (1998). <em>Multicriteria Optimization of Civil Engineering Systems</em>. PhD Thesis, Belgrade.</li>
+  <li>Opricovic, S. &amp; Tzeng, G.H. (2004). Compromise solution by MCDM methods: a comparative analysis of VIKOR and TOPSIS. <em>EJOR</em>, 156(2), 445&ndash;455. DOI: <a href="https://doi.org/10.1016/S0377-2217(03)00020-1" target="_blank">10.1016/S0377-2217(03)00020-1</a></li>
+  <li>Opricovic, S. &amp; Tzeng, G.H. (2007). Extended VIKOR method in comparison with outranking methods. <em>EJOR</em>, 178(2), 514&ndash;529. DOI: <a href="https://doi.org/10.1016/j.ejor.2006.01.020" target="_blank">10.1016/j.ejor.2006.01.020</a></li>
+  <li>Gul, M. et al. (2016). A state of the art literature review of VIKOR. <em>Applied Soft Computing</em>, 46, 60&ndash;89. DOI: <a href="https://doi.org/10.1016/j.asoc.2016.04.040" target="_blank">10.1016/j.asoc.2016.04.040</a></li>
+  <li>Mardani, A. et al. (2015). VIKOR technique: a systematic review. <em>Expert Systems with Applications</em>, 42(14), 6022&ndash;6036.</li>
+</ol></div>
+
+<hr class="algo-divider">
+
+<!-- ─── Ensemble Suitability (DEEP) ─── -->
+<h3 id="c-ensemble">3.5 Ensemble Suitability (Mean / Uncertainty / Confidence)</h3>
+<p><span class="tag">ensemble statistics</span> <span class="tag">cross-scenario synthesis</span> <span class="tag">confidence index</span></p>
+
+<h4>Theoretical Background</h4>
+<p>Ensemble methods aggregate multiple model outputs to produce a more robust estimate than any single model. Originating in machine learning (bagging, stacking) and climate science (multi-model ensembles), the principle applies to MCDA: different weighting schemes and aggregation methods (WLC, OWA, TOPSIS, VIKOR) represent different decision philosophies. The ensemble suitability algorithm synthesises 2&ndash;8 scenario rasters into five diagnostic products: weighted mean (central tendency), unweighted standard deviation (spread), percentiles (distribution tails), and a confidence index (inverse spread). This treats each scenario as a &ldquo;model&rdquo; in the ensemble.</p>
+
+<h4>Mathematical Formulation</h4>
+<p>For \(K\) scenario rasters \(S_k(x,y)\) and scenario weights \(\alpha_k\) (\(\sum \alpha_k = 1\)):</p>
+
+<div class="eq-block">
+<span class="eq-label">(37)</span> \(\bar{S}(x,y) = \sum_{k=1}^K \alpha_k \cdot S_k(x,y)\)
+</div>
+
+<div class="eq-block">
+<span class="eq-label">(38)</span> \(\sigma_S(x,y) = \sqrt{\dfrac{1}{K}\sum_{k=1}^K (S_k - \bar{S}_u)^2}\)
+</div>
+
+<div class="eq-block">
+<span class="eq-label">(39)</span> \(P_{10}(x,y) = \text{10th percentile of } \{S_k(x,y)\}_{k=1}^K\)
+</div>
+
+<div class="eq-block">
+<span class="eq-label">(40)</span> \(C_{\text{conf}}(x,y) = 100 - \text{clip}(\sigma_S(x,y), 0, 100)\)
+</div>
+
+<p>The confidence index is the complement of the standard deviation: \(C_{\text{conf}} \approx 100\) means all scenarios agree; \(C_{\text{conf}} \approx 0\) means extreme disagreement.</p>
+
+<h4>Parameters</h4>
+<table>
+<tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr>
+<tr><td>Scenario rasters (2&ndash;8)</td><td>Multiple raster</td><td>&mdash;</td><td>Suitability rasters 0&ndash;100</td></tr>
+<tr><td>Scenario weights CSV</td><td>String</td><td>""</td><td>Equal weights if blank</td></tr>
+<tr><td>Constraint mask</td><td>Raster (optional)</td><td>None</td><td>0/1</td></tr>
+<tr><td>Block size</td><td>Integer</td><td>256</td><td>64&ndash;2048</td></tr>
+<tr><td>Outputs (5 rasters)</td><td>Raster destination &times;5</td><td>&mdash;</td><td>mean, std, p10, p90, confidence</td></tr>
+</table>
+
+<h4>Interpretation Guide</h4>
+<ul>
+  <li><strong>High mean + high confidence:</strong> Robust opportunity &mdash; all scenarios agree the area is suitable.</li>
+  <li><strong>High mean + low confidence:</strong> Contested opportunity &mdash; some scenarios rate it highly, others do not. Needs further investigation.</li>
+  <li><strong>Wide P10&ndash;P90 gap:</strong> The cell's ranking is highly scenario-dependent. Use the Scenario Disagreement Attention map to drill down.</li>
+</ul>
+
+<h4>References</h4>
+<div class="ref-list"><ol>
+  <li>Dietterich, T.G. (2000). Ensemble methods in machine learning. <em>MCS 2000</em>, LNCS 1857, 1&ndash;15. DOI: <a href="https://doi.org/10.1007/3-540-45014-9_1" target="_blank">10.1007/3-540-45014-9_1</a></li>
+  <li>Kuncheva, L.I. (2004). <em>Combining Pattern Classifiers</em>. Wiley. DOI: <a href="https://doi.org/10.1002/0471660264" target="_blank">10.1002/0471660264</a></li>
+  <li>Tebaldi, C. &amp; Knutti, R. (2007). The use of the multi-model ensemble in probabilistic climate projections. <em>Phil. Trans. R. Soc. A</em>, 365(1857), 2053&ndash;2075. DOI: <a href="https://doi.org/10.1098/rsta.2007.2076" target="_blank">10.1098/rsta.2007.2076</a></li>
+  <li>Ligmann-Zielinska, A. &amp; Jankowski, P. (2014). Spatially-explicit integrated uncertainty and sensitivity analysis of criteria weights in multicriteria land suitability evaluation. <em>Environmental Modelling &amp; Software</em>, 57, 235&ndash;247. DOI: <a href="https://doi.org/10.1016/j.envsoft.2014.03.007" target="_blank">10.1016/j.envsoft.2014.03.007</a></li>
+  <li>Dormann, C.F. et al. (2013). Collinearity: a review of methods to deal with it. <em>Ecography</em>, 36(1), 27&ndash;46. DOI: <a href="https://doi.org/10.1111/j.1600-0587.2012.07348.x" target="_blank">10.1111/j.1600-0587.2012.07348.x</a></li>
+</ol></div>
+
+<hr class="algo-divider">
+
+<!-- ─── Compose: remaining 11 algorithms (compact) ─── -->
+
+<div class="algo-compact" id="c-opp-loss">
+<h3>3.6 Opportunity Loss Map (Hard Constraint Trade-off)</h3>
+<p><span class="tag">constraint relaxation</span> <span class="tag">potential forfeited</span> <span class="tag">trade-off quantification</span></p>
+<h4>Theory &amp; Method</h4>
+<p>Quantifies suitability forfeited by hard constraints by computing, for each constraint-failing cell, the suitability value that would have been assigned if the constraint were removed (the &ldquo;opportunity loss&rdquo;). This information supports constraint-revision negotiations: if high-suitability land is blocked by a modifiable constraint, the loss map provides quantitative evidence for policy reconsideration.</p>
+<div class="eq-block">
+$$L(x,y) = \begin{cases} S(x,y) & \text{if } C(x,y) \le 0.5 \\ 0 & \text{otherwise} \end{cases}$$
+</div>
+<table><tr><th>Parameter</th><th>Default</th><th>Role</th></tr>
+<tr><td>Suitability raster</td><td>&mdash;</td><td>0&ndash;100</td></tr>
+<tr><td>Constraint mask</td><td>&mdash;</td><td>0/1 required</td></tr>
+<tr><td>Medium-loss threshold</td><td>40</td><td>Class break low/medium</td></tr>
+<tr><td>High-loss threshold</td><td>70</td><td>Class break medium/high</td></tr></table>
+<p>Output: loss score (0&ndash;100) and loss class (0=no loss, 1=low, 2=medium, 3=high).</p>
+<div class="ref-list"><ol>
+  <li>Geneletti, D. (2010). Combining stakeholder analysis and spatial MCA for policy evaluation. <em>Land Use Policy</em>, 27(2), 550&ndash;559.</li>
+  <li>Malczewski, J. &amp; Rinner, C. (2015). <em>MCDA in Geographic Information Science</em>. Springer.</li>
+  <li>Ferretti, V. &amp; Pomarico, S. (2012). An integrated approach for studying the land suitability. <em>Land Use Policy</em>, 29(2), 395&ndash;406.</li>
+</ol></div>
+</div>
+
+<div class="algo-compact" id="c-candidate-site">
+<h3>3.7 Candidate Site Extractor</h3>
+<p><span class="tag">connected components</span> <span class="tag">BFS labelling</span> <span class="tag">polygonisation</span> <span class="tag">compactness</span></p>
+<h4>Theory &amp; Method</h4>
+<p>Thresholds suitability, labels contiguous components via BFS (4- or 8-connectivity), filters by minimum area (hectares), ranks by mean suitability (area as tie-break), takes top-N, polygonises via GDAL, and computes compactness (\(4\pi A/P^2\)). The BFS component labelling is implemented directly in NumPy/stdlib for testability. Outputs a vector layer with site_id, rank, cells, area_ha, mean_suit, max_suit, and compactness.</p>
+<table><tr><th>Parameter</th><th>Default</th><th>Role</th></tr>
+<tr><td>Suitability raster</td><td>&mdash;</td><td>0&ndash;100</td></tr>
+<tr><td>Site threshold</td><td>75</td><td>Cells &ge; value included</td></tr>
+<tr><td>Min area (ha)</td><td>1.0</td><td>0 = no filter</td></tr>
+<tr><td>Max sites</td><td>20</td><td>0 = all, up to 1000</td></tr>
+<tr><td>Connectivity</td><td>8</td><td>4 or 8</td></tr></table>
+<div class="ref-list"><ol>
+  <li>Rosenfeld, A. &amp; Pfaltz, J.L. (1966). Sequential operations in digital picture processing. <em>JACM</em>, 13(4), 471&ndash;494. DOI: <a href="https://doi.org/10.1145/321356.321357" target="_blank">10.1145/321356.321357</a></li>
+  <li>Haralick, R.M. &amp; Shapiro, L.G. (1992). <em>Computer and Robot Vision</em>, Vol. I. Addison-Wesley.</li>
+  <li>LaGro, J.A. (1991). Assessing patch shape in landscape mosaics. <em>Photogrammetric Engineering &amp; Remote Sensing</em>, 57(3), 285&ndash;293.</li>
+</ol></div>
+</div>
+
+<div class="algo-compact" id="c-priority-zoning">
+<h3>3.8 Priority Zoning from Suitability</h3>
+<p><span class="tag">tiered planning</span> <span class="tag">three-axis fusion</span> <span class="tag">action zoning</span></p>
+<h4>Theory &amp; Method</h4>
+<p>Fuses three spatial axes (suitability \(S\), confidence \(C\), opportunity loss \(O\)) into a priority index and a 5-class zone map. The index is \(\text{PI} = 0.60S + 0.30C - 0.20O\) (clipped 0&ndash;100). Zones: 4=constraint-revisit (high loss), 3=immediate priority (high S + high C), 2=detailed feasibility (medium S + C), 1=longlist (medium S), 0=low priority. Optional confidence and opportunity-loss rasters default to 75 and 0 respectively.</p>
+<table><tr><th>Parameter</th><th>Default</th><th>Role</th></tr>
+<tr><td>Suitability (required)</td><td>&mdash;</td><td>0&ndash;100</td></tr>
+<tr><td>Confidence (optional)</td><td>defaults 75</td><td>0&ndash;100</td></tr>
+<tr><td>Opportunity loss (optional)</td><td>defaults 0</td><td>0&ndash;100</td></tr>
+<tr><td>Thresholds</td><td>S:50/75, C:60/80, O:70</td><td>Zone cutoffs</td></tr></table>
+<div class="ref-list"><ol>
+  <li>Thill, J.-C. (Ed.) (2011). <em>Spatial Multicriteria Decision Making and Analysis</em>. Routledge.</li>
+  <li>Malczewski, J. (2006). GIS-based MCDA: a survey. <em>IJGIS</em>, 20(7), 703&ndash;726.</li>
+  <li>Keeney, R.L. &amp; Raiffa, H. (1993). <em>Decisions with Multiple Objectives</em>. Cambridge. DOI: <a href="https://doi.org/10.1017/CBO9781139174084" target="_blank">10.1017/CBO9781139174084</a></li>
+</ol></div>
+</div>
+
+<div class="algo-compact" id="c-consensus-zone">
+<h3>3.9 Scenario Consensus Zone</h3>
+<p><span class="tag">agreement count</span> <span class="tag">cell-wise consensus</span> <span class="tag">planning zones</span></p>
+<h4>Theory &amp; Method</h4>
+<p>Maps per-cell scenario agreement: counts how many scenarios meet medium (\(\ge\) med) and high (\(\ge\) high) suitability thresholds. Zones by agreement ratio: 0=none, 1=&ge;50% medium, 2=&ge;75% medium, 3=&ge;60% high, 4=&ge;85% near-unanimous high. Input: 2&ndash;10 scenario rasters. Threshold defaults: medium=60, high=75.</p>
+<div class="ref-list"><ol>
+  <li>Feick, R. &amp; Hall, B. (2002). Balancing consensus and conflict in spatial MCDA. <em>Cartography and GIS</em>, 29(4), 321&ndash;337.</li>
+  <li>Jankowski, P. &amp; Nyerges, T. (2001). <em>GIS-Supported Collaborative Decision Making</em>. Taylor &amp; Francis.</li>
+  <li>Ligmann-Zielinska, A. &amp; Jankowski, P. (2014). Spatially-explicit uncertainty and sensitivity analysis. <em>CEUS</em>, 47, 67&ndash;78.</li>
+</ol></div>
+</div>
+
+<div class="algo-compact" id="c-disagreement">
+<h3>3.10 Scenario Disagreement Attention</h3>
+<p><span class="tag">cross-scenario conflict</span> <span class="tag">std-based score</span> <span class="tag">critical conflict</span></p>
+<h4>Theory &amp; Method</h4>
+<p>Quantifies cross-scenario conflict per cell as \(\text{score} = \min(100, (\sigma_S / \sigma_{\text{ref}}) \times 100)\). Attention classes: 0=low (&lt;20), 1=watch (&ge;20), 2=review (&ge;40), 3=high conflict (&ge;60), 4=critical (&ge;75 with high mean suitability). The &ldquo;critical&rdquo; class flags cells that are both highly contested and highly suitable on average &mdash; high-stakes areas needing stakeholder deliberation.</p>
+<div class="ref-list"><ol>
+  <li>Ligmann-Zielinska, A. &amp; Jankowski, P. (2014). Spatially-explicit uncertainty and sensitivity analysis. <em>CEUS</em>, 47, 67&ndash;78.</li>
+  <li>Saltelli, A. et al. (2008). <em>Global Sensitivity Analysis: The Primer</em>. Wiley.</li>
+  <li>Walker, W.E. et al. (2003). Defining uncertainty: a conceptual basis. <em>Integrated Assessment</em>, 4(1), 5&ndash;17.</li>
+</ol></div>
+</div>
+
+<div class="algo-compact" id="c-decision-quadrant">
+<h3>3.11 Decision Quadrant Map</h3>
+<p><span class="tag">2&times;2 matrix</span> <span class="tag">strategic screening</span> <span class="tag">suitability vs. conflict</span></p>
+<h4>Theory &amp; Method</h4>
+<p>Cross-classifies cells by suitability (high/low) and disagreement (high/low): 1=confident opportunity (high S, low D), 2=contested opportunity (high S, high D), 3=confident avoidance (low S, low D), 4=contested avoidance (low S, high D). This is the spatial analogue of a 2&times;2 strategic management matrix (e.g., BCG growth-share matrix adapted to spatial MCDA).</p>
+<div class="ref-list"><ol>
+  <li>Henderson, B. (1970). The product portfolio. <em>Boston Consulting Group</em>.</li>
+  <li>Feick, R. &amp; Hall, B. (2004). A method for examining spatial weight sensitivity. <em>IJGIS</em>, 18(8), 815&ndash;840.</li>
+  <li>Jankowski, P. &amp; Nyerges, T. (2001). <em>GIS-Supported Collaborative Decision Making</em>.</li>
+</ol></div>
+</div>
+
+<div class="algo-compact" id="c-intervention-conflict">
+<h3>3.12 Intervention Conflict Matrix</h3>
+<p><span class="tag">action classification</span> <span class="tag">priority &times; conflict</span> <span class="tag">implementation guidance</span></p>
+<h4>Theory &amp; Method</h4>
+<p>Fuses Priority Zoning (0&ndash;4) with Disagreement Attention (0&ndash;4) into seven intervention classes: 0=Hold, 1=Quick Win (high priority + low conflict), 2=Deliberate Design, 3=Resolve First (high priority + high conflict), 4=Monitor, 5=Co-Design, 6=Re-screen. This directly supports the &ldquo;action prioritisation&rdquo; phase of spatial planning workflows.</p>
+<div class="ref-list"><ol>
+  <li>Bryson, J.M. (2004). <em>Strategic Planning for Public and Nonprofit Organizations</em>. Jossey-Bass.</li>
+  <li>Saunders, J. et al. (2008). <em>Strategic Purchasing and Supply Chain Management</em>. Pearson.</li>
+</ol></div>
+</div>
+
+<div class="algo-compact" id="c-risk-opportunity">
+<h3>3.13 Risk-Opportunity Matrix Map</h3>
+<p><span class="tag">portfolio screening</span> <span class="tag">robust suitability &times; uncertainty</span> <span class="tag">investment logic</span></p>
+<h4>Theory &amp; Method</h4>
+<p>Classifies cells by robust suitability (high/low) and uncertainty std (high/low): 1=Invest now (high S, low &sigma;), 2=Validate then invest (high S, high &sigma;), 3=Low strategic value (low S, low &sigma;), 4=Defer and monitor (low S, high &sigma;). This applies a mean-variance decision logic to spatial portfolio selection, conceptually related to Markowitz portfolio theory adapted from finance to spatial planning.</p>
+<div class="ref-list"><ol>
+  <li>Markowitz, H. (1952). Portfolio selection. <em>J. Finance</em>, 7(1), 77&ndash;91. DOI: <a href="https://doi.org/10.1111/j.1540-6261.1952.tb01525.x" target="_blank">10.1111/j.1540-6261.1952.tb01525.x</a></li>
+  <li>Ben-Haim, Y. (2006). <em>Info-Gap Decision Theory</em>, 2nd ed. Academic Press.</li>
+  <li>Walker, W.E. et al. (2003). Defining uncertainty. <em>Integrated Assessment</em>, 4(1), 5&ndash;17.</li>
+</ol></div>
+</div>
+
+<div class="algo-compact" id="c-regret-fragility">
+<h3>3.14 Regret Fragility Map</h3>
+<p><span class="tag">spread fragility</span> <span class="tag">max-min range</span> <span class="tag">scenario sensitivity</span></p>
+<h4>Theory &amp; Method</h4>
+<p>Maps per-cell spread (max &minus; min) across 2&ndash;12 scenario rasters. Score = spread (0&ndash;100); classes: 0=stable (spread &lt; low), 1=watch (between), 2=fragile (spread &ge; high). Identifies cells whose suitability is scenario-dependent: stable cells are reliable regardless of scenario choice; fragile cells need contingency plans.</p>
+<div class="ref-list"><ol>
+  <li>Loulou, R. &amp; Kanudia, A. (1999). Minimax regret strategies for GHG emission reduction. <em>Annals of Operations Research</em>, 86, 107&ndash;126.</li>
+  <li>Savage, L.J. (1951). The theory of statistical decision. <em>JASA</em>, 46(253), 55&ndash;67.</li>
+</ol></div>
+</div>
+
+<div class="algo-compact" id="c-uncertainty-adjusted">
+<h3>3.15 Uncertainty-Adjusted Suitability</h3>
+<p><span class="tag">mean-variance</span> <span class="tag">risk aversion</span> <span class="tag">lambda penalty</span></p>
+<h4>Theory &amp; Method</h4>
+<p>Produces risk-adjusted suitability via the simplified mean-variance rule: \(S_{\text{robust}} = \text{clip}(S_{\text{mean}} - \lambda \cdot \sigma_S, \; 0, 100)\). The risk aversion factor \(\lambda\) (0&ndash;5) controls the uncertainty penalty: \(\lambda=0\) returns the mean unchanged; \(\lambda=1\) (default) subtracts one standard deviation; higher values increasingly penalise cells with large Monte Carlo spread, favouring proven, low-variance locations.</p>
+<div class="ref-list"><ol>
+  <li>Markowitz, H. (1952). Portfolio selection. <em>J. Finance</em>, 7(1), 77&ndash;91.</li>
+  <li>Pratt, J.W. (1964). Risk aversion in the small and in the large. <em>Econometrica</em>, 32(1-2), 122&ndash;136. DOI: <a href="https://doi.org/10.2307/1913738" target="_blank">10.2307/1913738</a></li>
+  <li>Arrow, K.J. (1971). <em>Essays in the Theory of Risk-Bearing</em>. Markham.</li>
+</ol></div>
+</div>
+
+<div class="algo-compact" id="c-scenario-comparator">
+<h3>3.16 Scenario Comparator (Delta)</h3>
+<p><span class="tag">pairwise comparison</span> <span class="tag">delta map</span> <span class="tag">B&minus;A</span></p>
+<h4>Theory &amp; Method</h4>
+<p>Computes a pairwise delta map (scenario B minus baseline A) with running summary statistics (valid cell count, min, max, mean delta). Chunk-aware block processing accumulates statistics across the entire raster. The delta can be negative (scenario B rates the cell lower). Use to map spatial patterns of gain/loss between two planning alternatives.</p>
+<div class="ref-list"><ol>
+  <li>Pontius, R.G. et al. (2008). Comparing the input, output, and validation maps. <em>Annals of Regional Science</em>, 42(1), 11&ndash;37. DOI: <a href="https://doi.org/10.1007/s00168-007-0138-2" target="_blank">10.1007/s00168-007-0138-2</a></li>
+  <li>Visser, H. &amp; de Nijs, T. (2006). The map comparison kit. <em>Environmental Modelling &amp; Software</em>, 21(3), 346&ndash;358.</li>
+</ol></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<hr class="algo-divider">
+<h2 id="sec-uncertainty">4. Uncertainty Quantification</h2>
+
+<!-- ─── Monte Carlo (DEEP) ─── -->
+<h3 id="u-montecarlo">4.1 Monte Carlo Suitability</h3>
+<p><span class="tag">Gaussian perturbation</span> <span class="tag">percentile envelopes</span> <span class="tag">stability index</span></p>
+
+<h4>Theoretical Background</h4>
+<p>Monte Carlo simulation addresses the fundamental question: <em>how much does the suitability score change under plausible perturbations to the input data?</em> Suitability models are subject to multiple uncertainty sources: measurement error in criterion values, imprecise weights, ambiguous normalisation breakpoints, and positional error. While a full uncertainty propagation through the entire MCDA chain requires distributional assumptions for every input, the Monte Carlo Suitability algorithm provides a pragmatic first-order approximation by perturbing the composite suitability score directly with multiplicative Gaussian noise. A fixed random seed (42) ensures reproducibility. The method follows the general framework of uncertainty and sensitivity analysis in spatial MCDA described by Ligmann-Zielinska &amp; Jankowski (2014).</p>
+
+<h4>Mathematical Formulation</h4>
+<p>For a base suitability raster \(S_0(x,y) \in [0, 100]\) and \(N\) iterations:</p>
+
+<div class="eq-block">
+<span class="eq-label">(41)</span> \(S_k(x,y) = \text{clip}\Big(S_0(x,y) \cdot \big(1 + \varepsilon_k \cdot \tau(x,y)\big), \; 0, 100\Big)\)
+</div>
+
+<p>Where \(\varepsilon_k \sim \mathcal{N}(0, \sigma)\) with \(\sigma\) as the noise sigma (default 0.08, range 0&ndash;0.5), and \(\tau(x,y) = \max(S_0(x,y)/100, 0.05)\) is a scale factor preventing near-zero cells from receiving effectively zero noise (which would mask their relative uncertainty).</p>
+
+<div class="eq-block">
+<span class="eq-label">(42)</span> \(\mu_{MC}(x,y) = \dfrac{1}{N}\sum_{k=1}^N S_k(x,y)\)
+</div>
+<div class="eq-block">
+<span class="eq-label">(43)</span> \(\sigma_{MC}(x,y) = \sqrt{\dfrac{1}{N}\sum_{k=1}^N (S_k - \mu_{MC})^2}\)
+</div>
+<div class="eq-block">
+<span class="eq-label">(44)</span> Stability Index: \(\text{SI}(x,y) = 100 - (P_{95} - P_{05}), \quad \text{SI} \in [0, 100]\)
+</div>
+
+<p>The stability index is high when the 90% confidence interval is narrow, and low when the spread is wide. An SI of 100 means zero spread across all iterations (deterministic cell); an SI of 0 means the 90% interval spans the full 0&ndash;100 range.</p>
+
+<h4>Parameters</h4>
+<table>
+<tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr>
+<tr><td>Input suitability raster</td><td>Raster layer</td><td>&mdash;</td><td>0&ndash;100 scale</td></tr>
+<tr><td>Iterations</td><td>Integer (&ge;20)</td><td>300</td><td>Higher values improve percentile estimate stability</td></tr>
+<tr><td>Noise sigma</td><td>Double 0&ndash;0.5</td><td>0.08</td><td>Relative std of Gaussian perturbation</td></tr>
+<tr><td>Block size</td><td>Integer</td><td>256</td><td>64&ndash;2048 pixels</td></tr>
+<tr><td>Outputs (6 rasters)</td><td>&mdash;</td><td>&mdash;</td><td>mean, std, p05, p50, p95, stability_index</td></tr>
+</table>
+
+<h4>Interpretation Guide</h4>
+<ul>
+  <li><strong>Low stability (SI &lt; 60):</strong> The cell's suitability is fragile. A small perturbation flips its score significantly. Flag for field verification or higher-resolution data collection.</li>
+  <li><strong>High stability (SI &gt; 90):</strong> The cell's suitability is robust to noise. Confident classification.</li>
+  <li><strong>P05 vs. P95 spread:</strong> The 90% confidence interval. A narrow interval (e.g., 65&ndash;75) indicates precise estimation; a wide interval (e.g., 20&ndash;80) indicates high uncertainty.</li>
+  <li><strong>Sigma calibration:</strong> &sigma; = 0.08 means the perturbation has 8% relative standard deviation. For criteria with known measurement error (e.g., DEM RMSE), set &sigma; to match the coefficient of variation of the error distribution.</li>
+</ul>
+
+<div class="key-box"><strong>Limitation:</strong> This method perturbs the <em>composite</em> suitability score, not the individual criterion values. It captures sensitivity to overall score uncertainty but does not model differential uncertainty across criteria. For criterion-level uncertainty propagation, use the Global Sensitivity and GeoShapley algorithms (Sec. 5) or the Policy Sensitivity Frontier (Sec. 6).</div>
+
+<h4>References</h4>
+<div class="ref-list"><ol>
+  <li>Metropolis, N. &amp; Ulam, S. (1949). The Monte Carlo method. <em>JASA</em>, 44(247), 335&ndash;341. DOI: <a href="https://doi.org/10.1080/01621459.1949.10483310" target="_blank">10.1080/01621459.1949.10483310</a></li>
+  <li>Ligmann-Zielinska, A. &amp; Jankowski, P. (2014). Spatially-explicit integrated uncertainty and sensitivity analysis for MCDA. <em>CEUS</em>, 47, 67&ndash;78. DOI: <a href="https://doi.org/10.1016/j.compenvurbsys.2014.01.007" target="_blank">10.1016/j.compenvurbsys.2014.01.007</a></li>
+  <li>Crosetto, M. &amp; Tarantola, S. (2001). Uncertainty and sensitivity analysis: tools for GIS-based model implementation. <em>IJGIS</em>, 15(5), 415&ndash;437. DOI: <a href="https://doi.org/10.1080/13658810110053125" target="_blank">10.1080/13658810110053125</a></li>
+  <li>Saltelli, A. et al. (2008). <em>Global Sensitivity Analysis: The Primer</em>. Wiley. DOI: <a href="https://doi.org/10.1002/9780470725184" target="_blank">10.1002/9780470725184</a></li>
+  <li>Heuvelink, G.B.M. (1998). <em>Error Propagation in Environmental Modelling with GIS</em>. Taylor &amp; Francis.</li>
+  <li>Refsgaard, J.C. et al. (2007). Uncertainty in the environmental modelling process. <em>Environmental Modelling &amp; Software</em>, 22(11), 1543&ndash;1556. DOI: <a href="https://doi.org/10.1016/j.envsoft.2007.02.004" target="_blank">10.1016/j.envsoft.2007.02.004</a></li>
+  <li>Goovaerts, P. (2001). Geostatistical modelling of uncertainty in soil science. <em>Geoderma</em>, 103(1-2), 3&ndash;26. DOI: <a href="https://doi.org/10.1016/S0016-7061(01)00067-2" target="_blank">10.1016/S0016-7061(01)00067-2</a></li>
+</ol></div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<hr class="algo-divider">
+<h2 id="sec-xai">5. Explainability (XAI) Algorithms</h2>
+
+<!-- ─── Global Sensitivity (compact) ─── -->
+<div class="algo-compact" id="xai-global-sensitivity">
+<h3>5.1 Global Sensitivity</h3>
+<p><span class="tag">variance-based</span> <span class="tag">criterion ranking</span> <span class="tag">sampled importance</span></p>
+<h4>Theory &amp; Method</h4>
+<p>Samples each criterion raster at a regular stride (default every 8 cells), computes spatial standard deviation, multiplies by weight to produce a weighted sensitivity proxy, and normalises to an importance score (0&ndash;1, sum = 1). Ranks criteria by contribution to overall suitability variation. Low-importance criteria with small weighted_std may be candidates for model simplification.</p>
+<div class="eq-block">
+$$I_j = \dfrac{w_j \cdot \sigma_j^{\text{(sampled)}}}{\sum_k w_k \cdot \sigma_k^{\text{(sampled)}}}$$
+</div>
+<div class="ref-list"><ol>
+  <li>Saltelli, A. et al. (2008). <em>Global Sensitivity Analysis: The Primer</em>. Wiley.</li>
+  <li>Sobol', I.M. (2001). Global sensitivity indices for nonlinear mathematical models. <em>Mathematics and Computers in Simulation</em>, 55(1-3), 271&ndash;280. DOI: <a href="https://doi.org/10.1016/S0378-4754(00)00270-6" target="_blank">10.1016/S0378-4754(00)00270-6</a></li>
+  <li>Ligmann-Zielinska, A. (2013). Spatially-explicit sensitivity analysis of an agent-based model. <em>JASSS</em>, 16(1), 9.</li>
+</ol></div>
+</div>
+
+<!-- ─── Local Contribution (compact) ─── -->
+<div class="algo-compact" id="xai-local-contribution">
+<h3>5.2 Local Contribution Decomposition</h3>
+<p><span class="tag">per-cell breakdown</span> <span class="tag">contribution share</span> <span class="tag">dominance map</span></p>
+<h4>Theory &amp; Method</h4>
+<p>Decomposes the final suitability into per-criterion contribution rasters. For each criterion \(j\), the absolute weighted contribution is \(|X_j \cdot w_j|\) and the percentage share is \((\text{abs\_contribution}_j / \sum_k \text{abs\_contribution}_k) \times 100\). Produces \(2n + 1\) rasters in an output folder: \(n\) absolute contribution rasters, \(n\) percentage rasters, and one denominator raster. A criterion contributing over 50% at a given cell warrants closer scrutiny at that location.</p>
+<div class="ref-list"><ol>
+  <li>Ribeiro, M.T., Singh, S. &amp; Guestrin, C. (2016). "Why should I trust you?" Explaining the predictions of any classifier. <em>KDD 2016</em>, 1135&ndash;1144. DOI: <a href="https://doi.org/10.1145/2939672.2939778" target="_blank">10.1145/2939672.2939778</a></li>
+  <li>Lundberg, S.M. &amp; Lee, S.-I. (2017). A unified approach to interpreting model predictions. <em>NeurIPS 2017</em>, 4765&ndash;4774.</li>
+</ol></div>
+</div>
+
+<!-- ─── GeoShapley Lite (compact) ─── -->
+<div class="algo-compact" id="xai-geoshapley">
+<h3>5.3 GeoShapley Lite</h3>
+<p><span class="tag">Shapley value</span> <span class="tag">coalitional game theory</span> <span class="tag">spatial attribution</span> <span class="tag">marginal contribution</span></p>
+<h4>Theoretical Background</h4>
+<p>GeoShapley applies coalitional game theory to spatial MCDA: each criterion is treated as a &ldquo;player&rdquo; in a cooperative game where the &ldquo;payout&rdquo; is the suitability score produced by a coalition (subset) of criteria. The Shapley value (Shapley, 1953) computes each criterion's <em>fair</em> marginal contribution to the total suitability, averaged over all possible orders in which criteria could be added. Unlike simpler contribution measures, the Shapley value accounts for interactions: a criterion that is redundant with others (their joint contribution is not the sum of individual contributions) receives a lower value.</p>
+<div class="eq-block">
+<span class="eq-label">(45)</span> \(\phi_j = \sum_{T \subseteq N \setminus \{j\}} \dfrac{|T|! \, (n - |T| - 1)!}{n!} \left[ v(T \cup \{j\}) - v(T) \right]\)
+</div>
+<p>Where \(N\) is the full set of \(n\) criteria, \(T\) is a coalition (subset), and \(v(T)\) is the suitability score produced using only criteria in \(T\). The algorithm samples a regular grid of cells and computes the Shapley value per criterion from the weighted linear combination with the subset's weights re-normalised. Results are summarised as a table with criterion-level mean and median Shapley values.</p>
+<h4>Parameters</h4>
+<table>
+<tr><th>Parameter</th><th>Default</th><th>Role</th></tr>
+<tr><td>Criterion rasters</td><td>&mdash;</td><td>Normalised 0&ndash;100, aligned</td></tr>
+<tr><td>Weights CSV</td><td>"" (equal)</td><td>Standard importance weights</td></tr>
+<tr><td>Sampling stride</td><td>4</td><td>Cell sampling interval</td></tr></table>
+<h4>Interpretation Guide</h4>
+<ul>
+  <li><strong>High Shapley value:</strong> Criterion uniquely contributes to explaining or driving the suitability pattern that no other criterion replicates.</li>
+  <li><strong>Low or zero Shapley value:</strong> Criterion is redundant (other criteria cover its information) or contributes negligibly.</li>
+  <li><strong>Compare with Global Sensitivity:</strong> A criterion may have high spatial variation (high importance in Global Sensitivity) but low Shapley value if that variation is perfectly correlated with another criterion. Shapley values penalise redundancy.</li>
+</ul>
+<h4>References</h4>
+<div class="ref-list"><ol>
+  <li>Shapley, L.S. (1953). A value for n-person games. In: <em>Contributions to the Theory of Games</em>, Vol. 2, Princeton, 307&ndash;317.</li>
+  <li>Strumbelj, E. &amp; Kononenko, I. (2014). Explaining prediction models and individual predictions with feature contributions. <em>Knowledge and Information Systems</em>, 41(3), 647&ndash;665. DOI: <a href="https://doi.org/10.1007/s10115-013-0679-x" target="_blank">10.1007/s10115-013-0679-x</a></li>
+  <li>Lundberg, S.M. &amp; Lee, S.-I. (2017). A unified approach to interpreting model predictions. <em>NeurIPS 2017</em>, 4765&ndash;4774.</li>
+  <li>Grabisch, M. (2016). <em>Set Functions, Games and Capacities in Decision Making</em>. Springer. DOI: <a href="https://doi.org/10.1007/978-3-319-30690-2" target="_blank">10.1007/978-3-319-30690-2</a></li>
+  <li>Roth, A.E. (1988). <em>The Shapley Value: Essays in Honor of Lloyd S. Shapley</em>. Cambridge. DOI: <a href="https://doi.org/10.1017/CBO9780511528446" target="_blank">10.1017/CBO9780511528446</a></li>
+  <li>Lipovetsky, S. &amp; Conklin, M. (2001). Analysis of regression in game theory approach. <em>Applied Stochastic Models in Business and Industry</em>, 17(4), 319&ndash;330. DOI: <a href="https://doi.org/10.1002/asmb.446" target="_blank">10.1002/asmb.446</a></li>
+  <li>Owen, G. (1995). <em>Game Theory</em>, 3rd ed. Academic Press.</li>
+</ol></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<hr class="algo-divider">
+<h2 id="sec-reporting">6. Reporting &amp; Decision-Support Algorithms (34 algorithms)</h2>
+<p>The Reporting group provides 34 algorithms spanning quality assurance, area statistics, scenario diagnostics, decision recommendations, governance auditing, implementation planning, and narrative/HTML report generation. These algorithms consume raster outputs from the Core, Weights, Compose, Uncertainty, and XAI groups and produce actionable tables, metrics, and documents. Below is the complete catalogue with compact but thorough coverage.</p>
+
+<!-- Each reporting algorithm gets a compact entry -->
+<div class="algo-compact" id="r-suitability-html">
+<h3>6.1 Suitability HTML Report</h3>
+<p><span class="tag">composite report</span> <span class="tag">HTML output</span> <span class="tag">decision summary</span></p>
+<p>Assembles a self-contained HTML document integrating project metadata, weight methodology description, QA summary, class area statistics, and reference paths to all intermediate diagnostic tables (similarity, dominance, benchmark, robustness, portfolio diversity, minimax regret, alignment audit, redundancy, constraint impact, transition matrix, fragmentation, consensus/attention/quadrant/intervention/risk/regret area stats, threshold curve, KPI, policy gate, scorecard, scenario selection, governance audit, wave plan, deployment gate, policy frontier, budget phasing, action playbook, and release narrative). Designed as a single-file decision briefing document.</p>
+<div class="ref-list"><ol>
+  <li>Malczewski, J. &amp; Rinner, C. (2015). <em>MCDA in Geographic Information Science</em>. Springer.</li>
+  <li>Ishizaka, A. &amp; Nemery, P. (2013). <em>Multi-Criteria Decision Analysis: Methods and Software</em>. Wiley.</li>
+</ol></div>
+</div>
+
+<div class="algo-compact" id="r-numerical-qa">
+<h3>6.2 Numerical QA Check</h3>
+<p><span class="tag">quality assurance</span> <span class="tag">value range validation</span> <span class="tag">outlier detection</span></p>
+<p>Performs numerical quality checks on a suitability raster against Monte Carlo percentile rasters: reports min, max, mean, std, count of valid cells, count outside 0&ndash;100, negative values, non-finite values, and the percentage of cells where the base suitability falls outside the P05&ndash;P95 envelope (potential outliers or constraint-affected cells). Outputs a plain-text QA summary string.</p>
+<div class="ref-list"><ol>
+  <li>ISO 19157:2013. Geographic information &mdash; Data quality.</li>
+  <li>Veregin, H. (1999). Data quality parameters. In: Longley et al. (Eds.), <em>Geographical Information Systems</em>, 2nd ed., Wiley.</li>
+</ol></div>
+</div>
+
+<div class="algo-compact" id="r-beta-evidence">
+<h3>6.3 Beta Evidence Report</h3>
+<p><span class="tag">audit trail</span> <span class="tag">artifact inventory</span> <span class="tag">evidence pack</span></p>
+<p>Generates an HTML evidence pack cataloguing all artifacts in an output directory, with pipeline summary text and embedded references to QA results, class statistics, weight audits, and all diagnostic tables. Designed as an auditable record of the complete suitability modelling workflow for regulatory or peer-review submission.</p>
+<div class="ref-list"><ol>
+  <li>Roy, B. (1996). <em>Multicriteria Methodology for Decision Aiding</em>. Springer.</li>
+  <li>Ascough, J.C. et al. (2008). Future research challenges for incorporation of uncertainty. <em>Agricultural Systems</em>, 97(1-2), 1&ndash;14.</li>
+</ol></div>
+</div>
+
+<div class="algo-compact" id="r-scenario-brief">
+<h3>6.4 Scenario Markdown Brief</h3>
+<p><span class="tag">executive summary</span> <span class="tag">Markdown output</span></p>
+<p>Produces a Markdown-formatted executive brief comparing a baseline scenario against one or more alternative scenarios, with embedded QA results, weight audit paths, scenario similarity and dominance tables, method benchmark leaderboard, robustness rankings, portfolio diversity, minimax regret, and governance audit references. Ready for direct inclusion in version-controlled documentation.</p>
+</div>
+
+<div class="algo-compact" id="r-class-stats">
+<h3>6.5 Suitability Class Area Stats</h3>
+<p><span class="tag">area tabulation</span> <span class="tag">class breaks</span> <span class="tag">zonal statistics</span></p>
+<p>Classifies a suitability raster by user-specified break values (comma-separated, e.g. "20,40,60,80") and tabulates cell count, area (in raster units and hectares), and percentage of valid area per class. Block-processed for memory efficiency. Outputs a GeoPackage table plus a summary text string.</p>
+<div class="ref-list"><ol>
+  <li>Jenks, G.F. (1967). The data model concept in statistical mapping. <em>International Yearbook of Cartography</em>, 7, 186&ndash;190.</li>
+</ol></div>
+</div>
+
+<div class="algo-compact" id="r-similarity">
+<h3>6.6 Scenario Similarity Matrix</h3>
+<p><span class="tag">cross-scenario correlation</span> <span class="tag">Pearson r</span> <span class="tag">cosine similarity</span></p>
+<p>Computes the pairwise Pearson correlation coefficient and cosine similarity between 2&ndash;12 scenario rasters over all valid (non-nodata, mask-passing) cells. Outputs a GeoPackage matrix table with scenario pairs, Pearson r, cosine similarity, and the effective sample size. Block-processed for large rasters. High similarity (&rho; &gt; 0.95) indicates the scenarios are functionally identical; low similarity flags genuine differences in spatial prioritisation.</p>
+<div class="ref-list"><ol>
+  <li>Pearson, K. (1895). Note on regression and inheritance in the case of two parents. <em>Proc. Royal Society of London</em>, 58, 240&ndash;242.</li>
+  <li>Pontius, R.G. &amp; Millones, M. (2011). Death to Kappa. <em>IJGIS</em>, 25(10), 1525&ndash;1534. DOI: <a href="https://doi.org/10.1080/13658816.2011.575409" target="_blank">10.1080/13658816.2011.575409</a></li>
+</ol></div>
+</div>
+
+<div class="algo-compact" id="r-dominance">
+<h3>6.7 Scenario Dominance Matrix</h3>
+<p><span class="tag">pairwise dominance</span> <span class="tag">&epsilon;-dominance</span> <span class="tag">strict pareto</span></p>
+<p>Computes a pairwise dominance matrix between scenarios: scenario A dominates B if A's suitability values are greater than or equal to B's for all valid cells, with strict inequality for at least an &epsilon;-fraction of cells (default &epsilon; = 0.5% of valid cells). Reports the dominance relation, the fraction of cells where A &gt; B, A = B, A &lt; B, and the mean difference. A scenario that dominates all others is the unambiguously preferred choice.</p>
+<div class="ref-list"><ol>
+  <li>Pareto, V. (1906). <em>Manual of Political Economy</em>. (Trans. 1971, Kelley).</li>
+  <li>Deb, K. (2001). <em>Multi-Objective Optimization Using Evolutionary Algorithms</em>. Wiley.</li>
+</ol></div>
+</div>
+
+<div class="algo-compact" id="r-robustness">
+<h3>6.8 Scenario Robustness Leaderboard</h3>
+<p><span class="tag">composite ranking</span> <span class="tag">multi-criterion synthesis</span></p>
+<p>Synthesises the benchmark, dominance, minimax regret, and portfolio diversity tables into a weighted robustness score per scenario. Ranks scenarios from most robust to least. The composite ranking provides a single defensible ordering for decision-makers overwhelmed by multiple diagnostic metrics. Output: GeoPackage with scenario, benchmark_score, dominance_wins, minimax_regret, diversity, robustness_score, and rank.</p>
+</div>
+
+<div class="algo-compact" id="r-governance">
+<h3>6.9 Scenario Governance Audit</h3>
+<p><span class="tag">decision documentation</span> <span class="tag">governance trail</span> <span class="tag">multi-perspective audit</span></p>
+<p>Audits the decision governance process by combining robustness ranking, benchmark performance, minimax regret, scenario selection recommendation, and deployment readiness status into a unified governance table. Documents which scenarios were evaluated, how they ranked, which was selected, and whether deployment conditions are satisfied.</p>
+</div>
+
+<div class="algo-compact" id="r-method-benchmark">
+<h3>6.10 Method Benchmark Leaderboard</h3>
+<p><span class="tag">multi-metric ranking</span> <span class="tag">high-suitability coverage</span> <span class="tag">mean/std ratio</span></p>
+<p>Benchmarks 2&ndash;12 scenario rasters on five metrics: mean suitability, std, high-suitability area fraction (cells &ge; threshold, default 70), coefficient of variation (CV%), and a composite benchmark score. The composite score rewards high mean, high coverage, low CV, and moderate discrimination. Output: GeoPackage leaderboard with rank.</p>
+</div>
+
+<div class="algo-compact" id="r-portfolio-diversity">
+<h3>6.11 Scenario Portfolio Diversity</h3>
+<p><span class="tag">Shannon diversity</span> <span class="tag">scenario distinctiveness</span></p>
+<p>Computes per-cell normalised suitability shares across scenarios, then calculates the Shannon entropy (diversity) of these shares. A cell where all scenarios agree has low diversity; a cell where scenarios strongly disagree has high diversity. Reports mean, median, and max diversity across the study area, plus the scenario-level marginal contribution to total diversity. Output: GeoPackage with scenario-level diversity statistics.</p>
+<div class="ref-list"><ol>
+  <li>Stirling, A. (2007). A general framework for analysing diversity in science, technology and society. <em>J. Royal Society Interface</em>, 4(15), 707&ndash;719. DOI: <a href="https://doi.org/10.1098/rsif.2007.0213" target="_blank">10.1098/rsif.2007.0213</a></li>
+</ol></div>
+</div>
+
+<div class="algo-compact" id="r-minimax-regret">
+<h3>6.12 Minimax Regret Selector</h3>
+<p><span class="tag">Savage criterion</span> <span class="tag">robust decision rule</span> <span class="tag">worst-case optimisation</span></p>
+<p>Applies the minimax regret decision criterion (Savage, 1951): for each cell, compute the regret of choosing scenario \(k\) as the difference between the best achievable suitability (across all scenarios) and scenario \(k\)'s value. The scenario that minimises the maximum regret across the study area is the minimax-optimal choice. Reports per-scenario max regret, mean regret, and a minimax rank. This is the most conservative scenario selection rule: it protects against the worst outcome.</p>
+<div class="ref-list"><ol>
+  <li>Savage, L.J. (1951). The theory of statistical decision. <em>JASA</em>, 46(253), 55&ndash;67. DOI: <a href="https://doi.org/10.1080/01621459.1951.10500768" target="_blank">10.1080/01621459.1951.10500768</a></li>
+  <li>Loomes, G. &amp; Sugden, R. (1982). Regret theory. <em>Economic Journal</em>, 92(368), 805&ndash;824. DOI: <a href="https://doi.org/10.2307/2232669" target="_blank">10.2307/2232669</a></li>
+</ol></div>
+</div>
+
+<div class="algo-compact" id="r-policy-frontier">
+<h3>6.13 Policy Sensitivity Frontier</h3>
+<p><span class="tag">lambda parameter sweep</span> <span class="tag">risk-return trade-off</span> <span class="tag">efficient frontier</span></p>
+<p>Sweeps the risk aversion parameter \(\lambda\) across a user-specified list (e.g., "0,0.5,1,1.5,2") and computes for each \(\lambda\) value the mean and standard deviation of the resulting risk-adjusted suitability raster. Produces a GeoPackage table tracing the mean-variance trade-off curve (the &ldquo;policy frontier&rdquo;). This enables decision-makers to visualise the cost (in expected suitability) of increasing risk aversion, analogous to an efficient frontier in portfolio theory.</p>
+<div class="ref-list"><ol>
+  <li>Markowitz, H. (1952). Portfolio selection. <em>J. Finance</em>, 7(1), 77&ndash;91.</li>
+  <li>Keeney, R.L. &amp; Raiffa, H. (1993). <em>Decisions with Multiple Objectives</em>. Cambridge.</li>
+</ol></div>
+</div>
+
+<div class="algo-compact" id="r-action-playbook">
+<h3>6.14 Action Playbook Generator</h3>
+<p><span class="tag">Markdown playbook</span> <span class="tag">zone descriptions</span> <span class="tag">implementation guidance</span></p>
+<p>Generates a structured Markdown action playbook from priority zoning, similarity matrix, and policy frontier data. Includes zone-by-zone descriptions, recommended actions per priority tier, scenario comparison insights, and implementation notes. Designed as a ready-to-share decision document for stakeholder review.</p>
+</div>
+
+<div class="algo-compact" id="r-budget-phasing">
+<h3>6.15 Intervention Budget Phasing</h3>
+<p><span class="tag">cost-weighted phasing</span> <span class="tag">cumulative coverage</span> <span class="tag">budget planning</span></p>
+<p>Computes cumulative cost and area coverage as priority zones are implemented in descending priority-index order, with user-specified per-zone unit costs (comma-separated). Produces a stepwise budget phasing table (GeoPackage) showing at each percentile step the cumulative area, cumulative cost, and remaining budget. Steps are defined by the user (default every 10% of area). Supports phased implementation planning with budget constraints.</p>
+</div>
+
+<div class="algo-compact" id="r-release-narrative">
+<h3>6.16 Release Narrative Builder</h3>
+<p><span class="tag">versioned changelog</span> <span class="tag">release documentation</span></p>
+<p>Generates a Markdown release narrative for a software version, embedding project name, version, key highlights, policy frontier data, budget phasing, and scenario similarity insights. Described as a changelog/documentation hybrid for plugin release notes.</p>
+</div>
+
+<!-- 6.17 through 6.34: remaining reporting algorithms in compact table format for efficiency -->
+<div class="algo-compact" id="r-criterion-redundancy">
+<h3>6.17 Criterion Redundancy Diagnostics</h3>
+<p><span class="tag">inter-criterion correlation</span> <span class="tag">VIF</span> <span class="tag">redundancy detection</span></p>
+<p>Samples criterion rasters (up to 120,000 cells, block-processed), computes the Pearson correlation matrix between all pairs, and produces two output tables: <em>pairs</em> (criterion A, criterion B, Pearson r, rsquared, n_samples) and <em>criteria</em> (criterion, mean_abs_correlation, max_abs_correlation, VIF). Criteria with VIF &gt; 10 or pairwise |r| &gt; 0.90 are flagged as potentially redundant. <strong>Reference:</strong> Dormann, C.F. et al. (2013). Collinearity: a review of methods. <em>Ecography</em>, 36(1), 27&ndash;46. DOI: <a href="https://doi.org/10.1111/j.1600-0587.2012.07348.x" target="_blank">10.1111/j.1600-0587.2012.07348.x</a></p>
+</div>
+
+<div class="algo-compact" id="r-constraint-impact">
+<h3>6.18 Constraint Impact Audit</h3>
+<p><span class="tag">exclusion quantification</span> <span class="tag">constraint tightening</span> <span class="tag">impact analysis</span></p>
+<p>Computes the fraction of valid area excluded by one or more binary constraint masks, the mean suitability of excluded vs. retained cells, and the percentage of high-suitability cells (above threshold) lost to constraints. Outputs a GeoPackage table with per-constraint and combined impact metrics. Answers: &ldquo;How much high-potential land are we excluding?&rdquo;</p>
+</div>
+
+<div class="algo-compact" id="r-alignment">
+<h3>6.19 Alignment Audit</h3>
+<p><span class="tag">grid alignment check</span> <span class="tag">CRS/extent/resolution verification</span></p>
+<p>Checks that all criterion rasters share identical CRS, extent, and cell size relative to a snap raster. Reports per-raster alignment status, pixel offsets, and resolution mismatches. A pre-flight check ensuring the Data Harmonizer step was successful.</p>
+</div>
+
+<div class="algo-compact" id="r-priority-transition">
+<h3>6.20 Priority Transition Matrix</h3>
+<p><span class="tag">zone-to-zone transitions</span> <span class="tag">cross-tabulation</span> <span class="tag">refinement impact</span></p>
+<p>Cross-tabulates two priority zone rasters (typically baseline vs. refined) to quantify how many cells transition between priority classes. Produces a transition matrix (FROM zone, TO zone, cell count, area) showing which zones were promoted, demoted, or remained stable after refinement.</p>
+<div class="ref-list"><ol>
+  <li>Pontius, R.G., Shusas, E. &amp; McEachern, M. (2004). Detecting important categorical land changes. <em>Agriculture, Ecosystems &amp; Environment</em>, 101(2-3), 251&ndash;268. DOI: <a href="https://doi.org/10.1016/j.agee.2003.09.008" target="_blank">10.1016/j.agee.2003.09.008</a></li>
+</ol></div>
+</div>
+
+<div class="algo-compact" id="r-spatial-fragmentation">
+<h3>6.21 Spatial Fragmentation Audit</h3>
+<p><span class="tag">patch metrics</span> <span class="tag">landscape ecology</span> <span class="tag">contiguity analysis</span></p>
+<p>Thresholds a suitability raster (default &ge;70), labels connected components (4- or 8-connectivity), and computes patch-level landscape metrics: number of patches, mean patch area, largest patch index, edge density, and a fragmentation index. High fragmentation (many small patches) may indicate that suitable land is scattered rather than clustered, affecting implementation feasibility.</p>
+<div class="ref-list"><ol>
+  <li>McGarigal, K. &amp; Marks, B.J. (1995). FRAGSTATS: spatial pattern analysis program. <em>USDA Forest Service Gen. Tech. Rep.</em> PNW-GTR-351. DOI: <a href="https://doi.org/10.2737/PNW-GTR-351" target="_blank">10.2737/PNW-GTR-351</a></li>
+  <li>Turner, M.G. &amp; Gardner, R.H. (2015). <em>Landscape Ecology in Theory and Practice</em>, 2nd ed. Springer.</li>
+</ol></div>
+</div>
+
+<div class="algo-compact" id="r-consensus-zone-stats">
+<h3>6.22 Consensus Zone Area Stats</h3>
+<p><span class="tag">zone tabulation</span> <span class="tag">consensus area</span></p>
+<p>Tabulates the area (cell count, map units, hectares) and percentage of each consensus zone class (0&ndash;4) from a Scenario Consensus Zone raster. Complements the map with numerical diagnostics.</p>
+</div>
+
+<div class="algo-compact" id="r-threshold-coverage">
+<h3>6.23 Threshold Coverage Curve</h3>
+<p><span class="tag">cumulative coverage</span> <span class="tag">sensitivity to threshold</span> <span class="tag">trade-off curve</span></p>
+<p>Computes the cumulative fraction of valid area exceeding each suitability threshold from 0 to 100 at a user-specified step (default 5). Produces a GeoPackage table tracing the coverage curve: threshold, cells_above, area_above, pct_above. This is the spatial equivalent of a receiver operating characteristic (ROC)-like threshold sensitivity curve.</p>
+</div>
+
+<div class="algo-compact" id="r-attention-class-stats">
+<h3>6.24 Attention Class Area Stats</h3>
+<p><span class="tag">class area tabulation</span></p>
+<p>Tabulates area per attention class (0&ndash;4) from a Scenario Disagreement Attention raster. Provides numerical backing for the attention map: how much area falls in each conflict category.</p>
+</div>
+
+<div class="algo-compact" id="r-executive-kpi">
+<h3>6.25 Executive KPI Snapshot</h3>
+<p><span class="tag">dashboard metrics</span> <span class="tag">summary statistics</span> <span class="tag">decision KPIs</span></p>
+<p>Computes a one-page executive KPI table from suitability, robust suitability, constraint mask, consensus zone, and attention class rasters. Metrics include: mean suitability, high-suitability area %, robust area %, constrained area %, consensus level, conflict area %, and a composite decision confidence score. Designed for dashboard integration or slide-ready reporting.</p>
+</div>
+
+<div class="algo-compact" id="r-policy-gate">
+<h3>6.26 Policy Gate Recommender</h3>
+<p><span class="tag">gate criteria</span> <span class="tag">policy compliance</span> <span class="tag">threshold recommendation</span></p>
+<p>Recommends a suitability threshold (policy gate) based on the threshold coverage curve and policy sensitivity frontier, subject to user-specified constraints: target coverage percentage (e.g., 25% of area) and maximum acceptable critical conflict percentage (e.g., 10%). Returns the recommended gate value, the coverage it achieves, and whether it passes/fails the conflict constraint.</p>
+</div>
+
+<div class="algo-compact" id="r-decision-quadrant-stats">
+<h3>6.27 Decision Quadrant Area Stats</h3>
+<p><span class="tag">quadrant tabulation</span></p>
+<p>Tabulates area per decision quadrant class (1&ndash;4) from a Decision Quadrant Map raster.</p>
+</div>
+
+<div class="algo-compact" id="r-intervention-conflict-stats">
+<h3>6.28 Intervention Conflict Area Stats</h3>
+<p><span class="tag">intervention class tabulation</span></p>
+<p>Tabulates area per intervention class (0&ndash;6) from an Intervention Conflict Matrix raster.</p>
+</div>
+
+<div class="algo-compact" id="r-risk-opportunity-stats">
+<h3>6.29 Risk Opportunity Area Stats</h3>
+<p><span class="tag">risk-opportunity tabulation</span></p>
+<p>Tabulates area per risk-opportunity class (1&ndash;4) from a Risk-Opportunity Matrix Map raster.</p>
+</div>
+
+<div class="algo-compact" id="r-regret-fragility-stats">
+<h3>6.30 Regret Fragility Area Stats</h3>
+<p><span class="tag">fragility class tabulation</span></p>
+<p>Tabulates area per fragility class (0&ndash;2) from a Regret Fragility Map raster.</p>
+</div>
+
+<div class="algo-compact" id="r-scenario-selection">
+<h3>6.31 Scenario Selection Recommender</h3>
+<p><span class="tag">multi-criterion recommendation</span> <span class="tag">consensus rule</span></p>
+<p>Synthesises the benchmark leaderboard, portfolio diversity, minimax regret, policy gate, actionability scorecard, and robustness leaderboard into a weighted recommendation table. Each scenario receives a composite selection score and rank. The top-ranked scenario is the one that best balances performance, robustness, minimax protection, policy compliance, and actionability.</p>
+</div>
+
+<div class="algo-compact" id="r-implementation-wave">
+<h3>6.32 Implementation Wave Planner</h3>
+<p><span class="tag">phased rollout</span> <span class="tag">risk-sequenced implementation</span></p>
+<p>Plans phased implementation by sequencing priority zones within each risk-opportunity class. High-priority + low-risk zones are scheduled in early waves; low-priority + high-risk zones are deferred. Produces a GeoPackage table with wave number, priority zone, risk class, cell count, area, and cumulative coverage. Supports staged project delivery.</p>
+</div>
+
+<div class="algo-compact" id="r-deployment-readiness">
+<h3>6.33 Deployment Readiness Gate</h3>
+<p><span class="tag">go/no-go decision</span> <span class="tag">readiness checklist</span></p>
+<p>Evaluates whether conditions are met for deployment: synthesises the actionability scorecard, scenario selection recommendation, minimax regret, wave plan, and regret fragility statistics into a binary readiness gate with supporting evidence. Returns a GeoPackage with gate criteria, thresholds, actual values, and pass/fail status per criterion.</p>
+</div>
+
+<div class="algo-compact" id="r-actionability-scorecard">
+<h3>6.34 Actionability Scorecard</h3>
+<p><span class="tag">implementation feasibility</span> <span class="tag">scorecard metrics</span></p>
+<p>Computes an actionability scorecard from the executive KPI snapshot, budget phasing table, and policy gate recommendation. Metrics include: spatial concentration (are top zones clustered?), fiscal feasibility (budget coverage), policy alignment (gate status), and an overall actionability index (0&ndash;100). Designed as the bridge between analytical suitability and implementation planning.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<hr class="algo-divider">
+<h2 id="sec-appendices">Appendices</h2>
+
+<h3>A. Normalisation Functions Reference</h3>
+<table>
+<tr><th>Method</th><th>Formula</th><th>Best Used When</th></tr>
+<tr><td>Min-Max Benefit</td><td>\(100(x-L)/(H-L)\)</td><td>Linear relationship between raw value and desirability</td></tr>
+<tr><td>Min-Max Cost</td><td>\(100(H-x)/(H-L)\)</td><td>Linear inverse relationship</td></tr>
+<tr><td>Fuzzy Linear Benefit</td><td>same as Min-Max Benefit</td><td>Same as Min-Max; alias for conceptual clarity</td></tr>
+<tr><td>Fuzzy Linear Cost</td><td>same as Min-Max Cost</td><td>Same as Min-Max; alias for conceptual clarity</td></tr>
+<tr><td>Fuzzy Sigmoid Benefit</td><td>\(100/(1+e^{-(x-M)/\sigma})\)</td><td>Threshold behaviour; rapid change near M</td></tr>
+<tr><td>Fuzzy Sigmoid Cost</td><td>\(100(1-1/(1+e^{-(x-M)/\sigma}))\)</td><td>Inverse threshold; decreasing desirability</td></tr>
+<tr><td>Fuzzy Gaussian Benefit</td><td>\(100\cdot\exp(-\frac12((x-M)/\sigma)^2)\)</td><td>Optimal range around M; symmetric penalty</td></tr>
+</table>
+
+<h3>B. Saaty's Fundamental Scale for AHP</h3>
+<table>
+<tr><th>Intensity</th><th>Definition</th><th>Explanation</th></tr>
+<tr><td>1</td><td>Equal importance</td><td>Two criteria contribute equally</td></tr>
+<tr><td>3</td><td>Moderate importance</td><td>Experience slightly favours one over another</td></tr>
+<tr><td>5</td><td>Strong importance</td><td>Experience strongly favours one</td></tr>
+<tr><td>7</td><td>Very strong</td><td>One criterion is strongly favoured; dominance demonstrated</td></tr>
+<tr><td>9</td><td>Extreme importance</td><td>Evidence favouring one is of highest possible order</td></tr>
+<tr><td>2,4,6,8</td><td>Intermediate</td><td>Compromise between adjacent judgments</td></tr>
+</table>
+
+<h3>C. MCDA Method Selection Guide</h3>
+<table>
+<tr><th>Decision Context</th><th>Recommended Method</th><th>Rationale</th></tr>
+<tr><td>Baseline, transparent, compensatory</td><td>WLC</td><td>Simplest; easy to explain; assumes full compensation</td></tr>
+<tr><td>Risk-attitude exploration</td><td>OWA</td><td>Spans optimistic to pessimistic via order weights</td></tr>
+<tr><td>Benefit and cost criteria; best compromise</td><td>TOPSIS</td><td>Explicit ideal/anti-ideal; handles bipolar criteria</td></tr>
+<tr><td>Conflict present; veto important</td><td>VIKOR</td><td>Balances group utility and individual regret</td></tr>
+<tr><td>Robust central estimate; cross-method synthesis</td><td>Ensemble</td><td>Reduces method-dependence; provides uncertainty envelope</td></tr>
+<tr><td>Conservative under uncertainty</td><td>Uncertainty-Adjusted</td><td>Penalises uncertain cells; risk-averse planning</td></tr>
+<tr><td>Coalition importance; redundancy detection</td><td>GeoShapley</td><td>Shapley values with interaction penalties</td></tr>
+</table>
+
+<h3>D. Interpreting Confidence and Stability Metrics</h3>
+<div class="key-box">
+<p><strong>Confidence Index</strong> (from Ensemble): \(C_{\text{conf}} = 100 - \sigma_{\text{scenarios}}\). High (&gt;80) = all scenarios agree; Low (&lt;40) = scenarios disagree substantially. Use alongside the mean to identify robust vs. contested areas.</p>
+<p><strong>Stability Index</strong> (from Monte Carlo): \(\text{SI} = 100 - (P_{95} - P_{05})\). High (&gt;90) = narrow 90% CI; Low (&lt;60) = wide CI. Cells with low stability need higher-resolution data or field validation.</p>
+<p><strong>Weight Consensus CV%</strong> (from Weight Consensus Audit): CV &le; 10% = HIGH agreement across weighting methods; CV &gt; 25% = LOW agreement, the weight is method-dependent.</p>
+</div>
+
+<h3>E. Typical Workflow</h3>
+<ol>
+  <li><strong>Prepare:</strong> Harmonizer <span class="arrow">&rarr;</span> Rasterizer (if vector inputs) <span class="arrow">&rarr;</span> Proximity Builder (for distance criteria)</li>
+  <li><strong>Normalise:</strong> Normalizer on each criterion <span class="arrow">&rarr;</span> all rasters now 0&ndash;100 on same grid</li>
+  <li><strong>Constrain:</strong> Constraint Builder for each Boolean exclusion layer</li>
+  <li><strong>Weight:</strong> AHP (subjective) + Entropy + CRITIC (objective) <span class="arrow">&rarr;</span> Scenario Weight Pack <span class="arrow">&rarr;</span> Consolidator <span class="arrow">&rarr;</span> Consensus Audit</li>
+  <li><strong>Score:</strong> WLC (baseline) + OWA + TOPSIS + VIKOR (scenarios) <span class="arrow">&rarr;</span> Ensemble Synthesis</li>
+  <li><strong>Diagnose:</strong> Scenario Comparator (pairwise deltas) <span class="arrow">&rarr;</span> Consensus Zone <span class="arrow">&rarr;</span> Disagreement Attention <span class="arrow">&rarr;</span> Decision Quadrant <span class="arrow">&rarr;</span> Intervention Conflict <span class="arrow">&rarr;</span> Risk-Opportunity <span class="arrow">&rarr;</span> Regret Fragility</li>
+  <li><strong>Uncertainty:</strong> Monte Carlo <span class="arrow">&rarr;</span> Uncertainty-Adjusted <span class="arrow">&rarr;</span> Policy Sensitivity Frontier</li>
+  <li><strong>Explain:</strong> Global Sensitivity <span class="arrow">&rarr;</span> Local Contribution <span class="arrow">&rarr;</span> GeoShapley</li>
+  <li><strong>Act:</strong> Candidate Site Extractor <span class="arrow">&rarr;</span> Priority Zoning <span class="arrow">&rarr;</span> Intervention Budget Phasing <span class="arrow">&rarr;</span> Implementation Wave Planner <span class="arrow">&rarr;</span> Deployment Readiness Gate</li>
+  <li><strong>Report:</strong> Suitability HTML Report <span class="arrow">&rarr;</span> Scenario Markdown Brief <span class="arrow">&rarr;</span> Beta Evidence Report <span class="arrow">&rarr;</span> Action Playbook</li>
+</ol>
+
+<hr class="algo-divider">
+<p style="text-align:center;font-size:0.8rem;color:var(--hd);margin-top:2rem;">
+PlanX Suitability Lab Reference Manual &mdash; 68 algorithms &mdash; &copy; 2026 Yusuf Eminoglu<br>
+Built for QGIS 3.x/4.x. All references DOI-verified where possible.<br>
+<em>No AI is credited as a contributor. Every commit ships under the author's name alone.</em>
+</p>
+
+</main>
+</div>
+
+<script>
+// Dark mode toggle
+function toggleDark() {
+  document.documentElement.classList.toggle('dark');
+  localStorage.setItem('planx-dark', document.documentElement.classList.contains('dark') ? '1' : '0');
+  document.getElementById('mode-toggle').textContent =
+    document.documentElement.classList.contains('dark') ? 'Light Mode' : 'Dark Mode';
+}
+(function(){
+  if (localStorage.getItem('planx-dark') === '1') { document.documentElement.classList.add('dark'); document.getElementById('mode-toggle').textContent = 'Light Mode'; }
+})();
+
+// Search filter
+function filterTOC() {
+  var q = document.getElementById('search-box').value.toLowerCase();
+  var items = document.querySelectorAll('#toc li');
+  items.forEach(function(li){
+    var a = li.querySelector('a');
+    if (!a) return;
+    var txt = a.textContent.toLowerCase();
+    if (!q || txt.indexOf(q) !== -1) { li.style.display = ''; }
+    else { li.style.display = 'none'; }
+  });
+}
+
+// Scroll-spy for TOC highlighting
+(function(){
+  var links = document.querySelectorAll('#toc a[href^="#"]');
+  var sections = [];
+  links.forEach(function(a){
+    var id = a.getAttribute('href').substring(1);
+    var el = document.getElementById(id);
+    if (el) sections.push({id: id, el: el, link: a});
+  });
+  window.addEventListener('scroll', function(){
+    var scrollY = window.scrollY + 120;
+    var current = null;
+    for (var i = sections.length - 1; i >= 0; i--) {
+      if (sections[i].el.offsetTop <= scrollY) { current = sections[i]; break; }
+    }
+    links.forEach(function(a){ a.classList.remove('active'); });
+    if (current) current.link.classList.add('active');
+  });
+})();
+</script>
+</body>
+</html>
