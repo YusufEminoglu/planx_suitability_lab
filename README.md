@@ -7,7 +7,7 @@
 **Raster MCDA suitability lab for QGIS — AHP/PCA/Entropy weighting, WLC/OWA composition, Monte Carlo uncertainty, explainable analytics.**
 
 [![QGIS](https://img.shields.io/badge/QGIS-3.28%2B-93b023?logo=qgis&logoColor=white)](https://plugins.qgis.org/plugins/planx_suitability_lab/)
-[![Documentation](https://img.shields.io/badge/📖_Reference_Manual-13a0a0)](https://geophilo.pages.dev/planx_suitability_lab/)
+[![Documentation](https://img.shields.io/badge/📖_Reference_Manual-13a0a0)](https://geophilo.com/planx_suitability_lab/)
 [![Version](https://img.shields.io/github/v/tag/YusufEminoglu/planx_suitability_lab?label=version&color=blue)](https://gitlab.com/geospacephilo/EasyFillet/releases)
 [![License](https://img.shields.io/badge/license-GPL--3.0-orange)](LICENSE)
 [![QGIS Plugin Hub](https://img.shields.io/badge/QGIS%20Hub-install-589632?logo=qgis&logoColor=white)](https://plugins.qgis.org/plugins/planx_suitability_lab/)
@@ -20,7 +20,7 @@ PlanX Suitability Lab is a production-ready raster MCDA plugin for QGIS, designe
 
 ## 📖 Documentation
 
-**[Comprehensive Academic Reference Manual](https://geophilo.pages.dev/planx_suitability_lab/)** — complete documentation of every feature, parameter, and workflow. Hosted on Web Documentation.
+**[Comprehensive Academic Reference Manual](https://geophilo.com/planx_suitability_lab/)** — complete documentation of every feature, parameter, and workflow. Hosted on Web Documentation.
 
 
 ## Module catalog

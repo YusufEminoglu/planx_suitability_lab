@@ -7,11 +7,11 @@ version=1.6.8
 author=Yusuf Eminoglu
 email=yusuf.eminoglu@deu.edu.tr
 
-about=PlanX Suitability Lab provides an end-to-end raster MCDA pipeline in QGIS: data harmonization, criterion generation, AHP/PCA/Entropy weighting, WLC/OWA suitability composition, Monte Carlo uncertainty, and explainability outputs for planning-grade decision support. Developed with feedback from educational workflows at Dokuz Eylul University, Department of City and Regional Planning. Online User Manual & Documentation: https://geophilo.pages.dev/planx_suitability_lab/ | If you find this plugin helpful, please consider starring the repository on GitLab (https://gitlab.com/geospacephilo/planx_suitability_lab)!
+about=PlanX Suitability Lab provides an end-to-end raster MCDA pipeline in QGIS: data harmonization, criterion generation, AHP/PCA/Entropy weighting, WLC/OWA suitability composition, Monte Carlo uncertainty, and explainability outputs for planning-grade decision support. Developed with feedback from educational workflows at Dokuz Eylul University, Department of City and Regional Planning. Online User Manual & Documentation: https://geophilo.com/planx_suitability_lab/ | If you find this plugin helpful, please consider starring the repository on GitLab (https://gitlab.com/geospacephilo/planx_suitability_lab)!
 
 tracker=https://gitlab.com/geospacephilo/planx_suitability_lab/-/issues
 repository=https://gitlab.com/geospacephilo/planx_suitability_lab
-homepage=https://geophilo.pages.dev/planx_suitability_lab/
+homepage=https://geophilo.com/planx_suitability_lab/
 
 category=Processing
 hasProcessingProvider=yes
