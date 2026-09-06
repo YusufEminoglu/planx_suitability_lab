@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.6.8] - 2026-09-06
+
+- Migrate repository and documentation URLs to GitLab and Cloudflare Pages.
+
 ## [1.6.7] - 2026-08-07
 
 - Added online user manual link (https://yusufeminoglu.github.io/planx_suitability_lab/) and GitHub repository star call-to-action.
