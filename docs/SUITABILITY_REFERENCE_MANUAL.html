@@ -106,6 +106,7 @@ pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x:
   <input type="text" id="search-box" placeholder="Search algorithms..." oninput="filterTOC()">
   <button id="mode-toggle" onclick="toggleDark()">Dark Mode</button>
   <ul id="toc">
+    <li><a href="#sec-dashboard">Interactive Dashboard</a></li>
     <li class="cat">Core (7)</li>
     <li><a href="#core-harmonizer">Data Harmonizer</a></li>
     <li><a href="#core-rasterizer">Vector Rasterizer</a></li>
@@ -197,6 +198,20 @@ pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x:
   <iframe src="https://www.youtube-nocookie.com/embed/EMnk8vI2CS8" title="PlanX Suitability Lab &mdash; video walkthrough" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 </div>
 
+
+<!-- ═══════════════════════════════════════════════ -->
+<hr class="algo-divider">
+<h2 id="sec-dashboard">Interactive Dashboard</h2>
+<p><span class="tag">guided model flows</span> <span class="tag">module browser</span> <span class="tag">run log</span> <span class="tag">system health</span></p>
+<p>Alongside the 68 Processing algorithms documented below, the plugin ships a docked <code>SuitabilityDashboard</code> panel with five tabs, opened from its own toolbar action rather than the Processing Toolbox:</p>
+<table>
+<tr><th>Tab</th><th>Purpose</th></tr>
+<tr><td>Model Flow</td><td>Walks a curated, guided sequence of algorithms for one of three built-in flows &mdash; <em>Essential Suitability</em>, <em>Robust Decision Map</em>, and <em>Scenario Comparison</em> &mdash; tracking step-by-step progress and a running outcome summary. A Reset flow button restarts the sequence.</td></tr>
+<tr><td>Overview</td><td>A rendered summary of the plugin and its algorithm groups.</td></tr>
+<tr><td>Modules</td><td>A searchable, filterable grid of all 68 algorithm cards, with a group filter and a Favorites-only toggle, for browsing the full catalogue outside a guided flow.</td></tr>
+<tr><td>Recent Runs</td><td>A log of previously executed algorithms in this QGIS session, with a Clear Run Log action.</td></tr>
+<tr><td>System Health</td><td>Readiness diagnostics for the current project/environment.</td></tr>
+</table>
 
 <!-- ═══════════════════════════════════════════════ -->
 <hr class="algo-divider">
@@ -1563,17 +1578,56 @@ function toggleDark() {
   if (localStorage.getItem('planx-dark') === '1') { document.documentElement.classList.add('dark'); document.getElementById('mode-toggle').textContent = 'Light Mode'; }
 })();
 
-// Search filter
+// Search filter. Matches a TOC entry's own label OR the full text of the
+// section it links to, so (e.g.) searching "consistency ratio" finds AHP
+// Weights even though those words never appear in the sidebar label itself.
+var _tocSectionTextCache = null;
+function _tocSectionText(a) {
+  if (!_tocSectionTextCache) _tocSectionTextCache = {};
+  var href = a.getAttribute('href');
+  if (!(href in _tocSectionTextCache)) {
+    var el = href ? document.querySelector(href) : null;
+    var text = '';
+    if (el) {
+      // A TOC anchor points at a bare heading (<h2>/<h3>), not a wrapping
+      // <section> -- the algorithm's actual content (parameters, formulas,
+      // interpretation guide) lives in sibling elements after it, up to the
+      // next heading of the same-or-higher level. Walk those siblings too,
+      // or a search only ever matches the heading's own short title text.
+      var stopTags = el.tagName === 'H2' ? ['H2'] : ['H2', 'H3'];
+      var parts = [el.textContent];
+      var sib = el.nextElementSibling;
+      while (sib && stopTags.indexOf(sib.tagName) === -1) {
+        parts.push(sib.textContent);
+        sib = sib.nextElementSibling;
+      }
+      text = parts.join(' ');
+    }
+    _tocSectionTextCache[href] = text.toLowerCase();
+  }
+  return _tocSectionTextCache[href];
+}
 function filterTOC() {
   var q = document.getElementById('search-box').value.toLowerCase();
   var items = document.querySelectorAll('#toc li');
+  var lastCatLi = null, catHasVisibleChild = false;
   items.forEach(function(li){
     var a = li.querySelector('a');
-    if (!a) return;
+    if (!a) {
+      // A category header: decide its own visibility once we know whether
+      // any of ITS children matched, tracked as we walk past them below.
+      if (lastCatLi) lastCatLi.style.display = (!q || catHasVisibleChild) ? '' : 'none';
+      lastCatLi = li;
+      catHasVisibleChild = false;
+      li.style.display = '';
+      return;
+    }
     var txt = a.textContent.toLowerCase();
-    if (!q || txt.indexOf(q) !== -1) { li.style.display = ''; }
-    else { li.style.display = 'none'; }
+    var match = !q || txt.indexOf(q) !== -1 || _tocSectionText(a).indexOf(q) !== -1;
+    li.style.display = match ? '' : 'none';
+    if (match) catHasVisibleChild = true;
   });
+  if (lastCatLi) lastCatLi.style.display = (!q || catHasVisibleChild) ? '' : 'none';
 }
 
 // Scroll-spy for TOC highlighting
