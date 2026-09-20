@@ -12,3 +12,7 @@ setup.cfg
 # archive. Same convention as zero2cartolab and qgis_25d_styling.
 docs
 .github
+# Repository-only content, not part of the installed plugin.
+# Every Help link in the plugin resolves to the online manual; no shipped code
+# path opens a local copy. Same convention as planx_geostats.
+SUITABILITY_REFERENCE_MANUAL.html
