@@ -206,6 +206,36 @@ if criterion_files:
               and abs(_rows[1]["max_abs_change"] - float(_worst.max())) < 1e-3,
               "weight sensitivity change raster maps criterion 1's largest change per cell")
 
+    # Step 2e'': outputs are styled when QGIS loads them (rasters are always
+    # files, so a renderer set during the run could never reach them).
+    from qgis.core import QgsPalettedRasterRenderer, QgsSingleBandPseudoColorRenderer
+
+    def _loaded(algo_id, params):
+        _before = set(QgsProject.instance().mapLayers())
+        try:
+            processing.runAndLoadResults(algo_id, params)
+        except Exception as _exc:  # noqa: BLE001 - reported by the check below
+            print(f"  [FAIL] {algo_id} via runAndLoadResults: {_exc}")
+            return []
+        return [QgsProject.instance().mapLayer(_i)
+                for _i in set(QgsProject.instance().mapLayers()) - _before]
+
+    _score = _loaded("planx_suitability_lab:wlc_suitability",
+                     {"INPUT_RASTERS": _crit, "WEIGHTS_CSV": "0.4,0.3,0.3",
+                      "OUTPUT": os.path.join(out_dir, "styled_wlc.tif")})
+    _r = _score[0].renderer() if _score else None
+    check(isinstance(_r, QgsSingleBandPseudoColorRenderer)
+          and abs(_r.classificationMin()) < 1e-9 and abs(_r.classificationMax() - 100.0) < 1e-9,
+          f"WLC output loads with the 0-100 suitability ramp ({type(_r).__name__})")
+    if mask_files:
+        _mask_layers = _loaded("planx_suitability_lab:constraint_builder",
+                               {"INPUT": str(mask_files[0]), "THRESHOLD": 0.5,
+                                "OUTPUT": os.path.join(out_dir, "styled_mask.tif")})
+        _mr = _mask_layers[0].renderer() if _mask_layers else None
+        check(isinstance(_mr, QgsPalettedRasterRenderer) and len(_mr.classes()) == 2,
+              f"constraint mask loads with Excluded/Allowed classes ({type(_mr).__name__})")
+    QgsProject.instance().removeMapLayers([_l.id() for _l in _score + (_mask_layers if mask_files else [])])
+
     # Step 2f: Run OWA
     run_algo(
         "planx_suitability_lab:owa_suitability",

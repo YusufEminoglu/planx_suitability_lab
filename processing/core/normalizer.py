@@ -11,7 +11,7 @@ from qgis.core import (
     QgsProcessingParameterRasterDestination,
     QgsProcessingParameterRasterLayer,
 )
-from .._mcda_utils import smart_output_path
+from .._mcda_utils import smart_output_path, style_raster_output
 
 
 class NormalizerAlgorithm(QgsProcessingAlgorithm):
@@ -174,4 +174,5 @@ class NormalizerAlgorithm(QgsProcessingAlgorithm):
         if nodata is not None:
             norm[~valid] = nodata
         self._write_like(ds, out, norm, nodata)
+        style_raster_output(context, out, "score")
         return {self.OUTPUT: out}

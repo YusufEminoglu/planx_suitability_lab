@@ -16,6 +16,70 @@ from osgeo import gdal
 from contextlib import suppress
 
 
+# --------------------------------------------------------------------------
+# Output styling. Raster outputs are always files that QGIS opens after the
+# run, so a renderer set during processAlgorithm could never reach them; a
+# layer post-processor styles the layer QGIS actually loads. QGIS keeps only a
+# raw pointer to it, so each one is kept alive here.
+# --------------------------------------------------------------------------
+_STYLE_PROCESSORS: list = []
+
+#: 0-100 suitability ramp, light yellow (low) to dark green (high): sequential,
+#: colour-blind safe, and fixed to the score's own range so two runs compare.
+SCORE_RAMP = ("#ffffcc", "#c2e699", "#78c679", "#31a354", "#006837")
+
+
+def _apply_score_style(layer, minimum: float = 0.0, maximum: float = 100.0) -> None:
+    from qgis.core import (QgsColorRampShader, QgsRasterShader,
+                           QgsSingleBandPseudoColorRenderer)
+    from qgis.PyQt.QtGui import QColor
+    ramp = QgsColorRampShader(minimum, maximum)
+    ramp.setColorRampType(QgsColorRampShader.Type.Interpolated)
+    step = (maximum - minimum) / (len(SCORE_RAMP) - 1)
+    ramp.setColorRampItemList([
+        QgsColorRampShader.ColorRampItem(minimum + i * step, QColor(color), f"{minimum + i * step:g}")
+        for i, color in enumerate(SCORE_RAMP)])
+    shader = QgsRasterShader()
+    shader.setRasterShaderFunction(ramp)
+    renderer = QgsSingleBandPseudoColorRenderer(layer.dataProvider(), 1, shader)
+    renderer.setClassificationMin(minimum)
+    renderer.setClassificationMax(maximum)
+    layer.setRenderer(renderer)
+
+
+def _apply_mask_style(layer) -> None:
+    from qgis.core import QgsPalettedRasterRenderer
+    from qgis.PyQt.QtGui import QColor
+    classes = [QgsPalettedRasterRenderer.Class(0, QColor("#bdbdbd"), "Excluded (0)"),
+               QgsPalettedRasterRenderer.Class(1, QColor("#1a9850"), "Allowed (1)")]
+    layer.setRenderer(QgsPalettedRasterRenderer(layer.dataProvider(), 1, classes))
+
+
+def style_raster_output(context, output_path: str, kind: str = "score") -> bool:
+    """Style ``output_path`` when QGIS loads it: ``score`` (0-100 ramp) or
+    ``mask`` (0/1 classes). Returns True when a style was scheduled."""
+    from qgis.core import QgsProcessingLayerPostProcessorInterface
+    if not output_path or not context.willLoadLayerOnCompletion(output_path):
+        return False
+    apply = _apply_mask_style if kind == "mask" else _apply_score_style
+
+    class _Style(QgsProcessingLayerPostProcessorInterface):
+        def postProcessLayer(self, layer, ctx, feedback):
+            if layer is None or not hasattr(layer, "dataProvider"):
+                return
+            try:
+                apply(layer)
+                layer.triggerRepaint()
+            except Exception as exc:  # noqa: BLE001 - styling never fails a run
+                if feedback is not None:
+                    feedback.reportError(f"Could not style the output: {exc}", False)
+
+    processor = _Style()
+    _STYLE_PROCESSORS.append(processor)
+    context.layerToLoadOnCompletionDetails(output_path).setPostProcessor(processor)
+    return True
+
+
 def ensure_list(value):
     if value is None:
         return []

@@ -11,7 +11,7 @@ from qgis.core import (
     QgsProcessingParameterRasterLayer,
 )
 
-from .._mcda_utils import smart_output_path
+from .._mcda_utils import smart_output_path, style_raster_output
 
 MASK_NODATA = 255
 
@@ -108,4 +108,5 @@ class ConstraintBuilderAlgorithm(QgsProcessingAlgorithm):
         out_band = None
         dst = None
         src = None
+        style_raster_output(context, out, "mask")
         return {self.OUTPUT: out}

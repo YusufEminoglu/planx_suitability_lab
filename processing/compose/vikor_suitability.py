@@ -14,7 +14,7 @@ from qgis.core import (
     QgsProcessingParameterString,
 )
 
-from .._mcda_utils import ensure_list, parse_impacts_csv, parse_weights_csv, smart_output_path, limit_layers
+from .._mcda_utils import ensure_list, parse_impacts_csv, parse_weights_csv, smart_output_path, limit_layers, style_raster_output
 
 
 class VIKORSuitabilityAlgorithm(QgsProcessingAlgorithm):
@@ -349,4 +349,5 @@ class VIKORSuitabilityAlgorithm(QgsProcessingAlgorithm):
         for ds in datasets:
             ds = None
         feedback.pushInfo(f"VIKOR completed with v={v:.2f}. Output range constrained to [0,100].")
+        style_raster_output(context, out, "score")
         return {self.OUTPUT: out}

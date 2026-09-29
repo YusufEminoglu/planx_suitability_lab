@@ -14,7 +14,7 @@ from qgis.core import (
     QgsProcessingParameterString,
 )
 
-from .._mcda_utils import ensure_list, parse_weights_csv, smart_output_path, limit_layers
+from .._mcda_utils import ensure_list, parse_weights_csv, smart_output_path, limit_layers, style_raster_output
 
 
 class WLCSuitabilityAlgorithm(QgsProcessingAlgorithm):
@@ -195,4 +195,5 @@ class WLCSuitabilityAlgorithm(QgsProcessingAlgorithm):
         out_ds = None
         for ds in datasets:
             ds = None
+        style_raster_output(context, out, "score")
         return {self.OUTPUT: out}

@@ -10,7 +10,7 @@ from qgis.core import (
     QgsProcessingParameterRasterDestination,
     QgsProcessingParameterRasterLayer,
 )
-from .._mcda_utils import smart_output_path
+from .._mcda_utils import smart_output_path, style_raster_output
 
 
 class UncertaintyAdjustedSuitabilityAlgorithm(QgsProcessingAlgorithm):
@@ -124,4 +124,5 @@ class UncertaintyAdjustedSuitabilityAlgorithm(QgsProcessingAlgorithm):
         out_ds = None
         ds_m = None
         ds_s = None
+        style_raster_output(context, out, "score")
         return {self.OUTPUT: out}
