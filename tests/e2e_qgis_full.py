@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Full end-to-end test for planx_suitability_lab -- all 68 algorithms.
+"""Full end-to-end test for planx_suitability_lab -- all 69 algorithms.
 
 Run with OSGeo4W:
   C:/OSGeo4W/bin/python-qgis-ltr.bat tests/e2e_qgis_full.py   (QGIS 3.44)
@@ -77,7 +77,7 @@ def run_algo(algo_id, params, label_hint=""):
 print("=== 1. Provider assertion ===")
 reg = QgsApplication.processingRegistry()
 all_ids = [a.id() for a in reg.algorithms() if a.id().startswith("planx_suitability_lab:")]
-check(len(all_ids) == 68, f"Provider exposes 68 algorithms (got {len(all_ids)})")
+check(len(all_ids) == 69, f"Provider exposes 69 algorithms (got {len(all_ids)})")
 for aid in sorted(all_ids):
     print(f"    {aid}")
 
@@ -157,6 +157,54 @@ if criterion_files:
         wlc_tif = wlc_res["OUTPUT"]
         if isinstance(wlc_tif, str):
             check(os.path.exists(wlc_tif), "WLC output raster exists")
+
+    # Step 2e': One-at-a-time weight sensitivity, checked against numpy.
+    # (1) The WLC tool's own output equals _mcda_utils.wlc_score, so the
+    #     sensitivity tool measures the same model WLC publishes.
+    # (2) Its mean-absolute-change for criterion 1 is recomputed here.
+    from osgeo import gdal as _g
+    from planx_suitability_lab.processing import _mcda_utils as _U
+    _crit = [str(p) for p in criterion_files[:3]]
+    _arrays = []
+    for _p in _crit:
+        _ds = _g.Open(_p)
+        _arrays.append(_ds.ReadAsArray().astype(np.float32))
+        _ds = None
+    _stack = np.stack(_arrays)
+    _w = [0.4, 0.3, 0.3]
+    _plain = run_algo("planx_suitability_lab:wlc_suitability",
+                      {"INPUT_RASTERS": _crit, "WEIGHTS_CSV": "0.4,0.3,0.3", "OUTPUT": "TEMPORARY_OUTPUT"},
+                      "wlc_plain")
+    _wds = _g.Open(str(_plain.get("OUTPUT", ""))) if _plain else None
+    _wlc = _wds.ReadAsArray() if _wds is not None else None
+    check(_wlc is not None and np.allclose(_wlc, _U.wlc_score(_stack, _w), atol=1e-4),
+          "WLC tool output equals wlc_score (the model the sensitivity tool perturbs)")
+    _change_path = os.path.join(out_dir, "oat_change_1.tif")
+    _oat = run_algo("planx_suitability_lab:weight_sensitivity_oat",
+                    {"INPUT_RASTERS": _crit, "WEIGHTS_CSV": "0.4,0.3,0.3", "PERTURBATION": 20.0,
+                     "CHANGE_THRESHOLD": 2.0, "FOCUS": 1, "OUTPUT": "TEMPORARY_OUTPUT",
+                     "OUTPUT_CHANGE": _change_path},
+                    "weight_sensitivity_oat")
+    _table = _oat.get("OUTPUT") if _oat else None
+    if isinstance(_table, str):
+        from qgis.core import QgsProcessingUtils as _PU
+        _table = QgsProject.instance().mapLayer(_table) or _PU.mapLayerFromString(_table, None)
+    _rows = {f["criterion_id"]: f for f in _table.getFeatures()} if _table is not None else {}
+    check(sorted(_rows) == [1, 2, 3] and sorted(f["rank"] for f in _rows.values()) == [1, 2, 3],
+          "weight sensitivity table has one ranked row per criterion")
+    if 1 in _rows:
+        _base = _U.wlc_score(_stack, _w)
+        _up = _U.wlc_score(_stack, _U.oat_perturbed_weights(_w, 0, 0.2))
+        _dn = _U.wlc_score(_stack, _U.oat_perturbed_weights(_w, 0, -0.2))
+        _mac_up = float(np.abs(_up - _base).mean())
+        _worst = np.maximum(np.abs(_up - _base), np.abs(_dn - _base))
+        check(abs(_rows[1]["mac_up"] - _mac_up) < 1e-3 and abs(_rows[1]["weight_up"] - 0.48) < 1e-9,
+              f"weight sensitivity mac_up for criterion 1 matches numpy ({_rows[1]['mac_up']} vs {_mac_up:.6f})")
+        _cds = _g.Open(_change_path)
+        _chg = _cds.ReadAsArray() if _cds is not None else None
+        check(_chg is not None and np.allclose(_chg, _worst, atol=1e-4)
+              and abs(_rows[1]["max_abs_change"] - float(_worst.max())) < 1e-3,
+              "weight sensitivity change raster maps criterion 1's largest change per cell")
 
     # Step 2f: Run OWA
     run_algo(
@@ -703,7 +751,7 @@ try:
 
     # Verify no lang attribute remains
     dash_catalog_count = sum(len(items) for _, items in ALGO_GROUPS)
-    check(dash_catalog_count == 68, f"Dashboard catalog has 68 entries (got {dash_catalog_count})")
+    check(dash_catalog_count == 69, f"Dashboard catalog has 69 entries (got {dash_catalog_count})")
 
     # Verify no 'lang' related remnants in the class
     import inspect

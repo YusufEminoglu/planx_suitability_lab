@@ -81,6 +81,7 @@ ALGO_GROUPS = [
         "Uncertainty + Explain",
         [
             ("Monte Carlo Suitability", "planx_suitability_lab:montecarlo_suitability", "unc_mean/std/p05/p50/p95/stability."),
+            ("Weight Sensitivity (OAT)", "planx_suitability_lab:weight_sensitivity_oat", "Which criterion weight moves the WLC map, and where."),
             ("Global Sensitivity", "planx_suitability_lab:xai_global_sensitivity", "Sampled criterion influence table."),
             ("Local Contribution", "planx_suitability_lab:xai_local_contribution", "Contribution and percentage rasters."),
             ("GeoShapley-lite", "planx_suitability_lab:xai_geoshapley_lite", "Local attribution around sampled baseline."),
@@ -144,6 +145,7 @@ REQUIRED_IDS = [
     "planx_suitability_lab:opportunity_loss_map",
     "planx_suitability_lab:priority_zoning_from_suitability",
     "planx_suitability_lab:montecarlo_suitability",
+    "planx_suitability_lab:weight_sensitivity_oat",
     "planx_suitability_lab:xai_global_sensitivity",
     "planx_suitability_lab:critic_weights",
     "planx_suitability_lab:weight_consensus_audit",
@@ -201,6 +203,7 @@ GOVERNANCE_GROUPS = {
         "planx_suitability_lab:scenario_portfolio_diversity",
         "planx_suitability_lab:alignment_audit",
         "planx_suitability_lab:montecarlo_suitability",
+        "planx_suitability_lab:weight_sensitivity_oat",
         "planx_suitability_lab:xai_global_sensitivity",
         "planx_suitability_lab:criterion_redundancy_diagnostics",
         "planx_suitability_lab:constraint_impact_audit",

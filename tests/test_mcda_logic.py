@@ -239,6 +239,35 @@ def test_limit_layers_refuses_instead_of_truncating():
         assert "at most 6 criterion rasters; 7 were given" in str(exc), exc
 
 
+def test_oat_perturbation_renormalises_proportionally():
+    w = [0.5, 0.3, 0.2]
+    up = U.oat_perturbed_weights(w, 0, 0.2)
+    assert abs(up[0] - 0.6) < 1e-12 and abs(up.sum() - 1.0) < 1e-12, up
+    # the untouched weights keep their 3:2 ratio
+    assert abs(up[1] / up[2] - 1.5) < 1e-12, up
+    down = U.oat_perturbed_weights(w, 2, -0.2)
+    assert abs(down[2] - 0.16) < 1e-12 and abs(down.sum() - 1.0) < 1e-12, down
+    # clipped at 1, and a criterion holding all the weight is left alone
+    assert abs(U.oat_perturbed_weights([0.9, 0.1], 0, 0.5)[0] - 1.0) < 1e-12
+    assert U.oat_perturbed_weights([1.0, 0.0], 0, 0.2).tolist() == [1.0, 0.0]
+
+
+def test_oat_change_matches_the_analytic_two_criterion_identity():
+    # two criteria: raising w1 by d lowers w2 by d, so dS = d * (x1 - x2)
+    x1 = np.array([[80.0, 20.0], [50.0, 0.0]], dtype=np.float32)
+    x2 = np.array([[30.0, 60.0], [50.0, 100.0]], dtype=np.float32)
+    stack = np.stack([x1, x2])
+    w = [0.6, 0.4]
+    base = U.wlc_score(stack, w)
+    assert np.allclose(base, 0.6 * x1 + 0.4 * x2, atol=1e-4)
+    up = U.oat_perturbed_weights(w, 0, 0.2)          # 0.72 / 0.28
+    delta = U.wlc_score(stack, up) - base
+    assert np.allclose(delta, (0.72 - 0.6) * (x1 - x2), atol=1e-4), delta
+    # values outside 0-100 are clipped exactly as the WLC tool does
+    wild = np.stack([np.full((1, 1), 150.0), np.full((1, 1), -20.0)]).astype(np.float32)
+    assert abs(float(U.wlc_score(wild, w)[0, 0]) - 60.0) < 1e-4
+
+
 def test_threshold_mask_and_raster_calc_guard():
     from processing.core.constraint_builder import threshold_mask, MASK_NODATA
     arr = np.array([[0.2, 0.5, 0.9], [np.nan, -9999.0, 0.49]])

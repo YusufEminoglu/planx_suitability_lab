@@ -141,6 +141,33 @@ def parse_weights_csv(text: str, count: int) -> List[float]:
     return [v / s for v in vals]
 
 
+def oat_perturbed_weights(weights, index: int, fraction: float) -> np.ndarray:
+    """One-at-a-time weight perturbation (Chen, Yu & Khan, 2010).
+
+    ``w_i' = clip(w_i * (1 + fraction), 0, 1)``; every other weight is scaled
+    by ``(1 - w_i') / (1 - w_i)`` so the set keeps its proportions and still
+    sums to 1. A criterion that already carries all the weight (``w_i = 1``)
+    cannot be perturbed and is returned unchanged.
+    """
+    w = np.asarray(weights, dtype=np.float64)
+    wi = float(w[index])
+    if wi >= 1.0 - 1e-12:
+        return w.copy()
+    new_wi = min(1.0, max(0.0, wi * (1.0 + fraction)))
+    scale = (1.0 - new_wi) / (1.0 - wi)
+    out = w * scale
+    out[index] = new_wi
+    return out
+
+
+def wlc_score(stack, weights) -> np.ndarray:
+    """Weighted linear combination exactly as Compose: WLC Suitability computes
+    it: criteria clipped to 0-100, weighted sum, result clipped to 0-100."""
+    clipped = np.clip(np.asarray(stack, dtype=np.float32), 0.0, 100.0)
+    w = np.asarray(weights, dtype=np.float32)
+    return np.clip(np.sum(clipped * w[:, None, None], axis=0), 0.0, 100.0).astype(np.float32)
+
+
 def parse_impacts_csv(text: str, count: int) -> List[int]:
     if count <= 0:
         return []

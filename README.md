@@ -58,6 +58,9 @@ PlanX Suitability Lab is a production-ready raster MCDA plugin for QGIS, designe
 - Uncertainty:
   - `montecarlo_suitability` with chunk processing and outputs:
     `unc_mean`, `unc_std`, `unc_p05`, `unc_p50`, `unc_p95`, `stability_index`
+  - `weight_sensitivity_oat` (one-at-a-time weight sensitivity: each criterion weight
+    changed by ±p% with proportional renormalisation; ranked mean-absolute-change table
+    and an optional map of where a chosen weight matters)
 - Explainability:
   - `xai_global_sensitivity`
   - `xai_local_contribution`
@@ -106,7 +109,7 @@ PlanX Suitability Lab is a production-ready raster MCDA plugin for QGIS, designe
   - command palette for fast module/action launch (`Ctrl+K`)
   - live per-module `Ready/Missing` registry chips
   - recent-run log panel with timestamps
-  - in-toolbox help for all 68 algorithms (`shortHelpString` + `helpUrl`)
+  - in-toolbox help for all 69 algorithms (`shortHelpString` + `helpUrl`)
   - redesigned visual theme and layout
 
 ## Technical Policy

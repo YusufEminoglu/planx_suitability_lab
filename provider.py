@@ -37,6 +37,7 @@ from .processing.compose.regret_fragility_map import RegretFragilityMapAlgorithm
 from .processing.compose.uncertainty_adjusted_suitability import UncertaintyAdjustedSuitabilityAlgorithm
 from .processing.compose.scenario_comparator import ScenarioComparatorAlgorithm
 from .processing.uncertainty.montecarlo_suitability import MonteCarloSuitabilityAlgorithm
+from .processing.uncertainty.weight_sensitivity import WeightSensitivityOATAlgorithm
 from .processing.xai.global_sensitivity import GlobalSensitivityAlgorithm
 from .processing.xai.local_contribution import LocalContributionAlgorithm
 from .processing.xai.geoshapley_lite import GeoShapleyLiteAlgorithm
@@ -129,6 +130,7 @@ class PlanXSuitabilityLabProvider(QgsProcessingProvider):
         self.addAlgorithm(UncertaintyAdjustedSuitabilityAlgorithm())
         self.addAlgorithm(ScenarioComparatorAlgorithm())
         self.addAlgorithm(MonteCarloSuitabilityAlgorithm())
+        self.addAlgorithm(WeightSensitivityOATAlgorithm())
         self.addAlgorithm(GlobalSensitivityAlgorithm())
         self.addAlgorithm(LocalContributionAlgorithm())
         self.addAlgorithm(GeoShapleyLiteAlgorithm())
