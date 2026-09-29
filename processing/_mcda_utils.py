@@ -183,6 +183,14 @@ def copy_raster(src: str, dst: str):
 
 
 def raster_calc(inputs: List[str], formula: str, out_path: str):
+    # gdal:rastercalculator passes FORMULA on a command line that goes through
+    # a shell on Windows: ">" and "<" become redirects, "|", "&" and "^" are
+    # operators. The run still "succeeds" and writes an all-nodata raster.
+    unsafe = sorted(set(formula) & set("<>|&^"))
+    if unsafe:
+        raise ValueError(
+            f"raster_calc formula {formula!r} contains {''.join(unsafe)}, which the "
+            f"Windows command line mangles; compute it with numpy instead.")
     letters = ["A", "B", "C", "D", "E", "F"]
     params = {
         "INPUT_A": None,

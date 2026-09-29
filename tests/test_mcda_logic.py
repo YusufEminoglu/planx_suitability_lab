@@ -239,6 +239,19 @@ def test_limit_layers_refuses_instead_of_truncating():
         assert "at most 6 criterion rasters; 7 were given" in str(exc), exc
 
 
+def test_threshold_mask_and_raster_calc_guard():
+    from processing.core.constraint_builder import threshold_mask, MASK_NODATA
+    arr = np.array([[0.2, 0.5, 0.9], [np.nan, -9999.0, 0.49]])
+    got = threshold_mask(arr, 0.5, nodata=-9999.0)
+    assert got.tolist() == [[0, 1, 1], [MASK_NODATA, MASK_NODATA, 0]], got.tolist()
+    # a formula the Windows shell would mangle is refused, not silently run
+    try:
+        U.raster_calc(["x.tif"], "(A>=0.5)", "out.tif")
+        assert False, "raster_calc accepted a '>' formula"
+    except ValueError as exc:
+        assert ">" in str(exc), exc
+
+
 # ===================================================================
 # 7. Entropy weights with synthetic rasters
 # ===================================================================

@@ -121,13 +121,29 @@ if criterion_files:
         "normalizer",
     )
 
-    # Step 2d: Run constraint builder
+    # Step 2d: Run constraint builder - and read the mask it wrote. The run
+    # used to "succeed" on Windows while gdal:rastercalculator's shell turned
+    # ">" into a redirect, leaving a mask that was nodata everywhere.
     if mask_files:
-        run_algo(
+        cb_res = run_algo(
             "planx_suitability_lab:constraint_builder",
             {"INPUT": str(mask_files[0]), "THRESHOLD": 0.5, "OUTPUT": "TEMPORARY_OUTPUT"},
             "constraint_builder",
         )
+        from osgeo import gdal as _gdal
+        import numpy as _np
+        # hold each dataset: a chained gdal.Open(...).ReadAsArray() lets the
+        # dataset be collected before its band is read
+        _src_ds = _gdal.Open(str(mask_files[0]))
+        _src = _src_ds.ReadAsArray().astype(float)
+        _src_nd = _src_ds.GetRasterBand(1).GetNoDataValue()
+        _mask_ds = _gdal.Open(str(cb_res.get("OUTPUT", ""))) if cb_res else None
+        _mask = _mask_ds.ReadAsArray() if _mask_ds is not None else None
+        _valid = _np.isfinite(_src) & ((_src != _src_nd) if _src_nd is not None else True)
+        check(_mask is not None
+              and _np.array_equal(_mask[_valid], (_src[_valid] >= 0.5).astype(_mask.dtype))
+              and int((_mask == 1).sum()) > 0,
+              "constraint_builder mask is 1 exactly where input >= threshold")
 
     # Step 2e: Run WLC with equal weights
     wlc_res = run_algo(
