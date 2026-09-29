@@ -19,7 +19,7 @@ from qgis.core import (
     QgsCoordinateReferenceSystem,
 )
 
-from .._mcda_utils import ensure_list
+from .._mcda_utils import ensure_list, limit_layers
 
 
 class MinimaxRegretSelectorAlgorithm(QgsProcessingAlgorithm):
@@ -84,7 +84,7 @@ class MinimaxRegretSelectorAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Minimax regret scenario table", QgsProcessing.SourceType.TypeVector))
 
     def processAlgorithm(self, parameters, context, feedback):
-        layers = ensure_list(self.parameterAsLayerList(parameters, self.INPUT_RASTERS, context))[:12]
+        layers = limit_layers(ensure_list(self.parameterAsLayerList(parameters, self.INPUT_RASTERS, context)), 12, "scenario rasters")
         if len(layers) < 2:
             raise QgsProcessingException("Provide at least two scenario rasters.")
         mask = self.parameterAsRasterLayer(parameters, self.MASK, context)

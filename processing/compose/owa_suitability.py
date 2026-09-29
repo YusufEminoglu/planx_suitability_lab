@@ -15,7 +15,7 @@ from qgis.core import (
     QgsProcessingParameterString,
 )
 
-from .._mcda_utils import ensure_list, parse_weights_csv, smart_output_path
+from .._mcda_utils import ensure_list, parse_weights_csv, smart_output_path, limit_layers
 
 
 class OWASuitabilityAlgorithm(QgsProcessingAlgorithm):
@@ -109,7 +109,7 @@ class OWASuitabilityAlgorithm(QgsProcessingAlgorithm):
         return out_ds, out_band
 
     def processAlgorithm(self, parameters, context, feedback):
-        layers = ensure_list(self.parameterAsLayerList(parameters, self.INPUT_RASTERS, context))[:6]
+        layers = limit_layers(ensure_list(self.parameterAsLayerList(parameters, self.INPUT_RASTERS, context)), 6, "criterion rasters")
         if not layers:
             raise QgsProcessingException("No criterion rasters provided for OWA.")
         n = len(layers)
@@ -153,7 +153,10 @@ class OWASuitabilityAlgorithm(QgsProcessingAlgorithm):
             c_band = cds.GetRasterBand(1)
             c_nodata = c_band.GetNoDataValue()
 
-        out_nodata = nodatas[0] if nodatas[0] is not None else -9999.0
+        # A fixed value outside the 0-100 score range: borrowing the first
+        # input's nodata (often 0 for byte rasters) turned real scores of 0
+        # and constraint-excluded cells into nodata.
+        out_nodata = -9999.0
         out_ds, out_band = self._create_output(template_ds, out, out_nodata)
 
         blocks_x = (xsize + block - 1) // block

@@ -19,7 +19,7 @@ from qgis.core import (
     QgsCoordinateReferenceSystem,
 )
 
-from .._mcda_utils import ensure_list
+from .._mcda_utils import ensure_list, limit_layers
 
 
 class ConstraintImpactAuditAlgorithm(QgsProcessingAlgorithm):
@@ -96,7 +96,7 @@ class ConstraintImpactAuditAlgorithm(QgsProcessingAlgorithm):
 
     def processAlgorithm(self, parameters, context, feedback):
         suit_rl = self.parameterAsRasterLayer(parameters, self.SUITABILITY, context)
-        constraints = ensure_list(self.parameterAsLayerList(parameters, self.CONSTRAINTS, context))[:12]
+        constraints = limit_layers(ensure_list(self.parameterAsLayerList(parameters, self.CONSTRAINTS, context)), 12, "constraint rasters")
         if not constraints:
             raise QgsProcessingException("Provide at least one constraint raster.")
         high_thr = float(self.parameterAsDouble(parameters, self.HIGH_THRESHOLD, context))

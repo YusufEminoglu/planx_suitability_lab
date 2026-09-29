@@ -21,7 +21,7 @@ from qgis.core import (
     QgsCoordinateReferenceSystem,
 )
 
-from .._mcda_utils import ensure_list
+from .._mcda_utils import ensure_list, limit_layers
 
 
 class ScenarioSimilarityMatrixAlgorithm(QgsProcessingAlgorithm):
@@ -85,7 +85,7 @@ class ScenarioSimilarityMatrixAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Scenario similarity matrix", QgsProcessing.SourceType.TypeVector))
 
     def processAlgorithm(self, parameters, context, feedback):
-        layers = ensure_list(self.parameterAsLayerList(parameters, self.INPUT_RASTERS, context))[:8]
+        layers = limit_layers(ensure_list(self.parameterAsLayerList(parameters, self.INPUT_RASTERS, context)), 8, "scenario rasters")
         if len(layers) < 2:
             raise QgsProcessingException("Provide at least two scenario rasters.")
         block = int(self.parameterAsInt(parameters, self.BLOCK, context))

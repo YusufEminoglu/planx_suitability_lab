@@ -14,7 +14,7 @@ from qgis.core import (
     QgsProcessingParameterString,
 )
 
-from .._mcda_utils import ensure_list, parse_impacts_csv, parse_weights_csv, smart_output_path
+from .._mcda_utils import ensure_list, parse_impacts_csv, parse_weights_csv, smart_output_path, limit_layers
 
 
 class TOPSISSuitabilityAlgorithm(QgsProcessingAlgorithm):
@@ -49,7 +49,7 @@ class TOPSISSuitabilityAlgorithm(QgsProcessingAlgorithm):
             "(B/C or +/-1, default all benefit); optional constraint mask (0/1); "
             "block size 64–2048.<br>\n"
             "<b>Output:</b> Closeness coefficient raster (Float32, 0–100); "
-            "1.0 = ideal, 0.0 = anti-ideal; constraint-failing cells set to 0.<br>\n"
+            "100 = ideal, 0 = anti-ideal; constraint-failing cells set to 0.<br>\n"
             "<b>Method:</b> Three-pass: (1) vector normalisation denominators "
             "across all valid cells; (2) identify ideal-positive and "
             "ideal-negative points in weighted normalised space per criterion "
@@ -110,7 +110,7 @@ class TOPSISSuitabilityAlgorithm(QgsProcessingAlgorithm):
         return out_ds, out_band
 
     def processAlgorithm(self, parameters, context, feedback):
-        layers = ensure_list(self.parameterAsLayerList(parameters, self.INPUT_RASTERS, context))[:6]
+        layers = limit_layers(ensure_list(self.parameterAsLayerList(parameters, self.INPUT_RASTERS, context)), 6, "criterion rasters")
         if not layers:
             raise QgsProcessingException("No criterion rasters provided for TOPSIS.")
         n = len(layers)
@@ -241,7 +241,10 @@ class TOPSISSuitabilityAlgorithm(QgsProcessingAlgorithm):
             if not np.isfinite(neg[j]):
                 neg[j] = 0.0
 
-        out_nodata = nodatas[0] if nodatas[0] is not None else -9999.0
+        # A fixed value outside the 0-100 score range: borrowing the first
+        # input's nodata (often 0 for byte rasters) turned real scores of 0
+        # and constraint-excluded cells into nodata.
+        out_nodata = -9999.0
         out_ds, out_band = self._create_output(template_ds, out, out_nodata)
 
         # Pass 3: closeness coefficient.

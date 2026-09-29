@@ -11,7 +11,7 @@ from qgis.core import (
     QgsProcessingParameterString,
 )
 
-from .._mcda_utils import ensure_list, parse_weights_csv, raster_calc
+from .._mcda_utils import ensure_list, parse_weights_csv, raster_calc, limit_layers
 
 
 class LocalContributionAlgorithm(QgsProcessingAlgorithm):
@@ -67,7 +67,7 @@ class LocalContributionAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterFolderDestination(self.OUTPUT_DIR, "Output folder for xai_local_contribution_*"))
 
     def processAlgorithm(self, parameters, context, feedback):
-        layers = ensure_list(self.parameterAsLayerList(parameters, self.INPUT_RASTERS, context))[:6]
+        layers = limit_layers(ensure_list(self.parameterAsLayerList(parameters, self.INPUT_RASTERS, context)), 6, "criterion rasters")
         if not layers:
             raise Exception("No criterion rasters were provided.")
         out_dir = self.parameterAsString(parameters, self.OUTPUT_DIR, context)

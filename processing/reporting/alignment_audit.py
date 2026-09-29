@@ -17,7 +17,7 @@ from qgis.core import (
     QgsCoordinateReferenceSystem,
 )
 
-from .._mcda_utils import ensure_list
+from .._mcda_utils import ensure_list, limit_layers
 
 
 class AlignmentAuditAlgorithm(QgsProcessingAlgorithm):
@@ -77,7 +77,7 @@ class AlignmentAuditAlgorithm(QgsProcessingAlgorithm):
         return (round(minx, 8), round(miny, 8), round(maxx, 8), round(maxy, 8))
 
     def processAlgorithm(self, parameters, context, feedback):
-        rasters = ensure_list(self.parameterAsLayerList(parameters, self.INPUT_RASTERS, context))[:20]
+        rasters = limit_layers(ensure_list(self.parameterAsLayerList(parameters, self.INPUT_RASTERS, context)), 20, "scenario rasters")
         if len(rasters) < 2:
             raise QgsProcessingException("Provide at least two rasters.")
 

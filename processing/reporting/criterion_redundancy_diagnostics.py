@@ -19,7 +19,7 @@ from qgis.core import (
     QgsCoordinateReferenceSystem,
 )
 
-from .._mcda_utils import ensure_list
+from .._mcda_utils import ensure_list, limit_layers
 
 
 class CriterionRedundancyDiagnosticsAlgorithm(QgsProcessingAlgorithm):
@@ -105,7 +105,7 @@ class CriterionRedundancyDiagnosticsAlgorithm(QgsProcessingAlgorithm):
         return "LOW"
 
     def processAlgorithm(self, parameters, context, feedback):
-        layers = ensure_list(self.parameterAsLayerList(parameters, self.INPUT_RASTERS, context))[:10]
+        layers = limit_layers(ensure_list(self.parameterAsLayerList(parameters, self.INPUT_RASTERS, context)), 10, "criterion rasters")
         if len(layers) < 2:
             raise QgsProcessingException("Provide at least two criterion rasters.")
 

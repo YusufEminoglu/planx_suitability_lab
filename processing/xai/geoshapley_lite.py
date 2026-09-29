@@ -13,7 +13,7 @@ from qgis.core import (
     QgsProcessingParameterString,
 )
 
-from .._mcda_utils import ensure_list, parse_weights_csv, smart_output_path
+from .._mcda_utils import ensure_list, parse_weights_csv, smart_output_path, limit_layers
 
 
 class GeoShapleyLiteAlgorithm(QgsProcessingAlgorithm):
@@ -99,7 +99,7 @@ class GeoShapleyLiteAlgorithm(QgsProcessingAlgorithm):
         out_ds = None
 
     def processAlgorithm(self, parameters, context, feedback):
-        layers = ensure_list(self.parameterAsLayerList(parameters, self.INPUT_RASTERS, context))[:6]
+        layers = limit_layers(ensure_list(self.parameterAsLayerList(parameters, self.INPUT_RASTERS, context)), 6, "criterion rasters")
         if not layers:
             raise QgsProcessingException("At least one criterion raster is required.")
         weights = parse_weights_csv(self.parameterAsString(parameters, self.WEIGHTS_CSV, context), len(layers))

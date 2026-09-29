@@ -13,7 +13,7 @@ from qgis.core import (
     QgsProcessingParameterRasterLayer,
 )
 
-from .._mcda_utils import ensure_list, smart_output_path
+from .._mcda_utils import ensure_list, smart_output_path, limit_layers
 
 
 class RegretFragilityMapAlgorithm(QgsProcessingAlgorithm):
@@ -106,7 +106,7 @@ class RegretFragilityMapAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterRasterDestination(self.OUT_CLASS, "Regret fragility class raster"))
 
     def processAlgorithm(self, parameters, context, feedback):
-        layers = ensure_list(self.parameterAsLayerList(parameters, self.INPUT_RASTERS, context))[:12]
+        layers = limit_layers(ensure_list(self.parameterAsLayerList(parameters, self.INPUT_RASTERS, context)), 12, "scenario rasters")
         if len(layers) < 2:
             raise QgsProcessingException("Provide at least two scenario rasters.")
         mask = self.parameterAsRasterLayer(parameters, self.MASK, context)

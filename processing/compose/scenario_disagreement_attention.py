@@ -13,7 +13,7 @@ from qgis.core import (
     QgsProcessingParameterRasterLayer,
 )
 
-from .._mcda_utils import ensure_list, smart_output_path
+from .._mcda_utils import ensure_list, smart_output_path, limit_layers
 
 
 class ScenarioDisagreementAttentionAlgorithm(QgsProcessingAlgorithm):
@@ -107,7 +107,7 @@ class ScenarioDisagreementAttentionAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterRasterDestination(self.OUT_CLASS, "Output attention class raster (0..4)"))
 
     def processAlgorithm(self, parameters, context, feedback):
-        layers = ensure_list(self.parameterAsLayerList(parameters, self.INPUT_RASTERS, context))[:10]
+        layers = limit_layers(ensure_list(self.parameterAsLayerList(parameters, self.INPUT_RASTERS, context)), 10, "scenario rasters")
         if len(layers) < 2:
             raise QgsProcessingException("Provide at least two scenario rasters.")
         constraint = self.parameterAsRasterLayer(parameters, self.CONSTRAINT, context)

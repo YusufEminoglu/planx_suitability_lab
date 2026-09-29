@@ -14,7 +14,7 @@ from qgis.core import (
     QgsProcessingParameterString,
 )
 
-from .._mcda_utils import ensure_list, parse_weights_csv, smart_output_path
+from .._mcda_utils import ensure_list, parse_weights_csv, smart_output_path, limit_layers
 
 
 class EnsembleSuitabilityAlgorithm(QgsProcessingAlgorithm):
@@ -117,7 +117,7 @@ class EnsembleSuitabilityAlgorithm(QgsProcessingAlgorithm):
         return out_ds, out_band
 
     def processAlgorithm(self, parameters, context, feedback):
-        layers = ensure_list(self.parameterAsLayerList(parameters, self.INPUT_RASTERS, context))[:8]
+        layers = limit_layers(ensure_list(self.parameterAsLayerList(parameters, self.INPUT_RASTERS, context)), 8, "scenario rasters")
         if len(layers) < 2:
             raise QgsProcessingException("Provide at least two suitability rasters.")
         n = len(layers)
@@ -168,7 +168,10 @@ class EnsembleSuitabilityAlgorithm(QgsProcessingAlgorithm):
             c_band = cds.GetRasterBand(1)
             c_nodata = c_band.GetNoDataValue()
 
-        out_nodata = nodatas[0] if nodatas[0] is not None else -9999.0
+        # A fixed value outside the 0-100 score range: borrowing the first
+        # input's nodata (often 0 for byte rasters) turned real scores of 0
+        # and constraint-excluded cells into nodata.
+        out_nodata = -9999.0
         mean_ds, mean_band = self._create_output(template_ds, out_mean, out_nodata)
         std_ds, std_band = self._create_output(template_ds, out_std, out_nodata)
         p10_ds, p10_band = self._create_output(template_ds, out_p10, out_nodata)

@@ -21,7 +21,7 @@ from qgis.core import (
     QgsCoordinateReferenceSystem,
 )
 
-from .._mcda_utils import ensure_list
+from .._mcda_utils import ensure_list, limit_layers
 
 
 class ScenarioPortfolioDiversityAlgorithm(QgsProcessingAlgorithm):
@@ -87,7 +87,7 @@ class ScenarioPortfolioDiversityAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Portfolio diversity audit", QgsProcessing.SourceType.TypeVector))
 
     def processAlgorithm(self, parameters, context, feedback):
-        layers = ensure_list(self.parameterAsLayerList(parameters, self.INPUT_RASTERS, context))[:12]
+        layers = limit_layers(ensure_list(self.parameterAsLayerList(parameters, self.INPUT_RASTERS, context)), 12, "scenario rasters")
         if len(layers) < 3:
             raise QgsProcessingException("Provide at least three scenario rasters.")
         block = int(self.parameterAsInt(parameters, self.BLOCK, context))

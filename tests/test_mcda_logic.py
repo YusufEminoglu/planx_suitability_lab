@@ -206,6 +206,39 @@ def test_ahp_weights():
         pass
 
 
+def test_ahp_consistency_ratio_matches_textbook_value():
+    # [[1,3,5],[1/3,1,3],[1/5,1/3,1]]: lambda_max ~ 3.0385, CI ~ 0.0193,
+    # RI(3) = 0.58, so CR ~ 0.033 - pins the arithmetic, not just "CR > 0"
+    mat = [[1, 3, 5], [1.0 / 3, 1, 3], [1.0 / 5, 1.0 / 3, 1]]
+    w, cr = U.ahp_weights_from_json(json.dumps(mat))
+    assert abs(cr - 0.0332) < 0.001, cr
+    assert abs(w[0] - 0.637) < 0.002 and abs(w[1] - 0.258) < 0.002, w
+
+
+def test_ahp_rejects_non_reciprocal_matrices():
+    # a transposed judgement: 3 where 1/3 belongs
+    for bad in ([[1, 3, 5], [3, 1, 3], [0.2, 1.0 / 3, 1]],
+                [[2, 1], [1, 1]]):                     # diagonal not 1
+        try:
+            U.ahp_weights_from_json(json.dumps(bad))
+            assert False, f"accepted {bad}"
+        except ValueError as exc:
+            assert "reciprocal" in str(exc) or "diagonal" in str(exc), exc
+    # rounded fractions are fine: 3 * 0.3333 = 0.9999
+    w, cr = U.ahp_weights_from_json(json.dumps([[1, 2, 3], [0.5, 1, 2], [0.3333, 0.5, 1]]))
+    assert abs(sum(w) - 1.0) < 1e-9 and cr >= 0.0
+
+
+def test_limit_layers_refuses_instead_of_truncating():
+    assert U.limit_layers(["a", "b"], 6) == ["a", "b"]
+    assert U.limit_layers(list("abcdef"), 6) == list("abcdef")
+    try:
+        U.limit_layers(list("abcdefg"), 6, "criterion rasters")
+        assert False, "seven layers were accepted by a six-layer tool"
+    except ValueError as exc:
+        assert "at most 6 criterion rasters; 7 were given" in str(exc), exc
+
+
 # ===================================================================
 # 7. Entropy weights with synthetic rasters
 # ===================================================================

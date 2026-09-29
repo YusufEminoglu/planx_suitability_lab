@@ -24,6 +24,43 @@ def ensure_list(value):
     return [value]
 
 
+def limit_layers(layers, cap: int, what: str = "criterion rasters"):
+    """Return ``layers`` unchanged, or refuse when there are more than ``cap``.
+
+    The tools used to slice the list silently (``[:6]``), so a seventh
+    criterion vanished from the result without a word. Raising names the
+    limit instead of producing a map that ignores part of the input.
+    """
+    layers = list(layers)
+    if len(layers) > cap:
+        raise ValueError(
+            f"This tool accepts at most {cap} {what}; {len(layers)} were given. "
+            f"Remove or pre-combine {len(layers) - cap} of them - they would "
+            f"otherwise be left out of the result.")
+    return layers
+
+
+def validate_ahp_matrix(m, tolerance: float = 0.02) -> None:
+    """Check the reciprocity the AHP method assumes.
+
+    The diagonal must be 1 and ``m[i][j] * m[j][i]`` must be 1. The relative
+    tolerance admits rounded fractions such as 0.3333 for 1/3 (product
+    0.9999) but not a transposed or mistyped judgement.
+    """
+    n = m.shape[0]
+    for i in range(n):
+        if abs(m[i, i] - 1.0) > tolerance:
+            raise ValueError(f"AHP matrix diagonal must be 1; element [{i}][{i}] is {m[i, i]:g}.")
+    for i in range(n):
+        for j in range(i + 1, n):
+            product = m[i, j] * m[j, i]
+            if abs(product - 1.0) > tolerance:
+                raise ValueError(
+                    f"AHP matrix is not reciprocal: [{i}][{j}] = {m[i, j]:g} but "
+                    f"[{j}][{i}] = {m[j, i]:g} (expected {1.0 / m[i, j]:.4g}). "
+                    f"Each judgement below the diagonal must be the inverse of the one above it.")
+
+
 def infer_layer_label(layer_or_path, fallback: str = "layer") -> str:
     """Best-effort label extraction for naming outputs."""
     if layer_or_path is None:
@@ -181,6 +218,7 @@ def ahp_weights_from_json(matrix_json: str) -> Tuple[List[float], float]:
         raise ValueError("AHP matrix cannot be empty")
     if np.any(m <= 0):
         raise ValueError("AHP matrix values must be positive.")
+    validate_ahp_matrix(m)
 
     vals, vecs = np.linalg.eig(m)
     max_idx = int(np.argmax(vals.real))
@@ -192,7 +230,9 @@ def ahp_weights_from_json(matrix_json: str) -> Tuple[List[float], float]:
 
     ri_map = {1: 0.0, 2: 0.0, 3: 0.58, 4: 0.90, 5: 1.12, 6: 1.24, 7: 1.32, 8: 1.41, 9: 1.45, 10: 1.49}
     ri = ri_map.get(n, 1.49)
-    ci = (lam - n) / max(1.0, n - 1)
+    # lambda_max >= n for a positive reciprocal matrix; float noise can put it
+    # a hair below, which must not report a negative consistency ratio
+    ci = max(0.0, (lam - n) / max(1.0, n - 1))
     cr = 0.0 if ri == 0 else ci / ri
     return w.tolist(), float(cr)
 

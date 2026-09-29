@@ -21,7 +21,7 @@ from qgis.core import (
     QgsCoordinateReferenceSystem,
 )
 
-from .._mcda_utils import ensure_list
+from .._mcda_utils import ensure_list, limit_layers
 
 
 class MethodBenchmarkLeaderboardAlgorithm(QgsProcessingAlgorithm):
@@ -96,7 +96,7 @@ class MethodBenchmarkLeaderboardAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, "Method benchmark leaderboard", QgsProcessing.SourceType.TypeVector))
 
     def processAlgorithm(self, parameters, context, feedback):
-        layers = ensure_list(self.parameterAsLayerList(parameters, self.INPUT_RASTERS, context))[:12]
+        layers = limit_layers(ensure_list(self.parameterAsLayerList(parameters, self.INPUT_RASTERS, context)), 12, "scenario rasters")
         if len(layers) < 2:
             raise QgsProcessingException("Provide at least two scenario rasters.")
         high_thr = float(self.parameterAsDouble(parameters, self.HIGH_THRESHOLD, context))
