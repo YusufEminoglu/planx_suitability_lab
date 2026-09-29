@@ -55,8 +55,10 @@ class MonteCarloSuitabilityAlgorithm(QgsProcessingAlgorithm):
             "Processing uses configurable pixel blocks for memory efficiency. "
             "Per-cell summary statistics (mean, std, percentiles) are computed across all iterations; "
             "stability_index captures the confidence-interval width (100 - (P95-P05)).<br>"
-            "<b>Typical use:</b> Identify areas where suitability scores are fragile under data or weight uncertainty. "
-            "Low stability flags locations needing further investigation before committing to land-use decisions.</p>"
+            "<b>Typical use:</b> Illustrate how much a finished score moves under a chosen level of noise. "
+            "The noise is independent per cell and scaled by the score, so the outputs follow from the input "
+            "score and sigma; they do not model which weight or criterion is uncertain. To see which weight "
+            "drives the map, use <i>Uncertainty: One-at-a-Time Weight Sensitivity</i>.</p>"
         )
 
     def helpUrl(self):

@@ -140,8 +140,9 @@ pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x:
     <li><a href="#c-regret-fragility">Regret Fragility Map</a></li>
     <li><a href="#c-uncertainty-adjusted">Uncertainty-Adjusted Suitability</a></li>
     <li><a href="#c-scenario-comparator">Scenario Comparator</a></li>
-    <li class="cat">Uncertainty (1)</li>
+    <li class="cat">Uncertainty (2)</li>
     <li><a href="#u-montecarlo">Monte Carlo Suitability</a></li>
+    <li><a href="#u-weight-oat">One-at-a-Time Weight Sensitivity</a></li>
     <li class="cat">Explainability (3)</li>
     <li><a href="#xai-global-sensitivity">Global Sensitivity</a></li>
     <li><a href="#xai-local-contribution">Local Contribution Decomposition</a></li>
@@ -193,7 +194,7 @@ pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x:
 <p><strong>PlanX Suitability Lab</strong> is a QGIS processing plugin providing 68 raster-based multi-criteria decision analysis (MCDA) algorithms for land suitability modelling. It spans the full decision workflow: data harmonisation, criterion weighting (subjective and objective), compensatory and non-compensatory composite scoring, uncertainty quantification, explainable AI diagnostics, scenario comparison, and decision reporting. All algorithms operate on single-band raster layers aligned to a common grid. Outputs are GeoTIFF (Float32 or Int16/Byte) and GeoPackage vector tables.</p>
 
 <div class="section-tag">
-<span class="tag">raster MCDA</span> <span class="tag">QGIS processing</span> <span class="tag">68 algorithms</span> <span class="tag">WLC + OWA + TOPSIS + VIKOR</span> <span class="tag">Monte Carlo</span> <span class="tag">AHP / Entropy / CRITIC / PCA</span> <span class="tag">GeoShapley</span>
+<span class="tag">raster MCDA</span> <span class="tag">QGIS processing</span> <span class="tag">69 algorithms</span> <span class="tag">WLC + OWA + TOPSIS + VIKOR</span> <span class="tag">Monte Carlo</span> <span class="tag">AHP / Entropy / CRITIC / PCA</span> <span class="tag">GeoShapley</span>
 </div>
 <div class="video-embed">
   <iframe src="https://www.youtube-nocookie.com/embed/EMnk8vI2CS8" title="PlanX Suitability Lab &mdash; video walkthrough" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
@@ -204,12 +205,12 @@ pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x:
 <hr class="algo-divider">
 <h2 id="sec-dashboard">Interactive Dashboard</h2>
 <p><span class="tag">guided model flows</span> <span class="tag">module browser</span> <span class="tag">run log</span> <span class="tag">system health</span></p>
-<p>Alongside the 68 Processing algorithms documented below, the plugin ships a docked <code>SuitabilityDashboard</code> panel with five tabs, opened from its own toolbar action rather than the Processing Toolbox:</p>
+<p>Alongside the 69 Processing algorithms documented below, the plugin ships a docked <code>SuitabilityDashboard</code> panel with five tabs, opened from its own toolbar action rather than the Processing Toolbox:</p>
 <table>
 <tr><th>Tab</th><th>Purpose</th></tr>
 <tr><td>Model Flow</td><td>Walks a curated, guided sequence of algorithms for one of three built-in flows &mdash; <em>Essential Suitability</em>, <em>Robust Decision Map</em>, and <em>Scenario Comparison</em> &mdash; tracking step-by-step progress and a running outcome summary. A Reset flow button restarts the sequence.</td></tr>
 <tr><td>Overview</td><td>A rendered summary of the plugin and its algorithm groups.</td></tr>
-<tr><td>Modules</td><td>A searchable, filterable grid of all 68 algorithm cards, with a group filter and a Favorites-only toggle, for browsing the full catalogue outside a guided flow.</td></tr>
+<tr><td>Modules</td><td>A searchable, filterable grid of all 69 algorithm cards, with a group filter and a Favorites-only toggle, for browsing the full catalogue outside a guided flow.</td></tr>
 <tr><td>Recent Runs</td><td>A log of previously executed algorithms in this QGIS session, with a Clear Run Log action.</td></tr>
 <tr><td>System Health</td><td>Readiness diagnostics for the current project/environment.</td></tr>
 </table>
@@ -1166,7 +1167,7 @@ $$L(x,y) = \begin{cases} S(x,y) & \text{if } C(x,y) \le 0.5 \\ 0 & \text{otherwi
   <li><strong>Sigma calibration:</strong> &sigma; = 0.08 means the perturbation has 8% relative standard deviation. For criteria with known measurement error (e.g., DEM RMSE), set &sigma; to match the coefficient of variation of the error distribution.</li>
 </ul>
 
-<div class="key-box"><strong>Limitation:</strong> This method perturbs the <em>composite</em> suitability score, not the individual criterion values. It captures sensitivity to overall score uncertainty but does not model differential uncertainty across criteria. For criterion-level uncertainty propagation, use the Global Sensitivity and GeoShapley algorithms (Sec. 5) or the Policy Sensitivity Frontier (Sec. 6).</div>
+<div class="key-box"><strong>Limitation:</strong> This method perturbs the <em>composite</em> suitability score, not the individual criterion values. Because the noise is independent per cell and scaled by the cell's own score, its outputs are, up to sampling noise, a function of \(S_0\) and \(\sigma\) alone: \(\mu_{MC} \approx S_0\), \(\sigma_{MC} \approx \sigma\,\tau S_0\), and the stability index restates the score rather than measuring model uncertainty. Use it as a sensitivity illustration for a chosen noise level. To learn which <em>weight</em> drives the map, use One-at-a-Time Weight Sensitivity (Sec. 4.2); for criterion-level attribution, the Global Sensitivity and GeoShapley algorithms (Sec. 5) or the Policy Sensitivity Frontier (Sec. 6).</div>
 
 <h4>References</h4>
 <div class="ref-list"><ol>
@@ -1178,6 +1179,55 @@ $$L(x,y) = \begin{cases} S(x,y) & \text{if } C(x,y) \le 0.5 \\ 0 & \text{otherwi
   <li>Refsgaard, J.C. et al. (2007). Uncertainty in the environmental modelling process. <em>Environmental Modelling &amp; Software</em>, 22(11), 1543&ndash;1556. DOI: <a href="https://doi.org/10.1016/j.envsoft.2007.02.004" target="_blank">10.1016/j.envsoft.2007.02.004</a></li>
   <li>Goovaerts, P. (2001). Geostatistical modelling of uncertainty in soil science. <em>Geoderma</em>, 103(1-2), 3&ndash;26. DOI: <a href="https://doi.org/10.1016/S0016-7061(01)00067-2" target="_blank">10.1016/S0016-7061(01)00067-2</a></li>
 </ol></div>
+
+<!-- ─── One-at-a-Time Weight Sensitivity ─── -->
+<h3 id="u-weight-oat">4.2 One-at-a-Time Weight Sensitivity</h3>
+<p><span class="tag">weight uncertainty</span> <span class="tag">proportional renormalisation</span> <span class="tag">WLC</span></p>
+
+<h4>Theoretical Background</h4>
+<p>Weights are the most subjective input of a weighted overlay, and the question a decision maker asks of them is concrete: <em>if I am wrong about this weight by a fifth, does the map change?</em> One-at-a-time (OAT) sensitivity answers it directly. Each criterion weight in turn is raised and lowered by a fixed percentage while the other weights keep their proportions, the WLC composite is recomputed, and the change against the baseline map is summarised per criterion and, optionally, mapped. The procedure follows Chen, Yu &amp; Khan (2010), who applied it to GIS-based land suitability and showed that the spatial pattern of change, not only its average, is what separates influential from inert weights.</p>
+<p>It answers a different question from Monte Carlo Suitability (Sec. 4.1): Monte Carlo adds noise to a finished score, so it cannot say which weight matters; OAT changes exactly one weight at a time and measures the consequence. OAT does not capture interactions between weights - two weights uncertain at once - for which a variance-based global method is required (Saltelli et al., 2008).</p>
+
+<h4>Mathematical Formulation</h4>
+<p>For criterion \(i\), weights \(w_1..w_n\) summing to 1 and perturbation \(p\) (default 0.20):</p>
+<div class="eq-block">
+<span class="eq-label">(44a)</span> \(w_i' = \text{clip}\big(w_i (1 \pm p),\ 0,\ 1\big), \qquad w_j' = w_j \,\dfrac{1 - w_i'}{1 - w_i} \quad (j \ne i)\)
+</div>
+<p>The rescaling keeps the untouched weights in their original ratios and makes the set sum to 1 again. A criterion already carrying all the weight (\(w_i = 1\)) cannot be perturbed.</p>
+<div class="eq-block">
+<span class="eq-label">(44b)</span> \(S(x,y) = \text{clip}\Big(\textstyle\sum_j w_j\, \text{clip}(c_j(x,y), 0, 100),\ 0, 100\Big), \qquad \Delta S_i^{\pm}(x,y) = \big|S^{\pm}_i(x,y) - S(x,y)\big|\)
+</div>
+<div class="eq-block">
+<span class="eq-label">(44c)</span> \(\text{MAC}_i^{\pm} = \dfrac{1}{|V|}\sum_{(x,y) \in V} \Delta S_i^{\pm}(x,y), \qquad \text{MAC}_i = \tfrac{1}{2}\big(\text{MAC}_i^{+} + \text{MAC}_i^{-}\big)\)
+</div>
+<p>\(V\) is the set of valid cells (all criteria defined; passing the constraint mask when one is given - excluded cells score 0 whatever the weights). The composite in (44b) is the one Compose: WLC Suitability publishes; the test suite checks that the WLC tool's output equals it. For two criteria the change is exact and linear: raising \(w_1\) by \(\delta\) lowers \(w_2\) by \(\delta\), so \(\Delta S = \delta\,(c_1 - c_2)\).</p>
+
+<h4>Parameters</h4>
+<table>
+<tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr>
+<tr><td>Criterion rasters</td><td>Raster layers</td><td>&mdash;</td><td>2&ndash;12, normalised 0&ndash;100, identical grids</td></tr>
+<tr><td>Weights CSV</td><td>String</td><td>equal</td><td>As for WLC; normalised to sum to 1</td></tr>
+<tr><td>Weight perturbation</td><td>Percent 1&ndash;90</td><td>20</td><td>\(p\) in (44a); each weight is tried at \((1+p)\) and \((1-p)\)</td></tr>
+<tr><td>Change threshold</td><td>Score points</td><td>5</td><td>Cells moving more than this count towards share_changed_pct</td></tr>
+<tr><td>Constraint mask</td><td>Raster (0/1)</td><td>optional</td><td>Cells failing it are excluded from the statistics</td></tr>
+<tr><td>Focus criterion</td><td>Integer</td><td>0 (none)</td><td>1-based; writes the change raster for that criterion</td></tr>
+<tr><td>Outputs</td><td>&mdash;</td><td>&mdash;</td><td>Ranked table: weight, weight_up, weight_down, mac_up, mac_down, mac, max_abs_change, share_changed_pct, rank; optional change raster \(\max(\Delta S_i^+, \Delta S_i^-)\)</td></tr>
+</table>
+
+<h4>Interpretation Guide</h4>
+<ul>
+  <li><strong>Ranking:</strong> criteria at the top of the table are the weights worth defending - their value changes the map. Criteria with MAC near zero can be weighted loosely.</li>
+  <li><strong>MAC up vs. down:</strong> unequal values signal clipping (a weight near 0 or 1) or a criterion whose values differ strongly from the others only in part of the area.</li>
+  <li><strong>share_changed_pct:</strong> the fraction of the study area whose score moves by more than the threshold - a planning-relevant reading of "does this weight matter here".</li>
+  <li><strong>Change raster:</strong> shows where the focus weight matters. Change concentrates where that criterion disagrees most with the weighted mean of the others.</li>
+</ul>
+
+<h4>References</h4>
+<div class="ref-list"><ol>
+  <li>Chen, Y., Yu, J. &amp; Khan, S. (2010). Spatial sensitivity analysis of multi-criteria weights in GIS-based land suitability evaluation. <em>Environmental Modelling &amp; Software</em>, 25(12), 1582&ndash;1591. DOI: <a href="https://doi.org/10.1016/j.envsoft.2010.06.001" target="_blank">10.1016/j.envsoft.2010.06.001</a></li>
+  <li>Saltelli, A. et al. (2008). <em>Global Sensitivity Analysis: The Primer</em>. Wiley. DOI: <a href="https://doi.org/10.1002/9780470725184" target="_blank">10.1002/9780470725184</a></li>
+</ol></div>
+
 
 <!-- ═══════════════════════════════════════════════ -->
 <hr class="algo-divider">
@@ -1559,7 +1609,7 @@ $$I_j = \dfrac{w_j \cdot \sigma_j^{\text{(sampled)}}}{\sum_k w_k \cdot \sigma_k^
 
 <hr class="algo-divider">
 <p style="text-align:center;font-size:0.8rem;color:var(--hd);margin-top:2rem;">
-PlanX Suitability Lab Reference Manual &mdash; 68 algorithms &mdash; &copy; 2026 Yusuf Eminoglu<br>
+PlanX Suitability Lab Reference Manual &mdash; 69 algorithms &mdash; &copy; 2026 Yusuf Eminoglu<br>
 Built for QGIS 3.x/4.x. All references DOI-verified where possible.<br>
 <em>No AI is credited as a contributor. Every commit ships under the author's name alone.</em>
 </p>

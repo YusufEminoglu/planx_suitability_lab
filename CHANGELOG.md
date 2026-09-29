@@ -1,5 +1,41 @@
 # Changelog
 
+## [1.7.0] - 2026-09-29
+
+### Fixed
+- **Constraint Builder produced an all-nodata mask on Windows.** It ran
+  gdal:rastercalculator with the formula `(A>=t)`; that command line goes
+  through a shell on Windows, `>` became a redirect, the calculation failed
+  and wrote its error into a stray file named `0.5)`, and the run reported
+  success with a mask that was nodata in every cell - so any map constrained
+  by it lost every cell. The mask is now computed with GDAL and numpy, and
+  `raster_calc` refuses formulas the Windows command line would mangle.
+- **Inputs beyond a tool's limit were dropped silently.** 18 algorithms sliced
+  their raster list (`[:6]`, `[:12]`...); extra criteria vanished from the
+  result. They now stop with the limit and the number given.
+- **AHP accepted non-reciprocal matrices** although its method requires
+  `a[i][j] = 1/a[j][i]`; a transposed judgement produced plausible but
+  meaningless weights and CR. Such matrices are now rejected (2% tolerance for
+  rounded fractions such as 0.3333).
+- **WLC, OWA, TOPSIS, VIKOR and Ensemble borrowed the first input's nodata**
+  for their float output; with a byte raster's nodata 0, real scores of 0 and
+  constraint-excluded cells became nodata. Outputs now use -9999.
+- The TOPSIS help described a 0-1 result for a 0-100 output; the Monte Carlo
+  help claimed to capture weight uncertainty, which it does not model.
+- Two GDAL-dependent test files were registered as pure-Python tests and
+  failed the release gate; they now run on both QGIS runtimes.
+
+### Added
+- **Uncertainty: One-at-a-Time Weight Sensitivity** (`weight_sensitivity_oat`,
+  69th algorithm). Each criterion weight is changed by +/-p% (default 20) with
+  the others rescaled proportionally; the WLC map is recomputed and a ranked
+  table reports mean and maximum absolute change and the share of cells
+  moving more than a threshold, with an optional map of where one weight
+  matters (Chen, Yu & Khan 2010). Reference manual section 4.2.
+- Suitability outputs (WLC, OWA, TOPSIS, VIKOR, Normalizer, Robust
+  Suitability) load with a fixed 0-100 colour ramp, and constraint masks with
+  Excluded/Allowed classes, for temporary and file outputs alike.
+
 ## [1.6.9] - 2026-09-16
 
 - Redesign plugin icon to high-end 3D tactile brand design with circular teal pedestal, zero margin, and refreshed documentation links.
