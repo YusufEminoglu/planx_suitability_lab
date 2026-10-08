@@ -38,7 +38,7 @@ ALGO_GROUPS = [
     (
         "Criteria",
         [
-            ("Vector Rasterizer", "planx_suitability_lab:vector_rasterizer", "Rasterize by constant or field value."),
+            ("Vector Rasterizer", "planx_suitability_lab:vector_rasterizer", "Rasterize by constant or field value; with a reference raster it can build a 0/1 constraint mask on your grid."),
             ("Proximity Builder", "planx_suitability_lab:proximity_builder", "Distance raster from selected target values."),
             ("Normalizer/Reclassifier", "planx_suitability_lab:normalizer_reclassifier", "Min-max and fuzzy transforms."),
             ("Constraint Builder", "planx_suitability_lab:constraint_builder", "Generate hard 0/1 eligibility mask."),

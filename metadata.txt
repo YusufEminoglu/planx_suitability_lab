@@ -3,7 +3,7 @@ name=PlanX Suitability Lab
 qgisMinimumVersion=3.28
 qgisMaximumVersion=4.99
 description=Raster-based MCDA land suitability workflows with explainable analytics and uncertainty.
-version=1.7.0
+version=1.7.1
 author=Yusuf Eminoglu
 email=yusuf.eminoglu@deu.edu.tr
 
@@ -23,6 +23,7 @@ deprecated=False
 license=GPL-3
 
 changelog=
+    PlanX Suitability Lab 1.7.1 - Vector Rasterizer can now build a 0/1 constraint mask on the analysis grid: new optional reference raster (extent, cell size and CRS taken from it, vector reprojected when needed), background value and treat-background-as-NoData inputs. Defaults keep the previous behaviour.
     PlanX Suitability Lab 1.7.0 - Fixed Constraint Builder producing an all-nodata mask on Windows, inputs beyond a tool's limit being dropped silently, AHP accepting non-reciprocal matrices and outputs losing real zero scores to nodata. Added One-at-a-Time Weight Sensitivity (69 algorithms) and colour-ramp styling for suitability outputs and masks.
     1.6.9 - Redesign plugin icon to high-end 3D tactile brand design with circular teal pedestal, zero margin, and refreshed documentation links.
     PlanX Suitability Lab 1.6.4 - Added the outcome-led Model Flow dashboard with Essential, Robust, and Scenario Comparison routes, persistent stage progress, and explicit final deliverables. Consolidated overlapping workflow tabs and removed obsolete guide/test actions from the production interface.

@@ -27,7 +27,7 @@ PlanX Suitability Lab is a production-ready raster MCDA plugin for QGIS, designe
 
 - Core preparation:
   - `data_harmonizer` (batch CRS/extent/resolution alignment to output stack + manifest)
-  - `vector_rasterizer` (constant burn or field-driven rasterization)
+  - `vector_rasterizer` (constant burn or field-driven rasterization; optional reference raster for grid-exact output and a background value, so exclusion polygons become a 0/1 constraint mask)
   - `proximity_builder` (target values, distance units, max distance)
   - `normalizer_reclassifier` (min-max and fuzzy linear/sigmoid/gaussian)
   - `constraint_builder` (hard 0/1 mask policy)

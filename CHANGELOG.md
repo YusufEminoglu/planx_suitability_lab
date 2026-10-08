@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.7.1] - 2026-10-09
+
+### Added
+- **Vector Rasterizer can now produce a constraint mask on your analysis grid.**
+  Three optional inputs: a *reference raster* (its extent, cell size and CRS
+  replace the vector extent and the pixel size; the vector is reprojected when
+  the CRS differ), a *background value* and *treat background as NoData*.
+  The defaults reproduce the previous behaviour exactly (vector extent,
+  background 0 as NoData). Exclusion polygons become a 0/1 mask with
+  reference raster = grid, burn 0, background 1, NoData off: 0 inside the
+  polygons, 1 elsewhere, same shape as the criteria rasters.
+  Why: the old route (Vector Rasterizer, then Constraint Builder) produced a
+  mask that was smaller than the grid and marked the polygon interior as
+  *suitable* (Constraint Builder keeps cells >= threshold), the opposite of an
+  exclusion.
+
 ## [1.7.0] - 2026-09-29
 
 ### Fixed
