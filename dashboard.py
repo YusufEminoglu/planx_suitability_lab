@@ -9,6 +9,7 @@ from qgis.PyQt.QtWidgets import (
     QApplication,
     QComboBox,
     QDialog,
+    QDockWidget,
     QFrame,
     QGridLayout,
     QHBoxLayout,
@@ -310,18 +311,34 @@ DASHBOARD_SIZE = (1240, 820) if IS_QGIS4 else (1320, 860)
 DEFAULT_CARD_COLUMNS = 2 if IS_QGIS4 else 3
 
 
-class SuitabilityDashboard(QDialog):
-    def __init__(self, iface, parent=None):
-        super().__init__(parent)
+class SuitabilityDashboard(QDockWidget):
+    """
+    Main PlanX Suitability Lab production console docked on the right side of QGIS.
+    Dockable anywhere (RightDockWidgetArea by default), movable, floatable and tab-dockable.
+    """
+
+    def __init__(self, iface=None, parent=None):
+        super().__init__("PlanX Suitability Lab — Production Console", parent)
         self.iface = iface
+        self.setObjectName("PlanX_Suitability_Lab_Dock")
+        self.setAllowedAreas(Qt.DockWidgetArea.AllDockWidgetAreas)
+        self.setFeatures(
+            QDockWidget.DockWidgetFeature.DockWidgetMovable
+            | QDockWidget.DockWidgetFeature.DockWidgetFloatable
+            | QDockWidget.DockWidgetFeature.DockWidgetClosable
+        )
         self.settings = QSettings()
         self.recent_runs = []
         self.card_widgets = []
         self.model_step_widgets = []
         self._current_card_columns = DEFAULT_CARD_COLUMNS
         self.favorites = set(self.settings.value("planx_suitability_lab/favorites", [], type=list) or [])
-        self.setWindowTitle("PlanX Suitability Lab - Production Console")
-        self.resize(*DASHBOARD_SIZE)
+        self.setMinimumWidth(380)
+
+        self._central_widget = QWidget(self)
+        self._central_widget.setObjectName("dashboardCentralWidget")
+        self.setWidget(self._central_widget)
+
         self._apply_style()
         self._build_ui()
         self._refresh()
@@ -332,9 +349,20 @@ class SuitabilityDashboard(QDialog):
         tab_radius = 7 if IS_QGIS4 else 8
         card_radius = 10 if IS_QGIS4 else 13
         button_radius = 8 if IS_QGIS4 else 9
-        title_size = 24 if IS_QGIS4 else 26
+        title_size = 18 if IS_QGIS4 else 20
         self.setStyleSheet(
             """
+            QDockWidget { background: #ecf3f4; font-family: "Segoe UI"; }
+            QDockWidget::title {
+                background: #10384a;
+                color: #ffffff;
+                font-family: "Segoe UI Semibold", "Segoe UI";
+                font-weight: 700;
+                padding: 6px 10px;
+                border-top-left-radius: 4px;
+                border-top-right-radius: 4px;
+            }
+            QWidget#dashboardCentralWidget { background: #ecf3f4; font-family: "Segoe UI"; }
             QDialog { background: #ecf3f4; font-family: "Segoe UI"; }
             QFrame#heroCard {
                 background: qlineargradient(x1:0,y1:0,x2:1,y2:1, stop:0 #10384a, stop:0.45 #1b5f77, stop:1 #2d7f8f);
@@ -450,7 +478,7 @@ class SuitabilityDashboard(QDialog):
         root_spacing = 10 if IS_QGIS4 else 12
         section_margin = 8 if IS_QGIS4 else 10
         grid_spacing = 8 if IS_QGIS4 else 10
-        root = QVBoxLayout(self)
+        root = QVBoxLayout(self._central_widget)
         root.setContentsMargins(root_margin, root_margin, root_margin, root_margin)
         root.setSpacing(root_spacing)
 
@@ -577,7 +605,7 @@ class SuitabilityDashboard(QDialog):
         refresh.clicked.connect(self._refresh)
         footer.addWidget(refresh)
         btn_ahp = QPushButton("✨ AHP Studio")
-        btn_ahp.setToolTip("İnteraktif AHP Ağırlık ve Tutarlılık (CR) Tasarımcısını Aç")
+        btn_ahp.setToolTip("Open Interactive AHP Weight & Consistency (CR) Studio")
         btn_ahp.setStyleSheet("background: #1b7e5a; color: white; font-weight: bold;")
         btn_ahp.clicked.connect(self._open_ahp_studio)
         footer.addWidget(btn_ahp)
@@ -807,7 +835,7 @@ class SuitabilityDashboard(QDialog):
             self._track_run("planx_suitability_lab:ahp_weights", "AHP Interactive Studio")
             return True
         except Exception as exc:
-            QMessageBox.warning(self, "AHP Studio Hatası", f"AHP Studio başlatılamadı: {exc}")
+            QMessageBox.warning(self, "AHP Studio Error", f"Failed to open AHP Studio: {exc}")
             return False
 
     def _run_algorithm(self, algo_id, label):
@@ -1041,3 +1069,27 @@ class SuitabilityDashboard(QDialog):
             self._run_current_model_stage()
             return
         super().keyPressEvent(event)
+
+
+def open_dashboard(iface=None, parent=None) -> SuitabilityDashboard:
+    """
+    Opens PlanX Suitability Lab production console docked on the right side of QGIS.
+    If already opened, brings it to front and focuses it.
+    """
+    if iface is not None:
+        main_win = iface.mainWindow()
+        dock = main_win.findChild(QDockWidget, "PlanX_Suitability_Lab_Dock")
+        if dock is None:
+            dock = SuitabilityDashboard(iface, main_win)
+            iface.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, dock)
+            ahp_dock = main_win.findChild(QDockWidget, "PlanX_AHP_Studio_Dock")
+            if ahp_dock is not None:
+                iface.tabifyDockWidget(dock, ahp_dock)
+        dock.show()
+        dock.raise_()
+        dock.activateWindow()
+        return dock
+    else:
+        dock = SuitabilityDashboard(iface, parent)
+        dock.show()
+        return dock

@@ -48,15 +48,13 @@ class PlanXSuitabilityLabPlugin:
             self.iface.addPluginToMenu('&PlanX Suitability Lab', self.ahp_action)
 
     def open_dashboard(self):
-        if self.dialog is None:
-            self.dialog = SuitabilityDashboard(self.iface, self.iface.mainWindow())
-        self.dialog.show()
-        self.dialog.raise_()
-        self.dialog.activateWindow()
+        from .dashboard import open_dashboard
+        self.dialog = open_dashboard(self.iface, self.iface.mainWindow() if self.iface else None)
+        return self.dialog
 
     def open_ahp_studio(self):
         from .ahp_studio import open_ahp_studio
-        return open_ahp_studio(self.iface, self.iface.mainWindow())
+        return open_ahp_studio(self.iface, self.iface.mainWindow() if self.iface else None)
 
     def unload(self):
         if self.iface and self.action:
@@ -66,10 +64,11 @@ class PlanXSuitabilityLabPlugin:
             self.iface.removePluginMenu('&PlanX Suitability Lab', self.ahp_action)
         if self.iface:
             from qgis.PyQt.QtWidgets import QDockWidget
-            dock = self.iface.mainWindow().findChild(QDockWidget, "PlanX_AHP_Studio_Dock")
-            if dock is not None:
-                self.iface.removeDockWidget(dock)
-                dock.deleteLater()
+            for dock_name in ("PlanX_Suitability_Lab_Dock", "PlanX_AHP_Studio_Dock"):
+                dock = self.iface.mainWindow().findChild(QDockWidget, dock_name)
+                if dock is not None:
+                    self.iface.removeDockWidget(dock)
+                    dock.deleteLater()
         if self.provider:
             QgsApplication.processingRegistry().removeProvider(self.provider)
             self.provider = None

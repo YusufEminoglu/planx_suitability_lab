@@ -3,7 +3,7 @@ name=PlanX Suitability Lab
 qgisMinimumVersion=3.28
 qgisMaximumVersion=4.99
 description=Raster-based MCDA land suitability workflows with explainable analytics and uncertainty.
-version=1.7.3
+version=1.7.4
 author=Yusuf Eminoglu
 email=yusuf.eminoglu@deu.edu.tr
 
@@ -23,6 +23,7 @@ deprecated=False
 license=GPL-3
 
 changelog=
+    PlanX Suitability Lab 1.7.4 - Converted entire plugin console and AHP Studio to right-docked architecture (QDockWidget): both tools dock seamlessly into QGIS RightDockWidgetArea with automatic tabified switching, fully movable, floatable, and resizable layout.
     PlanX Suitability Lab 1.7.3 - Interactive AHP Studio improvements: resolved weight progress bar label overlapping via zero-churn dynamic cards, added publication-grade 300 DPI AHP Infographic export (PNG and OS Clipboard) for synthesis posters and reports, and refined Saaty matrix reciprocal view.
     PlanX Suitability Lab 1.7.2 - Added interactive AHP Studio with verbal pairwise comparison cards (Saaty 1-9 scale), real-time consistency ratio (CR) and eigenvalue diagnostics, live weight distribution bars, preset planning themes (Disaster/Growth), and direct WLC Suitability integration.
     PlanX Suitability Lab 1.7.1 - Vector Rasterizer can now build a 0/1 constraint mask on the analysis grid: new optional reference raster (extent, cell size and CRS taken from it, vector reprojected when needed), background value and treat-background-as-NoData inputs. Defaults keep the previous behaviour.
