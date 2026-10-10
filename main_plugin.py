@@ -43,7 +43,7 @@ class PlanXSuitabilityLabPlugin:
             self.iface.addPluginToMenu('&PlanX Suitability Lab', self.action)
 
             # Direct AHP Studio Action
-            self.ahp_action = QAction('✨ AHP Studio (İnteraktif Ağırlık Tasarımcısı)', self.iface.mainWindow())
+            self.ahp_action = QAction('✨ AHP Studio (Interactive Weight Designer)', self.iface.mainWindow())
             self.ahp_action.triggered.connect(self.open_ahp_studio)
             self.iface.addPluginToMenu('&PlanX Suitability Lab', self.ahp_action)
 
@@ -56,7 +56,7 @@ class PlanXSuitabilityLabPlugin:
 
     def open_ahp_studio(self):
         from .ahp_studio import open_ahp_studio
-        open_ahp_studio(self.iface, self.iface.mainWindow())
+        return open_ahp_studio(self.iface, self.iface.mainWindow())
 
     def unload(self):
         if self.iface and self.action:
@@ -64,6 +64,12 @@ class PlanXSuitabilityLabPlugin:
             self.iface.removeToolBarIcon(self.action)
         if self.iface and hasattr(self, 'ahp_action') and self.ahp_action:
             self.iface.removePluginMenu('&PlanX Suitability Lab', self.ahp_action)
+        if self.iface:
+            from qgis.PyQt.QtWidgets import QDockWidget
+            dock = self.iface.mainWindow().findChild(QDockWidget, "PlanX_AHP_Studio_Dock")
+            if dock is not None:
+                self.iface.removeDockWidget(dock)
+                dock.deleteLater()
         if self.provider:
             QgsApplication.processingRegistry().removeProvider(self.provider)
             self.provider = None

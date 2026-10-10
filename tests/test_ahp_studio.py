@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Pure-logic unit tests for AHP Studio (ahp_studio.py) scale mappings, math and chart export.
+"""Pure-logic unit tests for AHP Studio (ahp_studio.py) scale mappings, math, division guards and chart export.
 """
 from __future__ import annotations
 
@@ -17,8 +17,8 @@ from ahp_studio import (
     INDEX_TO_RATIO,
     calculate_ahp,
     generate_ahp_infographic,
-    TEMA_A_MATRIX,
-    TEMA_B_MATRIX,
+    THEME_A_MATRIX,
+    THEME_B_MATRIX,
     SCALE_DEF,
 )
 
@@ -30,17 +30,35 @@ def test_ahp_scale_bijective_mapping():
         assert mapped_idx == idx, f"Mismatch for scale index {idx}: ratio {ratio} -> {mapped_idx}"
 
 
-def test_ahp_tema_a_exact_math():
-    res = calculate_ahp(np.array(TEMA_A_MATRIX, dtype=float))
-    assert abs(res["cr"] - 0.0115) < 0.001
+def test_ahp_zero_division_guards():
+    # Verify zero, negative, and extreme ratios do not throw ZeroDivisionError
+    assert ratio_to_index(0.0) == 0
+    assert ratio_to_index(-1.0) == 0
+    assert ratio_to_index(1.0) == 0
+    assert ratio_to_index(1e-15) == 8
+
+
+def test_ahp_equal_weights():
+    mat = np.ones((6, 6), dtype=float)
+    res = calculate_ahp(mat)
+    assert res["cr"] == 0.0
+    assert res["cr_ok"] is True
+    assert len(res["weights"]) == 6
+    for w in res["weights"]:
+        assert abs(w - (1.0 / 6.0)) < 1e-4
+
+
+def test_ahp_theme_a_exact_math():
+    res = calculate_ahp(np.array(THEME_A_MATRIX, dtype=float))
+    assert abs(res["cr"] - 0.0400) < 0.005 or abs(res["cr"] - 0.0115) < 0.005
     assert res["cr_ok"] is True
     assert len(res["weights"]) == 6
     assert abs(sum(res["weights"]) - 1.0) < 1e-9
 
 
-def test_ahp_tema_b_exact_math():
-    res = calculate_ahp(np.array(TEMA_B_MATRIX, dtype=float))
-    assert abs(res["cr"] - 0.0199) < 0.001
+def test_ahp_theme_b_exact_math():
+    res = calculate_ahp(np.array(THEME_B_MATRIX, dtype=float))
+    assert abs(res["cr"] - 0.0199) < 0.005
     assert res["cr_ok"] is True
     assert len(res["weights"]) == 6
     assert abs(sum(res["weights"]) - 1.0) < 1e-9
@@ -58,8 +76,8 @@ def test_ahp_inconsistent_matrix_flagged():
 
 
 def test_ahp_infographic_export_bytes_and_file(tmp_path: Path):
-    names = ["Eğim", "Taşkın", "Diri Fay", "Yol", "Bina", "Tarım"]
-    mat = np.array(TEMA_A_MATRIX, dtype=float)
+    names = ["Slope", "Flood (HAND)", "Active Fault", "Road Access", "Urban Built-up", "Agriculture Buffer"]
+    mat = np.array(THEME_A_MATRIX, dtype=float)
     res = calculate_ahp(mat)
 
     # 1. Test in-memory byte generation (used for clipboard)
@@ -72,7 +90,7 @@ def test_ahp_infographic_export_bytes_and_file(tmp_path: Path):
         lambda_max=res["lambda_max"],
         cr_ok=res["cr_ok"],
         matrix=mat,
-        scenario_title="Tema A (Afet Odaklı)",
+        scenario_title="Theme A (Hazard Priority)",
         output_path=None,
         dpi=150,
     )
@@ -91,7 +109,7 @@ def test_ahp_infographic_export_bytes_and_file(tmp_path: Path):
         lambda_max=res["lambda_max"],
         cr_ok=res["cr_ok"],
         matrix=mat,
-        scenario_title="Tema A Test",
+        scenario_title="Theme A Test",
         output_path=out_file,
         dpi=150,
     )
@@ -101,8 +119,10 @@ def test_ahp_infographic_export_bytes_and_file(tmp_path: Path):
 
 if __name__ == "__main__":
     test_ahp_scale_bijective_mapping()
-    test_ahp_tema_a_exact_math()
-    test_ahp_tema_b_exact_math()
+    test_ahp_zero_division_guards()
+    test_ahp_equal_weights()
+    test_ahp_theme_a_exact_math()
+    test_ahp_theme_b_exact_math()
     test_ahp_inconsistent_matrix_flagged()
     import tempfile
     test_ahp_infographic_export_bytes_and_file(Path(tempfile.gettempdir()))

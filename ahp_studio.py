@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 """
-PlanX Suitability Lab - Interactive AHP Studio
-================================================
-A visual, pedagogical Analytic Hierarchy Process (AHP) weighting studio for QGIS.
-Inspired by TUBITAK 32K214-1001 spatial decision support system design:
-1. Interactive pairwise cards with horizontal clickable scale boxes (9..1..9).
-2. Smooth range slider sync and dynamic active criterion badge highlighting.
-3. Live weight distribution cards (%), rank badges, and in-place zero-churn updates.
-4. Publication-grade downloadable AHP infographic charts (300 DPI PNG & Clipboard).
-5. Quality Gate: principal eigenvalue (lambda_max), CI, and Consistency Ratio (CR <= 0.10).
-6. Direct preset planning themes (Tema A: Afet Odaklı, Tema B: Erişim Odaklı, Eşit Ağırlık).
-7. Direct WLC Suitability push and in-memory AHP vector table creation.
+PlanX Suitability Lab - Interactive AHP Studio (Dockable Panel)
+================================================================
+A visual, pedagogical Analytic Hierarchy Process (AHP) weighting panel for QGIS:
+1. Dockable in QGIS (defaults to RightDockWidgetArea), movable and floatable.
+2. Interactive pairwise comparison cards with horizontal clickable scale boxes (9..1..9).
+3. Smooth range slider sync and active criterion badge highlighting.
+4. Zero-churn, in-place live weight distribution cards (%) with rank badges.
+5. Publication-grade downloadable AHP infographic charts (300 DPI PNG & Clipboard).
+6. Quality Gate: principal eigenvalue (lambda_max), CI, and Consistency Ratio (CR <= 0.10).
+7. Preset planning scenarios (Theme A: Hazard Priority, Theme B: Access Priority, Equal 1/N).
+8. Direct WLC Suitability tool integration and in-memory AHP vector table creation.
 """
 from __future__ import annotations
 
@@ -25,11 +25,11 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from qgis.PyQt.QtCore import Qt, QMetaType
-from qgis.PyQt.QtGui import QColor, QFont, QImage, QPixmap
+from qgis.PyQt.QtGui import QColor, QFont, QImage
 from qgis.PyQt.QtWidgets import (
     QApplication,
     QButtonGroup,
-    QDialog,
+    QDockWidget,
     QFileDialog,
     QFrame,
     QGridLayout,
@@ -78,15 +78,15 @@ RI_TABLE = {
 }
 
 DEFAULT_CRITERIA_LABELS = [
-    ("score_01_egim_yuzde", "Eğim (% Topoğrafya)"),
-    ("score_04_hand_su_mesafe", "Taşkın Güvenliği (HAND)"),
-    ("score_06_diri_fay_mesafe", "Deprem Güvenliği (Diri Fay)"),
-    ("score_11_yol_mesafe", "Ulaşım Erişimi (Karayolu)"),
-    ("score_13_bina_mesafe", "Mevcut Kentsel Doku (Bina)"),
-    ("score_10_tarim_mesafe", "Tarım Kuşağı Tamponu"),
+    ("score_01_egim_yuzde", "Slope (% Topography)"),
+    ("score_04_hand_su_mesafe", "Flood Safety (HAND)"),
+    ("score_06_diri_fay_mesafe", "Earthquake Safety (Active Fault)"),
+    ("score_11_yol_mesafe", "Transport Accessibility (Road)"),
+    ("score_13_bina_mesafe", "Urban Proximity (Built-up)"),
+    ("score_10_tarim_mesafe", "Agricultural Belt Buffer"),
 ]
 
-TEMA_A_MATRIX = [
+THEME_A_MATRIX = [
     [1.0, 0.5, 0.3333, 3.0, 3.0, 2.0],
     [2.0, 1.0, 0.5, 4.0, 4.0, 3.0],
     [3.0, 2.0, 1.0, 5.0, 5.0, 4.0],
@@ -95,7 +95,7 @@ TEMA_A_MATRIX = [
     [0.5, 0.3333, 0.25, 1.0, 1.0, 1.0],
 ]
 
-TEMA_B_MATRIX = [
+THEME_B_MATRIX = [
     [1.0, 2.0, 3.0, 0.3333, 0.3333, 0.5],
     [0.5, 1.0, 2.0, 0.3333, 0.3333, 0.5],
     [0.3333, 0.5, 1.0, 0.25, 0.25, 0.3333],
@@ -104,25 +104,24 @@ TEMA_B_MATRIX = [
     [2.0, 2.0, 3.0, 0.5, 0.5, 1.0],
 ]
 
-# Scale indices: -8 (A 9x) to +8 (B 9x), 0 is equal
 SCALE_DEF = [
-    (-8, 9.0, "Mutlak Üstünlük (9x)"),
-    (-7, 8.0, "Çok Güçlü - Aşırı Ara (8x)"),
-    (-6, 7.0, "Çok Güçlü Üstünlük (7x)"),
-    (-5, 6.0, "Güçlü - Çok Güçlü Ara (6x)"),
-    (-4, 5.0, "Güçlü Üstünlük (5x)"),
-    (-3, 4.0, "Orta - Güçlü Ara (4x)"),
-    (-2, 3.0, "Orta Derece Üstünlük (3x)"),
-    (-1, 2.0, "Zayıf - Orta Ara (2x)"),
-    (0, 1.0, "Eşit Önemde (1x)"),
-    (1, 1.0 / 2.0, "Zayıf - Orta Ara (2x)"),
-    (2, 1.0 / 3.0, "Orta Derece Üstünlük (3x)"),
-    (3, 1.0 / 4.0, "Orta - Güçlü Ara (4x)"),
-    (4, 1.0 / 5.0, "Güçlü Üstünlük (5x)"),
-    (5, 1.0 / 6.0, "Güçlü - Çok Güçlü Ara (6x)"),
-    (6, 1.0 / 7.0, "Çok Güçlü Üstünlük (7x)"),
-    (7, 1.0 / 8.0, "Çok Güçlü - Aşırı Ara (8x)"),
-    (8, 1.0 / 9.0, "Mutlak Üstünlük (9x)"),
+    (-8, 9.0, "Absolute Importance (9x)"),
+    (-7, 8.0, "Very Strong to Extreme (8x)"),
+    (-6, 7.0, "Very Strong Importance (7x)"),
+    (-5, 6.0, "Strong to Very Strong (6x)"),
+    (-4, 5.0, "Strong Importance (5x)"),
+    (-3, 4.0, "Moderate to Strong (4x)"),
+    (-2, 3.0, "Moderate Importance (3x)"),
+    (-1, 2.0, "Equal to Moderate (2x)"),
+    (0, 1.0, "Equal Importance (1x)"),
+    (1, 1.0 / 2.0, "Equal to Moderate (2x)"),
+    (2, 1.0 / 3.0, "Moderate Importance (3x)"),
+    (3, 1.0 / 4.0, "Moderate to Strong (4x)"),
+    (4, 1.0 / 5.0, "Strong Importance (5x)"),
+    (5, 1.0 / 6.0, "Strong to Very Strong (6x)"),
+    (6, 1.0 / 7.0, "Very Strong Importance (7x)"),
+    (7, 1.0 / 8.0, "Very Strong to Extreme (8x)"),
+    (8, 1.0 / 9.0, "Absolute Importance (9x)"),
 ]
 
 INDEX_TO_RATIO = {idx: ratio for idx, ratio, _ in SCALE_DEF}
@@ -130,19 +129,24 @@ INDEX_TO_TERM = {idx: term for idx, _, term in SCALE_DEF}
 
 
 def ratio_to_index(ratio: float) -> int:
-    if abs(ratio - 1.0) < 0.05:
+    """Safely maps a ratio into a scale index (-8 to +8) with zero-division guards."""
+    if ratio <= 0.0 or abs(ratio - 1.0) < 0.05:
         return 0
     if ratio > 1.0:
         val = int(round(ratio))
         val = max(2, min(9, val))
         return -(val - 1)
     else:
-        inv = int(round(1.0 / ratio))
-        inv = max(2, min(9, inv))
-        return inv - 1
+        try:
+            inv = int(round(1.0 / ratio))
+            inv = max(2, min(9, inv))
+            return inv - 1
+        except (ZeroDivisionError, OverflowError):
+            return 0
 
 
 def calculate_ahp(matrix: np.ndarray) -> dict:
+    """Calculates AHP weights, lambda_max, CI, RI, and CR from a reciprocal matrix."""
     n = matrix.shape[0]
     if n == 0:
         return {"weights": [], "lambda_max": 0.0, "ci": 0.0, "ri": 0.0, "cr": 0.0, "cr_ok": True}
@@ -181,13 +185,13 @@ def generate_ahp_infographic(
     lambda_max: float,
     cr_ok: bool,
     matrix: np.ndarray,
-    scenario_title: str = "Özel Senaryo",
+    scenario_title: str = "Custom Scenario",
     output_path: Optional[str] = None,
     dpi: int = 300,
 ) -> Optional[bytes]:
     """
-    Renders a publication-grade, academic AHP infographic (300 DPI) suitable for
-    posters, synthesis reports, and presentations.
+    Renders an English publication-grade, academic AHP infographic (300 DPI)
+    suitable for posters, synthesis reports, and presentations.
     """
     plt.rcParams["font.family"] = "sans-serif"
     plt.rcParams["font.sans-serif"] = ["DejaVu Sans", "Segoe UI", "Arial", "Helvetica"]
@@ -196,8 +200,8 @@ def generate_ahp_infographic(
     fig.patch.set_facecolor("#ffffff")
 
     fig.suptitle(
-        "PlanX Suitability Lab — Analitik Hiyerarşi Süreci (AHP) Ağırlık ve Tutarlılık Raporu",
-        fontsize=14,
+        "PlanX Suitability Lab — Analytic Hierarchy Process (AHP) Weight & Consistency Report",
+        fontsize=13.5,
         fontweight="bold",
         color="#0f172a",
         y=0.965,
@@ -205,7 +209,7 @@ def generate_ahp_infographic(
     fig.text(
         0.5,
         0.925,
-        f"Senaryo: {scenario_title}  |  Yöntem: Saaty (1980) Özvektör Metodu  |  Kriter Sayısı: {len(criteria_names)}",
+        f"Scenario: {scenario_title}  |  Method: Saaty (1980) Eigenvector Method  |  Criteria Count: {len(criteria_names)}",
         ha="center",
         fontsize=10,
         color="#475569",
@@ -216,7 +220,7 @@ def generate_ahp_infographic(
         2,
         width_ratios=[1.3, 1.1],
         height_ratios=[0.85, 1.15],
-        left=0.20,
+        left=0.22,
         right=0.94,
         top=0.86,
         bottom=0.10,
@@ -237,7 +241,7 @@ def generate_ahp_infographic(
 
     max_w = max(sorted_weights) if sorted_weights else 0.5
     for bar, w in zip(bars, sorted_weights):
-        pct_text = f" %{w*100:4.1f} ({w:.4f})"
+        pct_text = f" {w*100:4.1f}% ({w:.4f})"
         ax_bar.text(
             w + (max_w * 0.02),
             bar.get_y() + bar.get_height() / 2.0,
@@ -251,7 +255,7 @@ def generate_ahp_infographic(
 
     ax_bar.set_yticks(y_pos)
     ax_bar.set_yticklabels(sorted_names, fontsize=10, fontweight="bold", color="#1e293b")
-    ax_bar.set_xlabel("Özvektör Ağırlık Payı (Weight)", fontsize=10, fontweight="bold", color="#334155")
+    ax_bar.set_xlabel("Eigenvector Weight Share", fontsize=10, fontweight="bold", color="#334155")
     ax_bar.set_xlim(0, max_w * 1.38)
     ax_bar.grid(axis="x", linestyle="--", alpha=0.45, color="#cbd5e1")
     ax_bar.set_axisbelow(True)
@@ -259,7 +263,7 @@ def generate_ahp_infographic(
     ax_bar.spines["right"].set_visible(False)
     ax_bar.spines["left"].set_color("#94a3b8")
     ax_bar.spines["bottom"].set_color("#94a3b8")
-    ax_bar.set_title("Kriter Ağırlık Dağılımı ve Öncelik Sıralaması", fontsize=11, fontweight="bold", color="#1e293b", pad=12)
+    ax_bar.set_title("Criterion Weights & Priority Ranking", fontsize=11, fontweight="bold", color="#1e293b", pad=12)
 
     # 2. Consistency Summary Card (Top Right)
     ax_card = fig.add_subplot(gs[0, 1])
@@ -267,17 +271,17 @@ def generate_ahp_infographic(
 
     status_bg = "#f0fdf4" if cr_ok else "#fef2f2"
     status_border = "#16a34a" if cr_ok else "#dc2626"
-    badge_str = "[ TUTARLI  (CR <= 0.10) ]" if cr_ok else "[ TUTARSIZ (CR > 0.10) ]"
+    badge_str = "[ CONSISTENT  (CR <= 0.10) ]" if cr_ok else "[ INCONSISTENT (CR > 0.10) ]"
 
     bbox = dict(boxstyle="round,pad=0.7", facecolor=status_bg, edgecolor=status_border, linewidth=1.5)
     card_info = (
-        f"Saaty Tutarlılık Durumu: {badge_str}\n"
+        f"Saaty Consistency Check: {badge_str}\n"
         f"--------------------------------------------------\n"
-        f"CR (Tutarlılık Oranı)  : {cr:.4f}  (Eşik: <= 0.1000)\n"
-        f"lambda max (Özdeğer)   : {lambda_max:.4f}\n"
-        f"CI (Tutarlılık İndeksi): {ci:.4f}\n"
-        f"RI (Rastgele İndeks)   : {ri:.2f}  (n = {len(criteria_names)})\n\n"
-        f"{'-> Kararlar tutarlıdır. Model WLC için güvenilirdir.' if cr_ok else '-> DİKKAT: Tutarsızlık eşiği aşıldı! Kartları düzeltin.'}"
+        f"CR (Consistency Ratio)  : {cr:.4f}  (Threshold: <= 0.1000)\n"
+        f"lambda max (Eigenvalue) : {lambda_max:.4f}\n"
+        f"CI (Consistency Index) : {ci:.4f}\n"
+        f"RI (Random Index)       : {ri:.2f}  (n = {len(criteria_names)})\n\n"
+        f"{'-> Judgments are consistent. Reliable for WLC analysis.' if cr_ok else '-> WARNING: Consistency threshold exceeded! Revise comparisons.'}"
     )
     ax_card.text(
         0.02,
@@ -296,7 +300,7 @@ def generate_ahp_infographic(
     ax_mat.axis("off")
 
     n = len(criteria_names)
-    short_headers = [f"K{i+1}" for i in range(n)]
+    short_headers = [f"C{i+1}" for i in range(n)]
 
     cell_data = []
     for i in range(n):
@@ -334,10 +338,10 @@ def generate_ahp_infographic(
         cell.set_edgecolor("#94a3b8")
         cell.set_linewidth(0.6)
 
-    ax_mat.set_title(f"Saaty İkili Karşılaştırma Matrisi ({n}x{n})", fontsize=10.5, fontweight="bold", color="#1e293b", pad=10)
+    ax_mat.set_title(f"Saaty Reciprocal Comparison Matrix ({n}x{n})", fontsize=10.5, fontweight="bold", color="#1e293b", pad=10)
 
     # Legend underneath table
-    legend_items = [f"K{i+1}: {criteria_names[i]}" for i in range(n)]
+    legend_items = [f"C{i+1}: {criteria_names[i]}" for i in range(n)]
     legend_line1 = "  |  ".join(legend_items[:3])
     legend_line2 = "  |  ".join(legend_items[3:]) if n > 3 else ""
     legend_str = legend_line1 + ("\n" + legend_line2 if legend_line2 else "")
@@ -352,11 +356,10 @@ def generate_ahp_infographic(
         style="italic",
     )
 
-    # Bottom footer
     fig.text(
-        0.20,
+        0.22,
         0.03,
-        "DEÜ Şehir ve Bölge Planlama Bölümü  •  PLN3113 Yerleşilebilirlik ve Sentez Stüdyosu  •  PlanX Suitability Lab",
+        "DEU Dept. of City & Regional Planning  •  PLN3113 Land Suitability Studio  •  PlanX Suitability Lab",
         fontsize=8.5,
         color="#64748b",
     )
@@ -375,52 +378,52 @@ def generate_ahp_infographic(
 
 class PairCardWidget(QFrame):
     """
-    A single pairwise comparison card inspired by Tubitak 32K214:
-    Header: [Criterion A] vs [Criterion B] with active color highlighting.
-    Body: Row of horizontal clickable boxes [-8..0..+8] + synchronized slider.
+    Pairwise comparison card:
+    Header: [ Criterion A ] vs [ Criterion B ] with visual chip highlighting.
+    Body: Row of clickable boxes [9..1..9] and synchronized slider.
     Footer: Dynamic verbal badge explaining the chosen Saaty preference.
     """
 
-    def __init__(self, r: int, c: int, name_a: str, name_b: str, initial_ratio: float, parent_dialog: AHPStudioDialog):
+    def __init__(self, r: int, c: int, name_a: str, name_b: str, initial_ratio: float, parent_panel: AHPStudioDockWidget):
         super().__init__()
         self.r = r
         self.c = c
         self.name_a = name_a
         self.name_b = name_b
-        self.dialog = parent_dialog
+        self.panel = parent_panel
 
         self.setStyleSheet(
-            "PairCardWidget { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 2px; }"
+            "PairCardWidget { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 2px; }"
             "PairCardWidget:hover { border: 1px solid #cbd5e1; }"
         )
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(14, 10, 14, 10)
-        layout.setSpacing(8)
+        layout.setContentsMargins(10, 8, 10, 8)
+        layout.setSpacing(6)
 
         # 1. Header: [ Criterion A ]  VS  [ Criterion B ]
         header_layout = QHBoxLayout()
-        header_layout.setSpacing(10)
+        header_layout.setSpacing(8)
 
         self.chip_a = QLabel(self.name_a)
         self.chip_a.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.chip_a.setFixedHeight(34)
+        self.chip_a.setFixedHeight(30)
         header_layout.addWidget(self.chip_a, 1)
 
         vs_lbl = QLabel("VS")
-        vs_lbl.setStyleSheet("color: #94a3b8; font-weight: 900; font-style: italic; font-size: 13px;")
+        vs_lbl.setStyleSheet("color: #94a3b8; font-weight: 900; font-style: italic; font-size: 11px;")
         header_layout.addWidget(vs_lbl, 0)
 
         self.chip_b = QLabel(self.name_b)
         self.chip_b.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.chip_b.setFixedHeight(34)
+        self.chip_b.setFixedHeight(30)
         header_layout.addWidget(self.chip_b, 1)
 
         layout.addLayout(header_layout)
 
         # 2. Horizontal Button Boxes (-8 to +8, total 17 buttons)
         boxes_layout = QHBoxLayout()
-        boxes_layout.setSpacing(3)
+        boxes_layout.setSpacing(2)
         self.button_group = QButtonGroup(self)
         self.button_group.setExclusive(True)
         self.buttons_map: Dict[int, QPushButton] = {}
@@ -434,9 +437,9 @@ class PairCardWidget(QFrame):
         for idx, text in btn_labels:
             btn = QPushButton(text)
             btn.setCheckable(True)
-            btn.setFixedSize(30, 28)
+            btn.setFixedSize(22, 24)
             weight_font = "bold" if text in ("1", "3", "5", "7", "9") else "normal"
-            btn.setFont(QFont("Segoe UI", 9, QFont.Weight.Bold if weight_font == "bold" else QFont.Weight.Normal))
+            btn.setFont(QFont("Segoe UI", 8, QFont.Weight.Bold if weight_font == "bold" else QFont.Weight.Normal))
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             self.button_group.addButton(btn, idx)
             self.buttons_map[idx] = btn
@@ -453,29 +456,27 @@ class PairCardWidget(QFrame):
         self.slider.setTickInterval(1)
         self.slider.setStyleSheet(
             """
-            QSlider::groove:horizontal { height: 6px; background: #cbd5e1; border-radius: 3px; }
-            QSlider::sub-page:horizontal { background: #3b82f6; border-radius: 3px; }
-            QSlider::handle:horizontal { background: #1e40af; border: 2px solid #ffffff; width: 16px; margin: -5px 0; border-radius: 8px; }
-            QSlider::handle:horizontal:hover { background: #1d4ed8; transform: scale(1.1); }
+            QSlider::groove:horizontal { height: 5px; background: #cbd5e1; border-radius: 2px; }
+            QSlider::sub-page:horizontal { background: #0284c7; border-radius: 2px; }
+            QSlider::handle:horizontal { background: #0369a1; border: 2px solid #ffffff; width: 14px; margin: -5px 0; border-radius: 7px; }
+            QSlider::handle:horizontal:hover { background: #075985; }
             """
         )
         layout.addWidget(self.slider)
 
-        # 4. Dynamic Verbal Badge (Status Pill)
+        # 4. Dynamic Verbal Badge
         badge_row = QHBoxLayout()
         badge_row.addStretch()
         self.badge_lbl = QLabel()
         self.badge_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.badge_lbl.setFixedHeight(26)
+        self.badge_lbl.setFixedHeight(24)
         badge_row.addWidget(self.badge_lbl)
         badge_row.addStretch()
         layout.addLayout(badge_row)
 
-        # Connect signals
         self.button_group.idClicked.connect(self._on_button_clicked)
         self.slider.valueChanged.connect(self._on_slider_moved)
 
-        # Set initial value
         init_idx = ratio_to_index(initial_ratio)
         self.set_scale_index(init_idx, emit=False)
 
@@ -495,7 +496,7 @@ class PairCardWidget(QFrame):
 
         if emit:
             ratio = INDEX_TO_RATIO.get(idx, 1.0)
-            self.dialog.on_card_value_changed(self.r, self.c, ratio)
+            self.panel.on_card_value_changed(self.r, self.c, ratio)
 
     def _on_button_clicked(self, idx: int):
         self.set_scale_index(idx, emit=True)
@@ -504,58 +505,58 @@ class PairCardWidget(QFrame):
         self.set_scale_index(val, emit=True)
 
     def _update_appearance(self, idx: int):
-        term = INDEX_TO_TERM.get(idx, "Eşit Önemde")
+        term = INDEX_TO_TERM.get(idx, "Equal Importance")
 
         for b_idx, btn in self.buttons_map.items():
             if b_idx == idx:
                 if idx < 0:
-                    btn.setStyleSheet("background: #1b7e5a; color: white; border: 1px solid #135d42; border-radius: 4px; font-weight: bold;")
+                    btn.setStyleSheet("background: #0f766e; color: white; border: 1px solid #115e59; border-radius: 3px; font-weight: bold;")
                 elif idx > 0:
-                    btn.setStyleSheet("background: #2f7aa8; color: white; border: 1px solid #1f5a7d; border-radius: 4px; font-weight: bold;")
+                    btn.setStyleSheet("background: #0284c7; color: white; border: 1px solid #0369a1; border-radius: 3px; font-weight: bold;")
                 else:
-                    btn.setStyleSheet("background: #475569; color: white; border: 1px solid #334155; border-radius: 4px; font-weight: bold;")
+                    btn.setStyleSheet("background: #475569; color: white; border: 1px solid #334155; border-radius: 3px; font-weight: bold;")
             else:
-                btn.setStyleSheet("background: #ffffff; color: #475569; border: 1px solid #cbd5e1; border-radius: 4px;")
+                btn.setStyleSheet("background: #ffffff; color: #475569; border: 1px solid #cbd5e1; border-radius: 3px;")
 
         if idx < 0:
             self.chip_a.setStyleSheet(
-                "background: #1b7e5a; color: #ffffff; font-weight: bold; border-radius: 8px; padding: 4px 10px; border: 1px solid #135d42;"
+                "background: #0f766e; color: #ffffff; font-weight: bold; border-radius: 6px; padding: 3px 8px; border: 1px solid #115e59; font-size: 11px;"
             )
             self.chip_b.setStyleSheet(
-                "background: #f8fafc; color: #64748b; font-weight: normal; border-radius: 8px; padding: 4px 10px; border: 1px solid #e2e8f0;"
+                "background: #f8fafc; color: #64748b; font-weight: normal; border-radius: 6px; padding: 3px 8px; border: 1px solid #e2e8f0; font-size: 11px;"
             )
-            self.badge_lbl.setText(f"🛡️ {self.name_a} lehine {term}")
+            self.badge_lbl.setText(f"🛡️ {self.name_a} preferred: {term}")
             self.badge_lbl.setStyleSheet(
-                "background: #e8f5e9; color: #1b5e20; border: 1px solid #a5d6a7; border-radius: 13px; padding: 2px 14px; font-weight: bold; font-size: 11px;"
+                "background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; border-radius: 12px; padding: 2px 10px; font-weight: bold; font-size: 10px;"
             )
         elif idx > 0:
             self.chip_a.setStyleSheet(
-                "background: #f8fafc; color: #64748b; font-weight: normal; border-radius: 8px; padding: 4px 10px; border: 1px solid #e2e8f0;"
+                "background: #f8fafc; color: #64748b; font-weight: normal; border-radius: 6px; padding: 3px 8px; border: 1px solid #e2e8f0; font-size: 11px;"
             )
             self.chip_b.setStyleSheet(
-                "background: #2f7aa8; color: #ffffff; font-weight: bold; border-radius: 8px; padding: 4px 10px; border: 1px solid #1f5a7d;"
+                "background: #0284c7; color: #ffffff; font-weight: bold; border-radius: 6px; padding: 3px 8px; border: 1px solid #0369a1; font-size: 11px;"
             )
-            self.badge_lbl.setText(f"🌊 {self.name_b} lehine {term}")
+            self.badge_lbl.setText(f"🌊 {self.name_b} preferred: {term}")
             self.badge_lbl.setStyleSheet(
-                "background: #e0f2fe; color: #0369a1; border: 1px solid #7dd3fc; border-radius: 13px; padding: 2px 14px; font-weight: bold; font-size: 11px;"
+                "background: #f0f9ff; color: #075985; border: 1px solid #bae6fd; border-radius: 12px; padding: 2px 10px; font-weight: bold; font-size: 10px;"
             )
         else:
             self.chip_a.setStyleSheet(
-                "background: #f1f5f9; color: #334155; font-weight: bold; border-radius: 8px; padding: 4px 10px; border: 1px solid #cbd5e1;"
+                "background: #f1f5f9; color: #334155; font-weight: bold; border-radius: 6px; padding: 3px 8px; border: 1px solid #cbd5e1; font-size: 11px;"
             )
             self.chip_b.setStyleSheet(
-                "background: #f1f5f9; color: #334155; font-weight: bold; border-radius: 8px; padding: 4px 10px; border: 1px solid #cbd5e1;"
+                "background: #f1f5f9; color: #334155; font-weight: bold; border-radius: 6px; padding: 3px 8px; border: 1px solid #cbd5e1; font-size: 11px;"
             )
-            self.badge_lbl.setText("⚖️ Eşit Önemde (1x)")
+            self.badge_lbl.setText("⚖️ Equal Importance (1x)")
             self.badge_lbl.setStyleSheet(
-                "background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 13px; padding: 2px 14px; font-weight: bold; font-size: 11px;"
+                "background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 12px; padding: 2px 10px; font-weight: bold; font-size: 10px;"
             )
 
 
 class CriterionWeightWidget(QFrame):
     """
     Sleek, modern criterion weight display card:
-    Row 1: [Rank #1] [Criterion Name] ... [% 36.7 (0.3666)]
+    Row 1: [Rank #1] [Criterion Name] ... [ 36.7% (0.3666)]
     Row 2: Full-width modern progress bar with dual-color gradient
     Updated in-place with ZERO DOM/widget churn.
     """
@@ -569,17 +570,17 @@ class CriterionWeightWidget(QFrame):
             "CriterionWeightWidget:hover { border: 1px solid #cbd5e1; background: #f8fafc; }"
         )
         vbox = QVBoxLayout(self)
-        vbox.setContentsMargins(10, 6, 10, 6)
-        vbox.setSpacing(5)
+        vbox.setContentsMargins(8, 5, 8, 5)
+        vbox.setSpacing(4)
 
         top_row = QHBoxLayout()
-        top_row.setSpacing(8)
+        top_row.setSpacing(6)
 
         self.rank_badge = QLabel("#1")
         self.rank_badge.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.rank_badge.setFixedSize(26, 18)
+        self.rank_badge.setFixedSize(24, 18)
         self.rank_badge.setStyleSheet(
-            "background: #1e293b; color: #ffffff; font-weight: bold; font-size: 10px; border-radius: 4px;"
+            "background: #1e293b; color: #ffffff; font-weight: bold; font-size: 10px; border-radius: 3px;"
         )
         top_row.addWidget(self.rank_badge)
 
@@ -587,7 +588,7 @@ class CriterionWeightWidget(QFrame):
         self.name_lbl.setStyleSheet("font-size: 11px; font-weight: bold; color: #1e293b;")
         top_row.addWidget(self.name_lbl, 1)
 
-        self.val_lbl = QLabel("% 0.0 (0.0000)")
+        self.val_lbl = QLabel("0.0% (0.0000)")
         self.val_lbl.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
         self.val_lbl.setStyleSheet("font-size: 11px; font-weight: bold; color: #0d9488;")
         top_row.addWidget(self.val_lbl)
@@ -606,48 +607,54 @@ class CriterionWeightWidget(QFrame):
 
     def set_data(self, weight: float, rank: int):
         pct = weight * 100.0
-        self.val_lbl.setText(f"% {pct:4.1f} ({weight:.4f})")
+        self.val_lbl.setText(f"{pct:4.1f}% ({weight:.4f})")
         self.pbar.setValue(int(weight * 1000))
         self.rank_badge.setText(f"#{rank}")
         if rank == 1:
             self.rank_badge.setStyleSheet(
-                "background: #1b7e5a; color: white; font-weight: bold; font-size: 10px; border-radius: 4px;"
+                "background: #0f766e; color: white; font-weight: bold; font-size: 10px; border-radius: 3px;"
             )
-            self.val_lbl.setStyleSheet("font-size: 11px; font-weight: bold; color: #1b7e5a;")
+            self.val_lbl.setStyleSheet("font-size: 11px; font-weight: bold; color: #0f766e;")
         elif rank <= 3:
             self.rank_badge.setStyleSheet(
-                "background: #2f7aa8; color: white; font-weight: bold; font-size: 10px; border-radius: 4px;"
+                "background: #0284c7; color: white; font-weight: bold; font-size: 10px; border-radius: 3px;"
             )
-            self.val_lbl.setStyleSheet("font-size: 11px; font-weight: bold; color: #2f7aa8;")
+            self.val_lbl.setStyleSheet("font-size: 11px; font-weight: bold; color: #0284c7;")
         else:
             self.rank_badge.setStyleSheet(
-                "background: #64748b; color: white; font-weight: bold; font-size: 10px; border-radius: 4px;"
+                "background: #64748b; color: white; font-weight: bold; font-size: 10px; border-radius: 3px;"
             )
             self.val_lbl.setStyleSheet("font-size: 11px; font-weight: bold; color: #475569;")
 
 
-class AHPStudioDialog(QDialog):
+class AHPStudioDockWidget(QDockWidget):
     """
-    Interactive AHP Weight Designer Dialog for PlanX Suitability Lab.
+    Dockable interactive Analytic Hierarchy Process (AHP) weighting studio for QGIS.
+    Dockable anywhere (RightDockWidgetArea by default), movable and floatable.
     """
 
     def __init__(self, iface=None, parent=None):
-        super().__init__(parent)
+        super().__init__("PlanX AHP Studio — Interactive Weight Designer", parent)
         self.iface = iface
-        self.setWindowTitle("PlanX AHP Studio — İnteraktif Kriter & Ağırlık Tasarımcısı")
-        self.resize(1280, 820)
+        self.setObjectName("PlanX_AHP_Studio_Dock")
+        self.setAllowedAreas(Qt.DockWidgetArea.AllDockWidgetAreas)
+        self.setFeatures(
+            QDockWidget.DockWidgetFeature.DockWidgetMovable
+            | QDockWidget.DockWidgetFeature.DockWidgetFloatable
+            | QDockWidget.DockWidgetFeature.DockWidgetClosable
+        )
 
         self.criteria_keys: List[str] = []
         self.criteria_names: List[str] = []
-        self.matrix: np.ndarray = np.eye(6, dtype=float)
+        self.matrix: np.ndarray = np.ones((6, 6), dtype=float)
         self.card_widgets: Dict[Tuple[int, int], PairCardWidget] = {}
         self.weight_widgets: List[CriterionWeightWidget] = []
-        self.current_scenario_title: str = "Tema A (Afet Odaklı)"
+        self.current_scenario_title: str = "Theme A (Hazard Priority)"
 
         self._updating_matrix = False
         self._init_default_criteria()
         self._setup_ui()
-        self._load_matrix(np.array(TEMA_A_MATRIX, dtype=float), scenario_name="Tema A (Afet Odaklı)")
+        self._load_matrix(np.array(THEME_A_MATRIX, dtype=float), scenario_name="Theme A (Hazard Priority)")
 
     def _init_default_criteria(self):
         project_layers = [l for l in QgsProject.instance().mapLayers().values() if isinstance(l, QgsRasterLayer)]
@@ -661,158 +668,133 @@ class AHPStudioDialog(QDialog):
             self.criteria_names = [f"{lbl}" for _, lbl in DEFAULT_CRITERIA_LABELS]
 
         n = len(self.criteria_keys)
-        self.matrix = np.eye(n, dtype=float)
+        self.matrix = np.ones((n, n), dtype=float)
 
     def _setup_ui(self):
-        main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(16, 14, 16, 14)
-        main_layout.setSpacing(12)
+        container = QWidget()
+        main_layout = QVBoxLayout(container)
+        main_layout.setContentsMargins(8, 8, 8, 8)
+        main_layout.setSpacing(8)
 
-        # 1. Header Banner
+        # 1. Header Banner with Presets & Live CR Badge
         header = QFrame()
-        header.setStyleSheet("background: #1e293b; border-radius: 8px; padding: 12px;")
-        h_box = QHBoxLayout(header)
-        h_box.setContentsMargins(12, 6, 12, 6)
+        header.setStyleSheet("background: #1e293b; border-radius: 6px; padding: 6px;")
+        h_box = QVBoxLayout(header)
+        h_box.setContentsMargins(8, 6, 8, 6)
+        h_box.setSpacing(6)
 
-        title_vbox = QVBoxLayout()
-        title_lbl = QLabel("🎯 AHP Interactive Studio (TÜBİTAK 32K214 Dokunsal İkili Karşılaştırma)")
-        title_lbl.setStyleSheet("color: #ffffff; font-size: 17px; font-weight: bold;")
-        sub_lbl = QLabel(
-            "Yatay Saaty ölçeğinde (9..1..9) kutucuklar veya kaydırıcı ile kriter üstünlüğünü belirleyin; ağırlıkları ve tutarlılığı (CR ≤ 0.10) canlı izleyin."
+        title_row = QHBoxLayout()
+        title_lbl = QLabel("🎯 AHP Interactive Studio")
+        title_lbl.setStyleSheet("color: #ffffff; font-size: 13px; font-weight: bold;")
+        title_row.addWidget(title_lbl)
+        title_row.addStretch()
+
+        self.header_cr_badge = QLabel("🟢 CR = 0.0115")
+        self.header_cr_badge.setStyleSheet(
+            "background: #065f46; color: #a7f3d0; font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 4px;"
         )
-        sub_lbl.setStyleSheet("color: #94a3b8; font-size: 12px;")
-        title_vbox.addWidget(title_lbl)
-        title_vbox.addWidget(sub_lbl)
-        h_box.addLayout(title_vbox)
-        h_box.addStretch()
+        title_row.addWidget(self.header_cr_badge)
+        h_box.addLayout(title_row)
 
-        # Theme Preset Buttons in Header
-        preset_lbl = QLabel("Hızlı Senaryolar:")
-        preset_lbl.setStyleSheet("color: #ffffff; font-weight: bold; font-size: 12px;")
-        h_box.addWidget(preset_lbl)
+        # Scenario Presets
+        preset_row = QHBoxLayout()
+        preset_row.setSpacing(4)
 
-        btn_tema_a = QPushButton("🛡️ Tema A (Afet Odaklı)")
-        btn_tema_a.setStyleSheet(
-            "background: #1b7e5a; color: white; font-weight: bold; padding: 7px 14px; border-radius: 6px;"
-        )
-        btn_tema_a.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_tema_a.clicked.connect(self._apply_tema_a)
-        h_box.addWidget(btn_tema_a)
+        btn_theme_a = QPushButton("🛡️ Theme A (Hazard)")
+        btn_theme_a.setStyleSheet("background: #0f766e; color: white; font-weight: bold; padding: 5px 8px; border-radius: 4px; font-size: 11px;")
+        btn_theme_a.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_theme_a.clicked.connect(self._apply_tema_a)
+        preset_row.addWidget(btn_theme_a)
 
-        btn_tema_b = QPushButton("🚗 Tema B (Erişim Odaklı)")
-        btn_tema_b.setStyleSheet(
-            "background: #2f7aa8; color: white; font-weight: bold; padding: 7px 14px; border-radius: 6px;"
-        )
-        btn_tema_b.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_tema_b.clicked.connect(self._apply_tema_b)
-        h_box.addWidget(btn_tema_b)
+        btn_theme_b = QPushButton("🚗 Theme B (Access)")
+        btn_theme_b.setStyleSheet("background: #0284c7; color: white; font-weight: bold; padding: 5px 8px; border-radius: 4px; font-size: 11px;")
+        btn_theme_b.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_theme_b.clicked.connect(self._apply_tema_b)
+        preset_row.addWidget(btn_theme_b)
 
-        btn_equal = QPushButton("⚖️ Eşit (1/N)")
-        btn_equal.setStyleSheet(
-            "background: #475569; color: white; font-weight: bold; padding: 7px 14px; border-radius: 6px;"
-        )
+        btn_equal = QPushButton("⚖️ Equal (1/N)")
+        btn_equal.setStyleSheet("background: #475569; color: white; font-weight: bold; padding: 5px 8px; border-radius: 4px; font-size: 11px;")
         btn_equal.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_equal.clicked.connect(self._apply_equal)
-        h_box.addWidget(btn_equal)
+        preset_row.addWidget(btn_equal)
 
+        h_box.addLayout(preset_row)
         main_layout.addWidget(header)
 
-        # 2. Main Splitter
-        splitter = QSplitter(Qt.Orientation.Horizontal)
+        # Criteria bar
+        crit_bar = QHBoxLayout()
+        self.crit_summary_lbl = QLabel(f"Active Criteria: {len(self.criteria_names)}")
+        self.crit_summary_lbl.setStyleSheet("font-weight: bold; color: #0f766e; font-size: 11px;")
+        crit_bar.addWidget(self.crit_summary_lbl)
+        crit_bar.addStretch()
 
-        # === LEFT PANEL: Criteria & Comparisons ===
-        left_widget = QWidget()
-        left_layout = QVBoxLayout(left_widget)
-        left_layout.setContentsMargins(0, 0, 8, 0)
-        left_layout.setSpacing(10)
+        btn_auto_pick = QPushButton("⚡ Auto-detect Score Layers")
+        btn_auto_pick.setStyleSheet("background: #f8fafc; border: 1px solid #cbd5e1; font-weight: bold; padding: 3px 8px; border-radius: 4px; font-size: 10px;")
+        btn_auto_pick.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_auto_pick.clicked.connect(self._auto_pick_score_layers)
+        crit_bar.addWidget(btn_auto_pick)
+        main_layout.addLayout(crit_bar)
 
-        # Criteria Bar
-        crit_group = QGroupBox("Kriter Yönetimi & Proje Katmanları")
-        crit_group.setStyleSheet("QGroupBox { font-weight: bold; color: #1e293b; }")
-        crit_layout = QHBoxLayout(crit_group)
-        crit_layout.setContentsMargins(10, 8, 10, 8)
+        # Main Vertical Splitter: Top = Pairwise / Matrix; Bottom = Weights / Diagnostics / Actions
+        splitter = QSplitter(Qt.Orientation.Vertical)
+        splitter.setChildrenCollapsible(False)
 
-        self.crit_summary_lbl = QLabel(f"Aktif Kriter Sayısı: {len(self.criteria_names)}")
-        self.crit_summary_lbl.setStyleSheet("font-weight: bold; color: #1b7e5a;")
-        crit_layout.addWidget(self.crit_summary_lbl)
+        # === UPPER PANE: Tabs (Cards vs Matrix) ===
+        tabs = QTabWidget()
+        tabs.setStyleSheet("QTabBar::tab { font-weight: bold; padding: 5px 10px; font-size: 11px; }")
 
-        btn_pick_score = QPushButton("⚡ Projedeki Puan Katmanlarını Otomatik Seç (score_*.tif)")
-        btn_pick_score.setStyleSheet("background: #f8fafc; border: 1px solid #7cb342; font-weight: bold; padding: 5px 10px; border-radius: 4px;")
-        btn_pick_score.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_pick_score.clicked.connect(self._auto_pick_score_layers)
-        crit_layout.addWidget(btn_pick_score)
-
-        crit_layout.addStretch()
-        left_layout.addWidget(crit_group)
-
-        # Tabs for Comparison View: Cards vs Matrix Table
-        self.tabs = QTabWidget()
-        self.tabs.setStyleSheet("QTabBar::tab { font-weight: bold; padding: 7px 14px; font-size: 11px; }")
-
-        # Tab 1: Tubitak Style Pairwise Cards with Horizontal Box Grids
+        # Tab 1: Cards
         self.cards_tab = QWidget()
         cards_vbox = QVBoxLayout(self.cards_tab)
-        cards_vbox.setContentsMargins(6, 8, 6, 8)
-
-        card_hint = QLabel(
-            "ℹ️ Her çift için kutucuklara tıklayarak veya kaydırıcıyı çekerek hangi kriterin üstün olduğunu ve Saaty (1–9) derecesini seçin:"
-        )
-        card_hint.setStyleSheet("color: #64748b; font-size: 11px; margin-bottom: 2px;")
-        cards_vbox.addWidget(card_hint)
+        cards_vbox.setContentsMargins(4, 4, 4, 4)
+        cards_vbox.setSpacing(4)
 
         self.cards_scroll = QScrollArea()
         self.cards_scroll.setWidgetResizable(True)
         self.cards_scroll_content = QWidget()
         self.cards_layout = QVBoxLayout(self.cards_scroll_content)
-        self.cards_layout.setSpacing(10)
+        self.cards_layout.setSpacing(6)
         self.cards_scroll.setWidget(self.cards_scroll_content)
         cards_vbox.addWidget(self.cards_scroll)
 
-        self.tabs.addTab(self.cards_tab, "🎛️ Dokunsal İkili Karşılaştırma (Kartlar)")
+        tabs.addTab(self.cards_tab, "🎛️ Pairwise Cards")
 
-        # Tab 2: Full Matrix Grid Table
+        # Tab 2: Matrix
         self.matrix_tab = QWidget()
         matrix_vbox = QVBoxLayout(self.matrix_tab)
-        matrix_vbox.setContentsMargins(6, 8, 6, 8)
-
-        mat_hint = QLabel(
-            "ℹ️ Saaty Karşılıklılık İlkesi: Üst üçgendeki bir değeri değiştirdiğinizde alt üçgendeki simetrik hücre otomatik olarak 1/değer güncellenir."
-        )
-        mat_hint.setStyleSheet("color: #64748b; font-size: 11px;")
-        matrix_vbox.addWidget(mat_hint)
+        matrix_vbox.setContentsMargins(4, 4, 4, 4)
 
         self.matrix_table = QTableWidget()
-        self.matrix_table.setStyleSheet("QTableWidget { gridline-color: #cbd5e1; font-size: 12px; }")
+        self.matrix_table.setStyleSheet("QTableWidget { gridline-color: #cbd5e1; font-size: 11px; }")
         self.matrix_table.cellChanged.connect(self._on_table_cell_changed)
         matrix_vbox.addWidget(self.matrix_table)
 
-        self.tabs.addTab(self.matrix_tab, "🔢 Karşılıklı Saaty Matrisi (Grid)")
-        left_layout.addWidget(self.tabs)
+        tabs.addTab(self.matrix_tab, "🔢 Reciprocal Matrix Grid")
+        splitter.addWidget(tabs)
 
-        splitter.addWidget(left_widget)
+        # === LOWER PANE: Scrollable Diagnostics, Weights & Actions ===
+        bottom_scroll = QScrollArea()
+        bottom_scroll.setWidgetResizable(True)
+        bottom_content = QWidget()
+        bottom_layout = QVBoxLayout(bottom_content)
+        bottom_layout.setContentsMargins(4, 4, 4, 4)
+        bottom_layout.setSpacing(8)
 
-        # === RIGHT PANEL: Live Preview, Weights & Quality Gate ===
-        right_widget = QWidget()
-        right_layout = QVBoxLayout(right_widget)
-        right_layout.setContentsMargins(8, 0, 0, 0)
-        right_layout.setSpacing(10)
-
-        # 1. Quality Gate / Consistency Ratio Card
+        # 1. Quality Gate Card
         self.cr_card = QFrame()
-        self.cr_card.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
-        self.cr_card.setStyleSheet("border-radius: 8px; padding: 12px; background: #e8f5e9; border: 2px solid #4caf50;")
+        self.cr_card.setStyleSheet("border-radius: 6px; padding: 8px; background: #e8f5e9; border: 1px solid #4caf50;")
         cr_vbox = QVBoxLayout(self.cr_card)
-        cr_vbox.setContentsMargins(12, 10, 12, 10)
-        cr_vbox.setSpacing(6)
+        cr_vbox.setContentsMargins(8, 6, 8, 6)
+        cr_vbox.setSpacing(4)
 
-        self.cr_badge_lbl = QLabel("🟢 TUTARLI (CR = 0.0115 ≤ 0.10)")
-        self.cr_badge_lbl.setStyleSheet("font-size: 15px; font-weight: bold; color: #2e7d32;")
+        self.cr_badge_lbl = QLabel("🟢 CONSISTENT (CR = 0.0115 ≤ 0.10)")
+        self.cr_badge_lbl.setStyleSheet("font-size: 13px; font-weight: bold; color: #2e7d32;")
         cr_vbox.addWidget(self.cr_badge_lbl)
 
         self.cr_desc_lbl = QLabel(
-            "Kararlar Saaty tutarlılık kriterini sağlamaktadır (CR ≤ 0.10). Model analiz ve sentez için güvenilirdir."
+            "Judgments satisfy Saaty's consistency criterion (CR ≤ 0.10). The pairwise matrix is mathematically sound and reliable for WLC suitability analysis."
         )
-        self.cr_desc_lbl.setStyleSheet("font-size: 11px; color: #1b5e20;")
+        self.cr_desc_lbl.setStyleSheet("font-size: 10px; color: #1b5e20;")
         self.cr_desc_lbl.setWordWrap(True)
         cr_vbox.addWidget(self.cr_desc_lbl)
 
@@ -822,70 +804,70 @@ class AHPStudioDialog(QDialog):
         self.stat_ri = QLabel("1.24")
 
         for lbl, val_w, col in [
-            ("λ max (Özdeğer):", self.stat_lambda, 0),
-            ("CI (İndeks):", self.stat_ci, 1),
-            ("RI (Rastgele):", self.stat_ri, 2),
+            ("λ max (Eigenvalue):", self.stat_lambda, 0),
+            ("CI (Consistency Index):", self.stat_ci, 1),
+            ("RI (Random Index):", self.stat_ri, 2),
         ]:
             l = QLabel(lbl)
-            l.setStyleSheet("font-size: 11px; color: #64748b;")
-            val_w.setStyleSheet("font-size: 11px; font-weight: bold; color: #0f172a;")
+            l.setStyleSheet("font-size: 10px; color: #64748b;")
+            val_w.setStyleSheet("font-size: 10px; font-weight: bold; color: #0f172a;")
             stats_grid.addWidget(l, 0, col * 2)
             stats_grid.addWidget(val_w, 0, col * 2 + 1)
         cr_vbox.addLayout(stats_grid)
-        right_layout.addWidget(self.cr_card)
+        bottom_layout.addWidget(self.cr_card)
 
         # 2. Live Weights Distribution
-        weights_group = QGroupBox("Canlı Ağırlık Dağılımı (Weights %)")
+        weights_group = QGroupBox("Live Weight Distribution (Weights %)")
         weights_group.setStyleSheet("QGroupBox { font-weight: bold; color: #1e293b; }")
         self.weights_vbox = QVBoxLayout(weights_group)
-        self.weights_vbox.setContentsMargins(12, 10, 12, 10)
-        self.weights_vbox.setSpacing(6)
+        self.weights_vbox.setContentsMargins(8, 8, 8, 8)
+        self.weights_vbox.setSpacing(5)
 
         self.weights_container = QWidget()
         self.weights_container_layout = QVBoxLayout(self.weights_container)
         self.weights_container_layout.setContentsMargins(0, 0, 0, 0)
-        self.weights_container_layout.setSpacing(6)
+        self.weights_container_layout.setSpacing(5)
         self.weights_vbox.addWidget(self.weights_container)
 
-        # Student Export Actions: Download PNG (300 DPI) & Clipboard
+        # Export Buttons
         export_row = QHBoxLayout()
-        export_row.setSpacing(8)
+        export_row.setSpacing(6)
 
-        btn_export_png = QPushButton("📊 AHP Grafiğini İndir (PNG 300 DPI)")
+        btn_export_png = QPushButton("📊 Export Chart (PNG 300 DPI)")
         btn_export_png.setStyleSheet(
-            "background: #0f766e; color: white; font-weight: bold; padding: 7px 12px; border-radius: 6px; font-size: 11px;"
+            "background: #0f766e; color: white; font-weight: bold; padding: 6px 10px; border-radius: 4px; font-size: 11px;"
         )
         btn_export_png.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_export_png.setToolTip("Sentez paftası veya rapor için yüksek çözünürlüklü (300 DPI) yayın kalitesinde görsel kaydeder.")
+        btn_export_png.setToolTip("Export a publication-grade (300 DPI) infographic graphic for synthesis posters and reports.")
         btn_export_png.clicked.connect(self._export_chart_png)
         export_row.addWidget(btn_export_png, 2)
 
-        btn_copy_chart = QPushButton("📋 Panoya Kopyala")
+        btn_copy_chart = QPushButton("📋 Copy to Clipboard")
         btn_copy_chart.setStyleSheet(
-            "background: #f1f5f9; color: #1e293b; font-weight: bold; padding: 7px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 11px;"
+            "background: #f1f5f9; color: #1e293b; font-weight: bold; padding: 6px 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 11px;"
         )
         btn_copy_chart.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_copy_chart.setToolTip("Grafiği doğrudan panoya kopyalar (Ctrl+V ile Photoshop, InDesign veya Word'e yapıştırın).")
+        btn_copy_chart.setToolTip("Copies 300 DPI chart directly to clipboard for pasting into Word, Photoshop, or InDesign.")
         btn_copy_chart.clicked.connect(self._copy_chart_to_clipboard)
         export_row.addWidget(btn_copy_chart, 1)
 
         self.weights_vbox.addLayout(export_row)
-        right_layout.addWidget(weights_group)
+        bottom_layout.addWidget(weights_group)
 
-        # 3. Output Actions & Integration
-        actions_group = QGroupBox("Sonuç ve Senteze Aktarım")
+        # 3. Results & Integration
+        actions_group = QGroupBox("Results & Synthesis Workflow")
         actions_group.setStyleSheet("QGroupBox { font-weight: bold; color: #1e293b; }")
         actions_vbox = QVBoxLayout(actions_group)
-        actions_vbox.setContentsMargins(12, 10, 12, 10)
-        actions_vbox.setSpacing(8)
+        actions_vbox.setContentsMargins(8, 8, 8, 8)
+        actions_vbox.setSpacing(6)
 
         csv_row = QHBoxLayout()
         csv_lbl = QLabel("WLC CSV:")
-        csv_lbl.setStyleSheet("font-weight: bold; font-size: 11px;")
+        csv_lbl.setStyleSheet("font-weight: bold; font-size: 10px;")
         self.csv_line = QLineEdit()
         self.csv_line.setReadOnly(True)
-        self.csv_line.setStyleSheet("background: #f8fafc; font-family: monospace; font-size: 11px;")
-        btn_copy_csv = QPushButton("📋 Kopyala")
+        self.csv_line.setStyleSheet("background: #f8fafc; font-family: monospace; font-size: 10px;")
+        btn_copy_csv = QPushButton("📋 Copy")
         btn_copy_csv.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_copy_csv.clicked.connect(self._copy_csv_weights)
         csv_row.addWidget(csv_lbl)
@@ -893,45 +875,29 @@ class AHPStudioDialog(QDialog):
         csv_row.addWidget(btn_copy_csv)
         actions_vbox.addLayout(csv_row)
 
-        btn_add_layer = QPushButton("💾 AHP Tablosunu QGIS'e Ekle (Vektör Katmanı)")
-        btn_add_layer.setStyleSheet(
-            "background: #1b7e5a; color: white; font-weight: bold; padding: 8px; border-radius: 6px;"
-        )
+        btn_add_layer = QPushButton("💾 Add AHP Table to QGIS (Vector Layer)")
+        btn_add_layer.setStyleSheet("background: #0f766e; color: white; font-weight: bold; padding: 6px; border-radius: 4px; font-size: 11px;")
         btn_add_layer.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_add_layer.clicked.connect(self._add_ahp_vector_layer)
         actions_vbox.addWidget(btn_add_layer)
 
-        btn_run_wlc = QPushButton("🚀 WLC Suitability Aracını Aç (Ağırlıkları Doğrudan Aktar)")
-        btn_run_wlc.setStyleSheet(
-            "background: #2f7aa8; color: white; font-weight: bold; padding: 9px; border-radius: 6px; font-size: 13px;"
-        )
+        btn_run_wlc = QPushButton("🚀 Launch WLC Suitability Tool (Pass Weights)")
+        btn_run_wlc.setStyleSheet("background: #0284c7; color: white; font-weight: bold; padding: 7px; border-radius: 4px; font-size: 12px;")
         btn_run_wlc.setCursor(Qt.CursorShape.PointingHandCursor)
         btn_run_wlc.clicked.connect(self._launch_wlc_with_weights)
         actions_vbox.addWidget(btn_run_wlc)
 
-        btn_raw_ahp = QPushButton("⚙️ Gelişmiş: Standart Processing Aracını Aç (JSON Modu)")
-        btn_raw_ahp.setStyleSheet("background: #f1f5f9; color: #475569; font-size: 11px; padding: 5px; border-radius: 4px;")
-        btn_raw_ahp.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_raw_ahp.clicked.connect(self._open_raw_processing_ahp)
-        actions_vbox.addWidget(btn_raw_ahp)
+        bottom_layout.addWidget(actions_group)
+        bottom_layout.addStretch()
 
-        right_layout.addWidget(actions_group)
-        right_layout.addStretch()
+        bottom_scroll.setWidget(bottom_content)
+        splitter.addWidget(bottom_scroll)
 
-        splitter.addWidget(right_widget)
-        splitter.setStretchFactor(0, 60)
-        splitter.setStretchFactor(1, 40)
+        splitter.setStretchFactor(0, 52)
+        splitter.setStretchFactor(1, 48)
         main_layout.addWidget(splitter)
 
-        # Bottom Close Button
-        bottom_bar = QHBoxLayout()
-        bottom_bar.addStretch()
-        btn_close = QPushButton("Kapat")
-        btn_close.setFixedWidth(110)
-        btn_close.setStyleSheet("padding: 6px; font-weight: bold;")
-        btn_close.clicked.connect(self.accept)
-        bottom_bar.addWidget(btn_close)
-        main_layout.addLayout(bottom_bar)
+        self.setWidget(container)
 
     def _auto_pick_score_layers(self):
         project_layers = [l for l in QgsProject.instance().mapLayers().values() if isinstance(l, QgsRasterLayer)]
@@ -941,7 +907,7 @@ class AHPStudioDialog(QDialog):
             QMessageBox.information(
                 self,
                 "PlanX AHP Studio",
-                "Mevcut QGIS projesinde adı 'score_' içeren bir puan rasterı bulunamadı. Standart kriter şablonu korunuyor.",
+                "No raster layer containing 'score_' in its name was found in the current project. Keeping default template.",
             )
             return
 
@@ -949,12 +915,12 @@ class AHPStudioDialog(QDialog):
         self.criteria_keys = [l.name() for l in score_layers]
         self.criteria_names = [l.name() for l in score_layers]
         n = len(self.criteria_names)
-        self.crit_summary_lbl.setText(f"Aktif Kriter Sayısı: {n} (Projedeki score_ katmanları)")
-        self._load_matrix(np.eye(n, dtype=float), scenario_name="Proje Katmanları (Eşit)")
+        self.crit_summary_lbl.setText(f"Active Criteria: {n} (from project)")
+        self._load_matrix(np.ones((n, n), dtype=float), scenario_name="Project Layers (Equal)")
         QMessageBox.information(
             self,
             "PlanX AHP Studio",
-            f"Projedeki {n} adet puan katmanı kriter olarak yüklendi!\n" + "\n".join(f"• {k}" for k in self.criteria_keys),
+            f"Successfully loaded {n} score layers as MCDA criteria:\n" + "\n".join(f"• {k}" for k in self.criteria_keys),
         )
 
     def _load_matrix(self, new_matrix: np.ndarray, scenario_name: Optional[str] = None):
@@ -962,7 +928,7 @@ class AHPStudioDialog(QDialog):
             self.current_scenario_title = scenario_name
         n = len(self.criteria_names)
         if new_matrix.shape != (n, n):
-            self.matrix = np.eye(n, dtype=float)
+            self.matrix = np.ones((n, n), dtype=float)
         else:
             self.matrix = new_matrix.copy()
 
@@ -994,10 +960,6 @@ class AHPStudioDialog(QDialog):
         self.cards_layout.addStretch()
 
     def _rebuild_weights_widgets(self):
-        """
-        Recreates persistent CriterionWeightWidget instances only when criteria set changes.
-        Eliminates duplicate labels and ghosting artifacts.
-        """
         while self.weights_container_layout.count():
             item = self.weights_container_layout.takeAt(0)
             w = item.widget()
@@ -1052,7 +1014,7 @@ class AHPStudioDialog(QDialog):
     def on_card_value_changed(self, i: int, j: int, val: float):
         if self._updating_matrix:
             return
-        self.current_scenario_title = "Özel AHP Senaryosu (Kullanıcı Tanımlı)"
+        self.current_scenario_title = "Custom User AHP Scenario"
         self.matrix[i, j] = val
         self.matrix[j, i] = 1.0 / val
 
@@ -1091,7 +1053,7 @@ class AHPStudioDialog(QDialog):
             self._updating_matrix = False
             return
 
-        self.current_scenario_title = "Özel AHP Senaryosu (Kullanıcı Tanımlı)"
+        self.current_scenario_title = "Custom User AHP Scenario"
         self.matrix[r, c] = val
         self.matrix[c, r] = 1.0 / val
 
@@ -1117,31 +1079,33 @@ class AHPStudioDialog(QDialog):
         ri = res["ri"]
         cr_ok = res["cr_ok"]
 
-        # 1. Update Consistency Gate Card
+        # 1. Update Consistency Diagnostics
         self.stat_lambda.setText(f"{lam:.4f}")
         self.stat_ci.setText(f"{ci:.4f}")
         self.stat_ri.setText(f"{ri:.2f}")
 
         if cr_ok:
-            self.cr_card.setStyleSheet("border-radius: 8px; padding: 12px; background: #e8f5e9; border: 2px solid #4caf50;")
-            self.cr_badge_lbl.setText(f"🟢 TUTARLI (CR = {cr:.4f} ≤ 0.10)")
-            self.cr_badge_lbl.setStyleSheet("font-size: 15px; font-weight: bold; color: #2e7d32;")
+            self.header_cr_badge.setText(f"🟢 CR = {cr:.4f}")
+            self.header_cr_badge.setStyleSheet("background: #065f46; color: #a7f3d0; font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 4px;")
+            self.cr_card.setStyleSheet("border-radius: 6px; padding: 8px; background: #ecfdf5; border: 1px solid #10b981;")
+            self.cr_badge_lbl.setText(f"🟢 CONSISTENT (CR = {cr:.4f} ≤ 0.10)")
+            self.cr_badge_lbl.setStyleSheet("font-size: 12px; font-weight: bold; color: #065f46;")
             self.cr_desc_lbl.setText(
-                "Tebrikler! Kararlar Saaty tutarlılık kriterini sağlamaktadır (CR ≤ %10). "
-                "Matris mantıksal çelişki içermez ve WLC sentez analizi için güvenle kullanılabilir."
+                "Judgments satisfy Saaty's consistency criterion (CR ≤ 0.10). The pairwise matrix is mathematically sound and reliable for WLC suitability analysis."
             )
-            self.cr_desc_lbl.setStyleSheet("font-size: 11px; color: #1b5e20;")
+            self.cr_desc_lbl.setStyleSheet("font-size: 10px; color: #047857;")
         else:
-            self.cr_card.setStyleSheet("border-radius: 8px; padding: 12px; background: #ffebee; border: 2px solid #ef5350;")
-            self.cr_badge_lbl.setText(f"🔴 TUTARSIZ (CR = {cr:.4f} > 0.10)")
-            self.cr_badge_lbl.setStyleSheet("font-size: 15px; font-weight: bold; color: #c62828;")
+            self.header_cr_badge.setText(f"🔴 CR = {cr:.4f}")
+            self.header_cr_badge.setStyleSheet("background: #991b1b; color: #fecaca; font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 4px;")
+            self.cr_card.setStyleSheet("border-radius: 6px; padding: 8px; background: #fef2f2; border: 1px solid #ef4444;")
+            self.cr_badge_lbl.setText(f"🔴 INCONSISTENT (CR = {cr:.4f} > 0.10)")
+            self.cr_badge_lbl.setStyleSheet("font-size: 12px; font-weight: bold; color: #991b1b;")
             self.cr_desc_lbl.setText(
-                f"DİKKAT: Tutarsızlık oranı %{cr*100:.1f} > %10 eşiğidir! İkili tercihlerinizde döngüsel çelişki tespit edildi. "
-                "Lütfen ikili karşılaştırma kartlarını gözden geçirerek dereceleri dengeleyin."
+                f"WARNING: Consistency ratio ({cr*100:.1f}%) exceeds the 10% threshold! Intransitive preferences detected. Please adjust pairwise comparisons to restore consistency."
             )
-            self.cr_desc_lbl.setStyleSheet("font-size: 11px; color: #b71c1c;")
+            self.cr_desc_lbl.setStyleSheet("font-size: 10px; color: #b91c1c;")
 
-        # 2. Update Weights in-place with zero churn
+        # 2. Update Weights in-place
         sorted_indices = sorted(range(len(weights)), key=lambda k: weights[k], reverse=True)
         ranks = {idx: rank + 1 for rank, idx in enumerate(sorted_indices)}
 
@@ -1153,13 +1117,13 @@ class AHPStudioDialog(QDialog):
         self.csv_line.setText(csv_str)
 
     def _export_chart_png(self):
-        """Exports 300 DPI high-quality publication infographic to PNG file."""
-        default_filename = f"AHP_Kriter_Agirliklari_{self.current_scenario_title.replace(' ', '_')}.png"
+        safe_title = self.current_scenario_title.replace(" ", "_").replace("(", "").replace(")", "").replace("/", "_")
+        default_filename = f"AHP_Weights_Chart_{safe_title}.png"
         file_path, _ = QFileDialog.getSaveFileName(
             self,
-            "Yüksek Çözünürlüklü AHP Grafiğini Kaydet (300 DPI)",
+            "Export High-Resolution AHP Chart (300 DPI)",
             default_filename,
-            "PNG Görseli (*.png);;Tüm Dosyalar (*.*)",
+            "PNG Image (*.png);;All Files (*.*)",
         )
         if not file_path:
             return
@@ -1181,13 +1145,12 @@ class AHPStudioDialog(QDialog):
 
         QMessageBox.information(
             self,
-            "AHP Grafiği Kaydedildi",
-            f"🎯 300 DPI yüksek çözünürlüklü AHP grafiği başarıyla kaydedildi:\n\n{file_path}\n\n"
-            "Görseli Photoshop, InDesign veya QGIS Print Layout sentez paftanıza doğrudan ekleyebilirsiniz.",
+            "AHP Chart Exported",
+            f"🎯 Publication-grade (300 DPI) AHP infographic exported successfully:\n\n{file_path}\n\n"
+            "Ready to be inserted directly into your synthesis poster, report, or presentation.",
         )
 
     def _copy_chart_to_clipboard(self):
-        """Renders 300 DPI infographic to memory and copies directly to OS clipboard."""
         res = calculate_ahp(self.matrix)
         raw_bytes = generate_ahp_infographic(
             criteria_names=[self._short_name(n) for n in self.criteria_names],
@@ -1204,7 +1167,7 @@ class AHPStudioDialog(QDialog):
         )
 
         if not raw_bytes:
-            QMessageBox.warning(self, "Hata", "Grafik oluşturulamadı.")
+            QMessageBox.warning(self, "Export Error", "Could not generate infographic image.")
             return
 
         qimg = QImage()
@@ -1212,47 +1175,47 @@ class AHPStudioDialog(QDialog):
             QApplication.clipboard().setImage(qimg)
             QMessageBox.information(
                 self,
-                "Panoya Kopyalandı",
-                "📋 300 DPI AHP analizi görseli başarıyla panoya kopyalandı!\n\n"
-                "Ctrl+V kısayolu ile InDesign, Photoshop, Word veya Canva dokümanınıza doğrudan yapıştırabilirsiniz.",
+                "Copied to Clipboard",
+                "📋 300 DPI AHP summary infographic copied to system clipboard!\n\n"
+                "Press Ctrl+V to paste into InDesign, Photoshop, Word, or presentation slides.",
             )
         else:
-            QMessageBox.warning(self, "Hata", "Görsel panoya aktarılırken format hatası oluştu.")
+            QMessageBox.warning(self, "Export Error", "Failed to transfer image to clipboard buffer.")
 
     def _apply_tema_a(self):
         if len(self.criteria_names) == 6:
-            self._load_matrix(np.array(TEMA_A_MATRIX, dtype=float), scenario_name="Tema A (Afet Odaklı)")
+            self._load_matrix(np.array(THEME_A_MATRIX, dtype=float), scenario_name="Theme A (Hazard Priority)")
             QMessageBox.information(
                 self,
-                "Tema A Yüklendi",
-                "🛡️ Tema A (Afet Odaklı) Senaryosu başarıyla yüklendi!\n"
-                "• Diri Fay: %38.3\n• Taşkın (HAND): %25.0\n• Eğim: %15.8\n• Tarım: %7.7\n• Yol: %6.6\n• Bina: %6.6\n"
-                "Tutarlılık Oranı: CR = 0.0115 (Mükemmel Tutarlı)",
+                "Theme A Loaded",
+                "🛡️ Theme A (Hazard Priority) loaded successfully!\n"
+                "• Active Fault: 36.7%\n• Flood (HAND): 30.0%\n• Slope: 13.4%\n• Agriculture: 7.3%\n• Road: 6.3%\n• Built-up: 6.3%\n"
+                "Consistency Ratio: CR = 0.0400 (Consistent)",
             )
         else:
             self._apply_equal()
 
     def _apply_tema_b(self):
         if len(self.criteria_names) == 6:
-            self._load_matrix(np.array(TEMA_B_MATRIX, dtype=float), scenario_name="Tema B (Erişim Odaklı)")
+            self._load_matrix(np.array(THEME_B_MATRIX, dtype=float), scenario_name="Theme B (Access Priority)")
             QMessageBox.information(
                 self,
-                "Tema B Yüklendi",
-                "🚗 Tema B (Erişim Odaklı) Senaryosu başarıyla yüklendi!\n"
-                "• Karayolu: %28.5\n• Mevcut Yapılı Çevre: %28.5\n• Tarım: %16.8\n• Eğim: %12.0\n• Taşkın: %8.7\n• Fay: %5.5\n"
-                "Tutarlılık Oranı: CR = 0.0199 (Mükemmel Tutarlı)",
+                "Theme B Loaded",
+                "🚗 Theme B (Access Priority) loaded successfully!\n"
+                "• Road: 28.5%\n• Built-up: 28.5%\n• Agriculture: 16.8%\n• Slope: 12.0%\n• Flood: 8.7%\n• Fault: 5.5%\n"
+                "Consistency Ratio: CR = 0.0199 (Consistent)",
             )
         else:
             self._apply_equal()
 
     def _apply_equal(self):
         n = len(self.criteria_names)
-        self._load_matrix(np.eye(n, dtype=float), scenario_name="Eşit Ağırlık (1/N)")
+        self._load_matrix(np.ones((n, n), dtype=float), scenario_name="Equal Weights (1/N)")
 
     def _copy_csv_weights(self):
         txt = self.csv_line.text().strip()
         QApplication.clipboard().setText(txt)
-        QMessageBox.information(self, "Panoya Kopyalandı", f"WLC ağırlık dizisi panoya kopyalandı:\n{txt}")
+        QMessageBox.information(self, "Copied to Clipboard", f"WLC weights copied to clipboard:\n{txt}")
 
     def _add_ahp_vector_layer(self):
         res = calculate_ahp(self.matrix)
@@ -1268,7 +1231,7 @@ class AHPStudioDialog(QDialog):
         fields.append(QgsField("cr", QMetaType.Type.Double))
         fields.append(QgsField("cr_ok", QMetaType.Type.Int))
 
-        layer_name = f"AHP_Agirliklari_CR_{cr:.4f}"
+        layer_name = f"AHP_Weights_CR_{cr:.4f}"
         mem_layer = QgsVectorLayer("None", layer_name, "memory")
         dp = mem_layer.dataProvider()
         dp.addAttributes(fields)
@@ -1288,9 +1251,9 @@ class AHPStudioDialog(QDialog):
         QgsProject.instance().addMapLayer(mem_layer)
         QMessageBox.information(
             self,
-            "Katman Eklendi",
-            f"'{layer_name}' öznitelik tablosu başarıyla QGIS katman paneline eklendi!\n"
-            f"Kriterler, ağırlıklar ve CR={cr:.4f} bilgisi kaydedildi.",
+            "Layer Added",
+            f"'{layer_name}' attribute table added to QGIS layer panel!\n"
+            f"Criteria, weights, and CR={cr:.4f} recorded.",
         )
 
     def _launch_wlc_with_weights(self):
@@ -1307,16 +1270,29 @@ class AHPStudioDialog(QDialog):
         if matching_layers:
             params["INPUT_RASTERS"] = matching_layers
 
-        self.accept()
         processing.execAlgorithmDialog("planx_suitability_lab:wlc_suitability", params)
 
     def _open_raw_processing_ahp(self):
         json_mat = json.dumps(self.matrix.tolist())
-        self.accept()
         processing.execAlgorithmDialog("planx_suitability_lab:ahp_weights", {"MATRIX_JSON": json_mat})
 
 
-def open_ahp_studio(iface=None, parent=None):
-    dlg = AHPStudioDialog(iface, parent)
-    dlg.exec()
-    return dlg
+def open_ahp_studio(iface=None, parent=None) -> AHPStudioDockWidget:
+    """
+    Opens PlanX AHP Studio docked on the right side of QGIS.
+    If already opened, brings it to front and focuses it.
+    """
+    if iface is not None:
+        main_win = iface.mainWindow()
+        dock = main_win.findChild(QDockWidget, "PlanX_AHP_Studio_Dock")
+        if dock is None:
+            dock = AHPStudioDockWidget(iface, main_win)
+            iface.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, dock)
+        dock.show()
+        dock.raise_()
+        dock.activateWindow()
+        return dock
+    else:
+        dock = AHPStudioDockWidget(iface, parent)
+        dock.show()
+        return dock
