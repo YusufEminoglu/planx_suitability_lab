@@ -3,7 +3,7 @@ name=PlanX Suitability Lab
 qgisMinimumVersion=3.28
 qgisMaximumVersion=4.99
 description=Raster-based MCDA land suitability workflows with explainable analytics and uncertainty.
-version=1.7.1
+version=1.7.3
 author=Yusuf Eminoglu
 email=yusuf.eminoglu@deu.edu.tr
 
@@ -23,6 +23,8 @@ deprecated=False
 license=GPL-3
 
 changelog=
+    PlanX Suitability Lab 1.7.3 - Interactive AHP Studio improvements: resolved weight progress bar label overlapping via zero-churn dynamic cards, added publication-grade 300 DPI AHP Infographic export (PNG and OS Clipboard) for synthesis posters and reports, and refined Saaty matrix reciprocal view.
+    PlanX Suitability Lab 1.7.2 - Added interactive AHP Studio with verbal pairwise comparison cards (Saaty 1-9 scale), real-time consistency ratio (CR) and eigenvalue diagnostics, live weight distribution bars, preset planning themes (Disaster/Growth), and direct WLC Suitability integration.
     PlanX Suitability Lab 1.7.1 - Vector Rasterizer can now build a 0/1 constraint mask on the analysis grid: new optional reference raster (extent, cell size and CRS taken from it, vector reprojected when needed), background value and treat-background-as-NoData inputs. Defaults keep the previous behaviour.
     PlanX Suitability Lab 1.7.0 - Fixed Constraint Builder producing an all-nodata mask on Windows, inputs beyond a tool's limit being dropped silently, AHP accepting non-reciprocal matrices and outputs losing real zero scores to nodata. Added One-at-a-Time Weight Sensitivity (69 algorithms) and colour-ramp styling for suitability outputs and masks.
     1.6.9 - Redesign plugin icon to high-end 3D tactile brand design with circular teal pedestal, zero margin, and refreshed documentation links.
@@ -31,4 +33,3 @@ changelog=
     PlanX Suitability Lab 1.6.2 - QGIS 4 / Qt6 readiness: scoped all 169 Qt5-style enum accesses across 63 algorithm files (QgsProcessing.SourceType.*, QgsProcessingParameterNumber.Type.*), verified on QGIS 3.44 LTR and QGIS 4. No functional change.
     PlanX Suitability Lab 1.6.1 - Security hardening: all remaining Bandit findings resolved in code (try/except-pass patterns rewritten with contextlib.suppress; no skip configuration left), so the Hub security scan passes with zero findings. Packaging hygiene: internal work-order files are always excluded from the Hub zip.
     PlanX Suitability Lab 1.6.0 - English-only conversion: removed bilingual EN/TR dashboard mode and all Turkish UI text. Added in-toolbox shortHelpString and helpUrl for all 68 algorithms. New pure-logic unit tests for weight derivation math (AHP/Entropy/PCA/CRITIC edge cases). Fixed single-criterion CRITIC and degenerate-covariance PCA edge cases in _mcda_utils. Dashboard catalog corrected to 68 entries (added missing weight_consolidator). Updated docs and command guide.
-

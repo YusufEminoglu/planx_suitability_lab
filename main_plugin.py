@@ -42,6 +42,11 @@ class PlanXSuitabilityLabPlugin:
             self.iface.addToolBarIcon(self.action)
             self.iface.addPluginToMenu('&PlanX Suitability Lab', self.action)
 
+            # Direct AHP Studio Action
+            self.ahp_action = QAction('✨ AHP Studio (İnteraktif Ağırlık Tasarımcısı)', self.iface.mainWindow())
+            self.ahp_action.triggered.connect(self.open_ahp_studio)
+            self.iface.addPluginToMenu('&PlanX Suitability Lab', self.ahp_action)
+
     def open_dashboard(self):
         if self.dialog is None:
             self.dialog = SuitabilityDashboard(self.iface, self.iface.mainWindow())
@@ -49,10 +54,16 @@ class PlanXSuitabilityLabPlugin:
         self.dialog.raise_()
         self.dialog.activateWindow()
 
+    def open_ahp_studio(self):
+        from .ahp_studio import open_ahp_studio
+        open_ahp_studio(self.iface, self.iface.mainWindow())
+
     def unload(self):
         if self.iface and self.action:
             self.iface.removePluginMenu('&PlanX Suitability Lab', self.action)
             self.iface.removeToolBarIcon(self.action)
+        if self.iface and hasattr(self, 'ahp_action') and self.ahp_action:
+            self.iface.removePluginMenu('&PlanX Suitability Lab', self.ahp_action)
         if self.provider:
             QgsApplication.processingRegistry().removeProvider(self.provider)
             self.provider = None

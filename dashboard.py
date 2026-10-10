@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 from __future__ import annotations
 
 from datetime import datetime
@@ -576,6 +576,11 @@ class SuitabilityDashboard(QDialog):
         refresh = QPushButton("Refresh")
         refresh.clicked.connect(self._refresh)
         footer.addWidget(refresh)
+        btn_ahp = QPushButton("✨ AHP Studio")
+        btn_ahp.setToolTip("İnteraktif AHP Ağırlık ve Tutarlılık (CR) Tasarımcısını Aç")
+        btn_ahp.setStyleSheet("background: #1b7e5a; color: white; font-weight: bold;")
+        btn_ahp.clicked.connect(self._open_ahp_studio)
+        footer.addWidget(btn_ahp)
         hint = QLabel("Shortcuts: Ctrl+N current model stage | Ctrl+K module search | Ctrl+R refresh | Ctrl+D status | Ctrl+H help")
         hint.setStyleSheet("color:#35545f;")
         footer.addWidget(hint, 1)
@@ -795,7 +800,20 @@ class SuitabilityDashboard(QDialog):
         self.recent_runs = []
         self._refresh_runlog()
 
+    def _open_ahp_studio(self):
+        try:
+            from .ahp_studio import open_ahp_studio
+            open_ahp_studio(self.iface, self)
+            self._track_run("planx_suitability_lab:ahp_weights", "AHP Interactive Studio")
+            return True
+        except Exception as exc:
+            QMessageBox.warning(self, "AHP Studio Hatası", f"AHP Studio başlatılamadı: {exc}")
+            return False
+
     def _run_algorithm(self, algo_id, label):
+        if algo_id == "planx_suitability_lab:ahp_weights":
+            return self._open_ahp_studio()
+
         reg = QgsApplication.processingRegistry()
         if not _processing_provider_enabled() or reg.algorithmById(algo_id) is None:
             QMessageBox.information(

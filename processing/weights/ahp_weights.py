@@ -52,18 +52,25 @@ class AHPWeightsAlgorithm(QgsProcessingAlgorithm):
     def helpUrl(self):
         return "https://github.com/YusufEminoglu/planx_suitability_lab"
 
+    CRITERIA_NAMES = 'CRITERIA_NAMES'
+
     def createInstance(self):
         return AHPWeightsAlgorithm()
 
     def initAlgorithm(self, config=None):
         self.addParameter(QgsProcessingParameterString(self.MATRIX_JSON, 'Pairwise matrix JSON', multiLine=True, defaultValue='[[1,2,3],[0.5,1,2],[0.3333,0.5,1]]'))
+        self.addParameter(QgsProcessingParameterString(self.CRITERIA_NAMES, 'Criteria names (comma-separated, optional)', defaultValue='', optional=True))
         self.addParameter(QgsProcessingParameterFeatureSink(self.OUTPUT, 'AHP weights table', QgsProcessing.SourceType.TypeVector))
 
     def processAlgorithm(self, parameters, context, feedback):
         txt = self.parameterAsString(parameters, self.MATRIX_JSON, context)
+        crit_names_raw = self.parameterAsString(parameters, self.CRITERIA_NAMES, context)
+        names = [x.strip() for x in crit_names_raw.split(',') if x.strip()] if crit_names_raw else []
+
         w, cr = ahp_weights_from_json(txt)
         fields = QgsFields()
         fields.append(QgsField('criterion_id', QMetaType.Type.Int))
+        fields.append(QgsField('criterion_name', QMetaType.Type.QString))
         fields.append(QgsField('weight', QMetaType.Type.Double))
         fields.append(QgsField('cr', QMetaType.Type.Double))
         fields.append(QgsField('cr_ok', QMetaType.Type.Int))
@@ -74,6 +81,7 @@ class AHPWeightsAlgorithm(QgsProcessingAlgorithm):
         for i, wi in enumerate(w, start=1):
             f = QgsFeature(fields)
             f['criterion_id'] = i
+            f['criterion_name'] = names[i - 1] if i - 1 < len(names) else f'criterion_{i}'
             f['weight'] = float(wi)
             f['cr'] = float(cr)
             f['cr_ok'] = cr_ok
