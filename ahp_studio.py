@@ -29,6 +29,7 @@ from qgis.PyQt.QtGui import QColor, QFont, QImage
 from qgis.PyQt.QtWidgets import (
     QApplication,
     QButtonGroup,
+    QDialog,
     QDockWidget,
     QFileDialog,
     QFrame,
@@ -36,8 +37,11 @@ from qgis.PyQt.QtWidgets import (
     QGroupBox,
     QHBoxLayout,
     QHeaderView,
+    QInputDialog,
     QLabel,
     QLineEdit,
+    QListWidget,
+    QListWidgetItem,
     QMessageBox,
     QProgressBar,
     QPushButton,
@@ -75,6 +79,11 @@ RI_TABLE = {
     8: 1.41,
     9: 1.45,
     10: 1.49,
+    11: 1.51,
+    12: 1.54,
+    13: 1.56,
+    14: 1.57,
+    15: 1.59,
 }
 
 DEFAULT_CRITERIA_LABELS = [
@@ -163,7 +172,7 @@ def calculate_ahp(matrix: np.ndarray) -> dict:
     if w.sum() == 0:
         w = np.ones(n, dtype=float)
     weights = (w / w.sum()).tolist()
-    ri = RI_TABLE.get(n, 1.49)
+    ri = RI_TABLE.get(n, (1.98 * (n - 2) / n) if n > 2 else 0.0)
     ci = max(0.0, (lam - n) / max(1.0, n - 1))
     cr = 0.0 if ri == 0 else ci / ri
     return {
@@ -654,15 +663,19 @@ class AHPStudioDockWidget(QDockWidget):
         self._updating_matrix = False
         self._init_default_criteria()
         self._setup_ui()
-        self._load_matrix(np.array(THEME_A_MATRIX, dtype=float), scenario_name="Theme A (Hazard Priority)")
+        n = len(self.criteria_names)
+        if n == 6 and self.criteria_keys == [k for k, _ in DEFAULT_CRITERIA_LABELS]:
+            self._load_matrix(np.array(THEME_A_MATRIX, dtype=float), scenario_name="Theme A (Hazard Priority)")
+        else:
+            self._load_matrix(np.ones((n, n), dtype=float), scenario_name="Project Layers (Equal)")
 
     def _init_default_criteria(self):
         project_layers = [l for l in QgsProject.instance().mapLayers().values() if isinstance(l, QgsRasterLayer)]
         score_layers = [l for l in project_layers if "score_" in l.name().lower() or "score" in l.name().lower()]
 
         if len(score_layers) >= 2:
-            self.criteria_keys = [l.name() for l in score_layers[:6]]
-            self.criteria_names = [l.name() for l in score_layers[:6]]
+            self.criteria_keys = [l.name() for l in score_layers[:15]]
+            self.criteria_names = [l.name() for l in score_layers[:15]]
         else:
             self.criteria_keys = [k for k, _ in DEFAULT_CRITERIA_LABELS]
             self.criteria_names = [f"{lbl}" for _, lbl in DEFAULT_CRITERIA_LABELS]
@@ -727,6 +740,12 @@ class AHPStudioDockWidget(QDockWidget):
         self.crit_summary_lbl.setStyleSheet("font-weight: bold; color: #0f766e; font-size: 11px;")
         crit_bar.addWidget(self.crit_summary_lbl)
         crit_bar.addStretch()
+
+        btn_choose = QPushButton("📁 Choose Layers...")
+        btn_choose.setStyleSheet("background: #f8fafc; border: 1px solid #cbd5e1; font-weight: bold; padding: 3px 8px; border-radius: 4px; font-size: 10px;")
+        btn_choose.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_choose.clicked.connect(self._choose_project_layers_dialog)
+        crit_bar.addWidget(btn_choose)
 
         btn_auto_pick = QPushButton("⚡ Auto-detect Score Layers")
         btn_auto_pick.setStyleSheet("background: #f8fafc; border: 1px solid #cbd5e1; font-weight: bold; padding: 3px 8px; border-radius: 4px; font-size: 10px;")
@@ -907,21 +926,98 @@ class AHPStudioDockWidget(QDockWidget):
             QMessageBox.information(
                 self,
                 "PlanX AHP Studio",
-                "No raster layer containing 'score_' in its name was found in the current project. Keeping default template.",
+                "No raster layer containing 'score_' in its name was found in the current project. Keeping current criteria.",
             )
             return
 
-        score_layers = score_layers[:8]
+        if len(score_layers) > 15:
+            score_layers = score_layers[:15]
+            QMessageBox.information(
+                self,
+                "PlanX AHP Studio",
+                "Found more than 15 score layers. Selected the first 15 layers for AHP matrix consistency stability.",
+            )
+
         self.criteria_keys = [l.name() for l in score_layers]
         self.criteria_names = [l.name() for l in score_layers]
         n = len(self.criteria_names)
         self.crit_summary_lbl.setText(f"Active Criteria: {n} (from project)")
-        self._load_matrix(np.ones((n, n), dtype=float), scenario_name="Project Layers (Equal)")
+        self._load_matrix(np.ones((n, n), dtype=float), scenario_name=f"Project Layers ({n} criteria)")
         QMessageBox.information(
             self,
             "PlanX AHP Studio",
             f"Successfully loaded {n} score layers as MCDA criteria:\n" + "\n".join(f"• {k}" for k in self.criteria_keys),
         )
+
+    def _choose_project_layers_dialog(self):
+        project_layers = [l for l in QgsProject.instance().mapLayers().values() if isinstance(l, QgsRasterLayer)]
+        if not project_layers:
+            text, ok = QInputDialog.getText(
+                self,
+                "Custom Criteria Definition",
+                "Enter criteria names separated by commas (e.g. Slope, Flood, Fault, Landuse):",
+                QLineEdit.EchoMode.Normal,
+                ", ".join(self._short_name(n) for n in self.criteria_names),
+            )
+            if not ok or not text.strip():
+                return
+            items = [s.strip() for s in text.split(",") if s.strip()]
+            if len(items) < 2:
+                QMessageBox.warning(self, "Criteria Error", "AHP requires at least 2 criteria for pairwise comparison.")
+                return
+            self.criteria_keys = items[:15]
+            self.criteria_names = items[:15]
+            n = len(self.criteria_names)
+            self.crit_summary_lbl.setText(f"Active Criteria: {n} (custom)")
+            self._load_matrix(np.ones((n, n), dtype=float), scenario_name=f"Custom ({n} criteria)")
+            return
+
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Select Project Raster Layers for AHP")
+        dialog.resize(360, 420)
+        vbox = QVBoxLayout(dialog)
+
+        info = QLabel("Select 2 to 15 raster layers to include as MCDA criteria:")
+        info.setWordWrap(True)
+        vbox.addWidget(info)
+
+        list_widget = QListWidget()
+        for lyr in project_layers:
+            item = QListWidgetItem(lyr.name())
+            item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
+            is_checked = lyr.name() in self.criteria_keys or "score" in lyr.name().lower()
+            item.setCheckState(Qt.CheckState.Checked if is_checked else Qt.CheckState.Unchecked)
+            list_widget.addItem(item)
+        vbox.addWidget(list_widget, 1)
+
+        btn_box = QHBoxLayout()
+        btn_ok = QPushButton("OK")
+        btn_ok.clicked.connect(dialog.accept)
+        btn_cancel = QPushButton("Cancel")
+        btn_cancel.clicked.connect(dialog.reject)
+        btn_box.addStretch()
+        btn_box.addWidget(btn_cancel)
+        btn_box.addWidget(btn_ok)
+        vbox.addLayout(btn_box)
+
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            selected = []
+            for idx in range(list_widget.count()):
+                item = list_widget.item(idx)
+                if item.checkState() == Qt.CheckState.Checked:
+                    selected.append(item.text())
+            if len(selected) < 2:
+                QMessageBox.warning(self, "Selection Error", "Please select at least 2 raster layers for AHP.")
+                return
+            if len(selected) > 15:
+                selected = selected[:15]
+                QMessageBox.information(self, "Selection Notice", "Limited to top 15 layers for AHP consistency stability.")
+
+            self.criteria_keys = selected
+            self.criteria_names = selected
+            n = len(self.criteria_names)
+            self.crit_summary_lbl.setText(f"Active Criteria: {n} (project)")
+            self._load_matrix(np.ones((n, n), dtype=float), scenario_name=f"Project Layers ({n} criteria)")
 
     def _load_matrix(self, new_matrix: np.ndarray, scenario_name: Optional[str] = None):
         if scenario_name:

@@ -59,7 +59,7 @@ class LocalContributionAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterMultipleLayers(
                 self.INPUT_RASTERS,
-                "Criterion rasters (max 6)",
+                "Criterion rasters",
                 QgsProcessing.SourceType.TypeRaster,
             )
         )
@@ -67,7 +67,7 @@ class LocalContributionAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterFolderDestination(self.OUTPUT_DIR, "Output folder for xai_local_contribution_*"))
 
     def processAlgorithm(self, parameters, context, feedback):
-        layers = limit_layers(ensure_list(self.parameterAsLayerList(parameters, self.INPUT_RASTERS, context)), 6, "criterion rasters")
+        layers = limit_layers(ensure_list(self.parameterAsLayerList(parameters, self.INPUT_RASTERS, context)), 20, "criterion rasters")
         if not layers:
             raise Exception("No criterion rasters were provided.")
         out_dir = self.parameterAsString(parameters, self.OUTPUT_DIR, context)

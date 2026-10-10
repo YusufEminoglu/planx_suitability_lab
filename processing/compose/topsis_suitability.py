@@ -67,7 +67,7 @@ class TOPSISSuitabilityAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterMultipleLayers(
                 self.INPUT_RASTERS,
-                "Criterion rasters (max 6, normalized to 0-100)",
+                "Criterion rasters (normalized to 0-100)",
                 QgsProcessing.SourceType.TypeRaster,
             )
         )
@@ -110,7 +110,7 @@ class TOPSISSuitabilityAlgorithm(QgsProcessingAlgorithm):
         return out_ds, out_band
 
     def processAlgorithm(self, parameters, context, feedback):
-        layers = limit_layers(ensure_list(self.parameterAsLayerList(parameters, self.INPUT_RASTERS, context)), 6, "criterion rasters")
+        layers = limit_layers(ensure_list(self.parameterAsLayerList(parameters, self.INPUT_RASTERS, context)), 20, "criterion rasters")
         if not layers:
             raise QgsProcessingException("No criterion rasters provided for TOPSIS.")
         n = len(layers)

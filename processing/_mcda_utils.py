@@ -327,8 +327,11 @@ def ahp_weights_from_json(matrix_json: str) -> Tuple[List[float], float]:
         w = np.ones(n, dtype=float)
     w = w / w.sum()
 
-    ri_map = {1: 0.0, 2: 0.0, 3: 0.58, 4: 0.90, 5: 1.12, 6: 1.24, 7: 1.32, 8: 1.41, 9: 1.45, 10: 1.49}
-    ri = ri_map.get(n, 1.49)
+    ri_map = {
+        1: 0.0, 2: 0.0, 3: 0.58, 4: 0.90, 5: 1.12, 6: 1.24, 7: 1.32,
+        8: 1.41, 9: 1.45, 10: 1.49, 11: 1.51, 12: 1.54, 13: 1.56, 14: 1.57, 15: 1.59,
+    }
+    ri = ri_map.get(n, (1.98 * (n - 2) / n) if n > 2 else 0.0)
     # lambda_max >= n for a positive reciprocal matrix; float noise can put it
     # a hair below, which must not report a negative consistency ratio
     ci = max(0.0, (lam - n) / max(1.0, n - 1))
