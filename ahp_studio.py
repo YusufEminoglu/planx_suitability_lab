@@ -1289,8 +1289,11 @@ def open_ahp_studio(iface=None, parent=None) -> AHPStudioDockWidget:
             dock = AHPStudioDockWidget(iface, main_win)
             iface.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, dock)
             dash_dock = main_win.findChild(QDockWidget, "PlanX_Suitability_Lab_Dock")
-            if dash_dock is not None:
-                iface.tabifyDockWidget(dash_dock, dock)
+            if dash_dock is not None and hasattr(main_win, "tabifyDockWidget"):
+                try:
+                    main_win.tabifyDockWidget(dash_dock, dock)
+                except Exception:
+                    pass
         dock.show()
         dock.raise_()
         dock.activateWindow()
