@@ -14,6 +14,7 @@ A visual, pedagogical Analytic Hierarchy Process (AHP) weighting panel for QGIS:
 """
 from __future__ import annotations
 
+import contextlib
 import io
 import json
 import os
@@ -29,6 +30,7 @@ from qgis.PyQt.QtGui import QColor, QFont, QImage
 from qgis.PyQt.QtWidgets import (
     QApplication,
     QButtonGroup,
+    QComboBox,
     QDialog,
     QDockWidget,
     QFileDialog,
@@ -68,6 +70,12 @@ from qgis.core import (
 import processing
 
 
+# Saaty's published random consistency index (RI) for n = 1..15. The n = 16..20
+# values continue it with Alonso & Lamata (2006), "Consistency in the analytic
+# hierarchy process: a new approach", Int. J. Uncertainty, Fuzziness and
+# Knowledge-Based Systems 14(4): 445-459, doi:10.1142/S0218488506004114 — the
+# standard continuation of Saaty's table, and the reason the criterion ceiling
+# below is 20 rather than an arbitrary UI number.
 RI_TABLE = {
     1: 0.0,
     2: 0.0,
@@ -84,7 +92,20 @@ RI_TABLE = {
     13: 1.56,
     14: 1.57,
     15: 1.59,
+    16: 1.5978,
+    17: 1.6086,
+    18: 1.6181,
+    19: 1.6265,
+    20: 1.6341,
 }
+
+# Hard ceiling on AHP criteria. It is set by the RI table above and by nothing
+# else: past n = 20 no RI is published, and the 1.98 * (n - 2) / n approximation
+# circulating in the literature inflates it (1.79 where the trend gives ~1.64 at
+# n = 21). Since CR = CI / RI, an inflated RI *understates* CR, so a genuinely
+# inconsistent matrix would be reported as consistent. Every entry point caps
+# here instead of extrapolating.
+AHP_MAX_CRITERIA = max(RI_TABLE)
 
 DEFAULT_CRITERIA_LABELS = [
     ("score_01_egim_yuzde", "Slope (% Topography)"),
@@ -158,12 +179,15 @@ def calculate_ahp(matrix: np.ndarray) -> dict:
     """Calculates AHP weights, lambda_max, CI, RI, and CR from a reciprocal matrix."""
     n = matrix.shape[0]
     if n == 0:
-        return {"weights": [], "lambda_max": 0.0, "ci": 0.0, "ri": 0.0, "cr": 0.0, "cr_ok": True}
+        return {"weights": [], "lambda_max": 0.0, "ci": 0.0, "ri": 0.0, "cr": 0.0,
+                "cr_ok": True, "cr_evaluable": True}
     if n == 1:
-        return {"weights": [1.0], "lambda_max": 1.0, "ci": 0.0, "ri": 0.0, "cr": 0.0, "cr_ok": True}
+        return {"weights": [1.0], "lambda_max": 1.0, "ci": 0.0, "ri": 0.0, "cr": 0.0,
+                "cr_ok": True, "cr_evaluable": True}
     if n == 2:
         w1 = matrix[0, 1] / (1.0 + matrix[0, 1])
-        return {"weights": [w1, 1.0 - w1], "lambda_max": 2.0, "ci": 0.0, "ri": 0.0, "cr": 0.0, "cr_ok": True}
+        return {"weights": [w1, 1.0 - w1], "lambda_max": 2.0, "ci": 0.0, "ri": 0.0,
+                "cr": 0.0, "cr_ok": True, "cr_evaluable": True}
 
     vals, vecs = np.linalg.eig(matrix)
     max_idx = int(np.argmax(vals.real))
@@ -172,8 +196,21 @@ def calculate_ahp(matrix: np.ndarray) -> dict:
     if w.sum() == 0:
         w = np.ones(n, dtype=float)
     weights = (w / w.sum()).tolist()
-    ri = RI_TABLE.get(n, (1.98 * (n - 2) / n) if n > 2 else 0.0)
+    ri = RI_TABLE.get(n)
     ci = max(0.0, (lam - n) / max(1.0, n - 1))
+    if ri is None:
+        # Only a hand-built matrix can get past AHP_MAX_CRITERIA, since every
+        # entry point caps there. Fail closed rather than extrapolate: an
+        # inflated RI understates CR and would pass an inconsistent matrix.
+        return {
+            "weights": weights,
+            "lambda_max": lam,
+            "ci": ci,
+            "ri": 0.0,
+            "cr": 0.0,
+            "cr_ok": False,
+            "cr_evaluable": False,
+        }
     cr = 0.0 if ri == 0 else ci / ri
     return {
         "weights": weights,
@@ -182,6 +219,7 @@ def calculate_ahp(matrix: np.ndarray) -> dict:
         "ri": ri,
         "cr": cr,
         "cr_ok": (cr <= 0.10),
+        "cr_evaluable": True,
     }
 
 
@@ -197,181 +235,374 @@ def generate_ahp_infographic(
     scenario_title: str = "Custom Scenario",
     output_path: Optional[str] = None,
     dpi: int = 300,
+    chart_type: str = "infographic",
 ) -> Optional[bytes]:
     """
-    Renders an English publication-grade, academic AHP infographic (300 DPI)
+    Renders an English publication-grade, academic AHP infographic or specialized chart (300/600 DPI)
     suitable for posters, synthesis reports, and presentations.
+
+    Supported chart_type:
+    - 'infographic': All-in-one Executive Summary (Weights Bar + Consistency Card + Reciprocal Matrix Table)
+    - 'bar': Dedicated Priority Ranking Bar Chart (Weights, %, Equal Share Benchmark, Rank Badges)
+    - 'radar': Multi-Criteria Polar Radar / Spider Web Profile (360-degree polygon, vertex weight markers)
+    - 'donut': Proportional Donut & Composition Slices (Scenario in center, percentage callouts)
+    - 'heatmap': Saaty Reciprocal Comparison Matrix Heatmap (Log-scale intensity, numeric cells)
+    - 'pareto': Pareto Analysis & Cumulative 80/20 Distribution Curve
     """
     plt.rcParams["font.family"] = "sans-serif"
     plt.rcParams["font.sans-serif"] = ["DejaVu Sans", "Segoe UI", "Arial", "Helvetica"]
 
-    fig = plt.figure(figsize=(13, 7.6), dpi=dpi)
-    fig.patch.set_facecolor("#ffffff")
+    n = len(criteria_names)
+    weights_arr = np.array(weights, dtype=float)
 
-    fig.suptitle(
-        "PlanX Suitability Lab — Analytic Hierarchy Process (AHP) Weight & Consistency Report",
-        fontsize=13.5,
-        fontweight="bold",
-        color="#0f172a",
-        y=0.965,
-    )
-    fig.text(
-        0.5,
-        0.925,
-        f"Scenario: {scenario_title}  |  Method: Saaty (1980) Eigenvector Method  |  Criteria Count: {len(criteria_names)}",
-        ha="center",
-        fontsize=10,
-        color="#475569",
-    )
+    if chart_type == "bar":
+        fig, ax = plt.subplots(figsize=(10.5, max(5.0, n * 0.45)), dpi=dpi)
+        fig.patch.set_facecolor("#ffffff")
 
-    gs = fig.add_gridspec(
-        2,
-        2,
-        width_ratios=[1.3, 1.1],
-        height_ratios=[0.85, 1.15],
-        left=0.22,
-        right=0.94,
-        top=0.86,
-        bottom=0.10,
-        wspace=0.32,
-        hspace=0.28,
-    )
+        pairs = sorted(zip(criteria_names, weights_arr), key=lambda x: x[1])
+        s_names = [p[0] for p in pairs]
+        s_weights = [p[1] for p in pairs]
+        y_pos = np.arange(n)
 
-    # 1. Bar Chart (Left Column)
-    ax_bar = fig.add_subplot(gs[:, 0])
-    pairs = list(zip(criteria_names, weights))
-    pairs_sorted = sorted(pairs, key=lambda x: x[1])
-    sorted_names = [p[0] for p in pairs_sorted]
-    sorted_weights = [p[1] for p in pairs_sorted]
-    y_pos = np.arange(len(sorted_names))
+        colors = plt.cm.viridis(np.linspace(0.35, 0.85, n))
+        bars = ax.barh(y_pos, s_weights, height=0.55, color=colors, edgecolor="#0f172a", linewidth=0.8, alpha=0.92)
 
-    colors = plt.cm.viridis(np.linspace(0.40, 0.82, len(sorted_names)))
-    bars = ax_bar.barh(y_pos, sorted_weights, height=0.55, color=colors, edgecolor="#0f172a", linewidth=0.7, alpha=0.9)
+        max_w = max(s_weights) if s_weights else 0.5
+        mean_w = 1.0 / n if n > 0 else 0.0
+        ax.axvline(mean_w, color="#ef4444", linestyle="--", linewidth=1.2, alpha=0.75, label=f"Equal Share Benchmark ({mean_w*100:.1f}%)")
 
-    max_w = max(sorted_weights) if sorted_weights else 0.5
-    for bar, w in zip(bars, sorted_weights):
-        pct_text = f" {w*100:4.1f}% ({w:.4f})"
-        ax_bar.text(
-            w + (max_w * 0.02),
-            bar.get_y() + bar.get_height() / 2.0,
-            pct_text,
-            va="center",
-            ha="left",
-            fontsize=9.5,
+        for idx, (bar, w) in enumerate(zip(bars, s_weights)):
+            rank = n - idx
+            label = f" #{rank} | {w*100:4.1f}% (w={w:.4f})"
+            ax.text(w + (max_w * 0.02), bar.get_y() + bar.get_height() / 2.0, label, va="center", ha="left", fontsize=9.5, fontweight="bold", color="#0f172a")
+
+        ax.set_yticks(y_pos)
+        ax.set_yticklabels(s_names, fontsize=10, fontweight="bold", color="#1e293b")
+        ax.set_xlabel("Eigenvector Weight Share", fontsize=10.5, fontweight="bold", color="#334155")
+        ax.set_xlim(0, max_w * 1.45)
+        ax.grid(axis="x", linestyle="--", alpha=0.5, color="#cbd5e1")
+        ax.set_axisbelow(True)
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.spines["left"].set_color("#94a3b8")
+        ax.spines["bottom"].set_color("#94a3b8")
+
+        status_txt = f"CR = {cr:.4f} ({'Consistent <= 0.10' if cr_ok else 'Inconsistent > 0.10'})"
+        ax.set_title(f"AHP Criterion Weights & Priority Ranking\nScenario: {scenario_title}  |  {status_txt}", fontsize=11.5, fontweight="bold", color="#0f172a", pad=12)
+        ax.legend(loc="lower right", frameon=True, facecolor="#f8fafc", edgecolor="#cbd5e1", fontsize=8.5)
+
+        fig.text(0.12, 0.02, "PlanX Suitability Lab  •  Multi-Criteria Decision Analysis (MCDA) Toolset", fontsize=8, color="#64748b")
+        plt.tight_layout(rect=[0, 0.04, 1, 0.96])
+
+    elif chart_type == "radar":
+        fig = plt.figure(figsize=(9, 9), dpi=dpi)
+        fig.patch.set_facecolor("#ffffff")
+        ax = fig.add_subplot(111, polar=True)
+
+        angles = np.linspace(0, 2 * np.pi, n, endpoint=False).tolist()
+        r_weights = weights_arr.tolist()
+        angles += angles[:1]
+        r_weights += r_weights[:1]
+
+        ax.plot(angles, r_weights, color="#0f766e", linewidth=2.4, linestyle="solid")
+        ax.fill(angles, r_weights, color="#14b8a6", alpha=0.35)
+        ax.scatter(angles[:-1], weights_arr, color="#0f766e", s=45, zorder=5)
+
+        ax.set_xticks(angles[:-1])
+        label_texts = [f"{name}\n({w*100:.1f}%)" for name, w in zip(criteria_names, weights_arr)]
+        ax.set_xticklabels(label_texts, fontsize=9.5, fontweight="bold", color="#1e293b")
+
+        max_val = max(weights_arr) if len(weights_arr) else 0.5
+        ax.set_ylim(0, max_val * 1.25)
+        ax.grid(color="#cbd5e1", linestyle="--", linewidth=0.8)
+        ax.spines["polar"].set_color("#94a3b8")
+
+        status_txt = f"CR: {cr:.4f} ({'Consistent' if cr_ok else 'Inconsistent'})"
+        ax.set_title(f"AHP Multi-Criteria Radar Profile\nScenario: {scenario_title}  •  {status_txt}", fontsize=12, fontweight="bold", color="#0f172a", pad=24)
+
+        fig.text(0.5, 0.03, "PlanX Suitability Lab  •  Multi-Criteria Decision Analysis (MCDA) Toolset", ha="center", fontsize=8.5, color="#64748b")
+        plt.tight_layout(rect=[0, 0.05, 1, 0.95])
+
+    elif chart_type == "donut":
+        fig, ax = plt.subplots(figsize=(9.5, 7.5), dpi=dpi)
+        fig.patch.set_facecolor("#ffffff")
+
+        pairs = sorted(zip(criteria_names, weights_arr), key=lambda x: x[1], reverse=True)
+        s_names = [p[0] for p in pairs]
+        s_weights = [p[1] for p in pairs]
+
+        colors = plt.cm.Spectral(np.linspace(0.15, 0.85, n))
+        wedges, texts, autotexts = ax.pie(
+            s_weights,
+            labels=s_names,
+            autopct="%1.1f%%",
+            pctdistance=0.76,
+            startangle=140,
+            colors=colors,
+            wedgeprops=dict(width=0.42, edgecolor="#ffffff", linewidth=2),
+            textprops=dict(color="#1e293b", fontsize=9.5, fontweight="bold"),
+        )
+        for at in autotexts:
+            at.set_fontsize(8.5)
+            at.set_fontweight("bold")
+            at.set_color("#0f172a")
+
+        ax.text(0, 0.08, f"{scenario_title}", ha="center", va="center", fontsize=10.5, fontweight="bold", color="#0f172a")
+        ax.text(0, -0.06, f"Criteria: {n}\nCR: {cr:.4f}", ha="center", va="center", fontsize=9, color="#475569")
+
+        status_txt = "Consistent (CR <= 0.10)" if cr_ok else "Inconsistent (CR > 0.10)"
+        ax.set_title(f"AHP Weight Proportional Composition\nStatus: {status_txt}", fontsize=12, fontweight="bold", color="#0f172a", pad=12)
+        fig.text(0.5, 0.03, "PlanX Suitability Lab  •  Multi-Criteria Decision Analysis (MCDA) Toolset", ha="center", fontsize=8.5, color="#64748b")
+        plt.tight_layout(rect=[0, 0.05, 1, 0.95])
+
+    elif chart_type == "heatmap":
+        fig, ax = plt.subplots(figsize=(max(8.0, n * 0.8), max(7.0, n * 0.7)), dpi=dpi)
+        fig.patch.set_facecolor("#ffffff")
+
+        safe_mat = np.where(matrix <= 1e-5, 1.0, matrix)
+        log_matrix = np.log2(np.clip(safe_mat, 1.0/9.0, 9.0))
+        cax = ax.matshow(log_matrix, cmap="coolwarm", vmin=-3.17, vmax=3.17, alpha=0.88)
+
+        cbar = fig.colorbar(cax, ax=ax, fraction=0.046, pad=0.04)
+        cbar.set_ticks([-3.17, -2.0, -1.0, 0, 1.0, 2.0, 3.17])
+        cbar.set_ticklabels(["1/9 (Min)", "1/4", "1/2", "1 (Equal)", "2", "4", "9 (Max)"])
+        cbar.ax.tick_params(labelsize=8)
+        cbar.set_label("Saaty Preference Scale Relative to Diagonal", fontsize=9, fontweight="bold", color="#334155")
+
+        short_names = [nm[:12] + ".." if len(nm) > 12 else nm for nm in criteria_names]
+        ax.set_xticks(range(n))
+        ax.set_yticks(range(n))
+        ax.set_xticklabels(short_names, rotation=35, ha="left", fontsize=9, fontweight="bold", color="#1e293b")
+        ax.set_yticklabels(short_names, fontsize=9, fontweight="bold", color="#1e293b")
+
+        for i in range(n):
+            for j in range(n):
+                val = matrix[i, j]
+                if abs(val - 1.0) < 1e-4:
+                    txt = "1"
+                elif val <= 1e-5:
+                    txt = "0"
+                elif val >= 1.0:
+                    txt = f"{val:.1f}".rstrip("0").rstrip(".")
+                else:
+                    inv = int(round(1.0 / max(val, 1e-5)))
+                    txt = f"1/{inv}"
+                log_v = log_matrix[i, j]
+                t_color = "#ffffff" if abs(log_v) > 2.0 else "#0f172a"
+                ax.text(j, i, txt, ha="center", va="center", fontsize=8.5, fontweight="bold", color=t_color)
+
+        ax.set_title(f"Saaty Pairwise Comparison Matrix Heatmap ({n}x{n})\nCR: {cr:.4f} ({'Consistent' if cr_ok else 'Inconsistent'})", fontsize=11.5, fontweight="bold", color="#0f172a", pad=18)
+        fig.text(0.5, 0.02, "PlanX Suitability Lab  •  Multi-Criteria Decision Analysis (MCDA) Toolset", ha="center", fontsize=8, color="#64748b")
+        plt.tight_layout(rect=[0, 0.04, 1, 0.96])
+
+    elif chart_type == "pareto":
+        fig, ax1 = plt.subplots(figsize=(10.5, 6.2), dpi=dpi)
+        fig.patch.set_facecolor("#ffffff")
+
+        pairs = sorted(zip(criteria_names, weights_arr), key=lambda x: x[1], reverse=True)
+        s_names = [p[0] for p in pairs]
+        s_weights = [p[1] for p in pairs]
+        cum_weights = np.cumsum(s_weights) * 100.0
+        x_pos = np.arange(n)
+
+        colors = plt.cm.viridis(np.linspace(0.40, 0.85, n))
+        bars = ax1.bar(x_pos, [w * 100 for w in s_weights], color=colors, edgecolor="#0f172a", linewidth=0.8, width=0.55, label="Individual Criterion Weight (%)")
+        ax1.set_ylabel("Individual Weight (%)", fontsize=10, fontweight="bold", color="#0f766e")
+        ax1.set_xticks(x_pos)
+        ax1.set_xticklabels(s_names, rotation=25, ha="right", fontsize=9, fontweight="bold", color="#1e293b")
+        ax1.set_ylim(0, max([w * 100 for w in s_weights]) * 1.25)
+        ax1.grid(axis="y", linestyle="--", alpha=0.4, color="#cbd5e1")
+
+        for bar in bars:
+            h = bar.get_height()
+            ax1.text(bar.get_x() + bar.get_width()/2.0, h + 0.5, f"{h:.1f}%", ha="center", va="bottom", fontsize=8.5, fontweight="bold", color="#0f172a")
+
+        ax2 = ax1.twinx()
+        ax2.plot(x_pos, cum_weights, color="#dc2626", linewidth=2.4, marker="o", markersize=6, label="Cumulative Share (%)")
+        ax2.axhline(80.0, color="#f59e0b", linestyle=":", linewidth=1.5, label="80% Pareto Dominance Threshold")
+        ax2.set_ylabel("Cumulative Share (%)", fontsize=10, fontweight="bold", color="#dc2626")
+        ax2.set_ylim(0, 105)
+
+        for x, c in zip(x_pos, cum_weights):
+            ax2.text(x, c + 2.0, f"{c:.0f}%", ha="center", va="bottom", fontsize=8, color="#dc2626", fontweight="bold")
+
+        lines1, labels1 = ax1.get_legend_handles_labels()
+        lines2, labels2 = ax2.get_legend_handles_labels()
+        ax1.legend(lines1 + lines2, labels1 + labels2, loc="center right", frameon=True, facecolor="#f8fafc", edgecolor="#cbd5e1", fontsize=8.5)
+
+        ax1.set_title(f"AHP Pareto Analysis & Cumulative Weight Distribution\nScenario: {scenario_title}  |  CR: {cr:.4f}", fontsize=11.5, fontweight="bold", color="#0f172a", pad=12)
+        fig.text(0.12, 0.02, "PlanX Suitability Lab  •  Multi-Criteria Decision Analysis (MCDA) Toolset", fontsize=8, color="#64748b")
+        plt.tight_layout(rect=[0, 0.04, 1, 0.96])
+
+    else:
+        # Default 'infographic' multi-panel report
+        fig = plt.figure(figsize=(13, 7.6), dpi=dpi)
+        fig.patch.set_facecolor("#ffffff")
+
+        fig.suptitle(
+            "PlanX Suitability Lab — Analytic Hierarchy Process (AHP) Weight & Consistency Report",
+            fontsize=13.5,
             fontweight="bold",
             color="#0f172a",
+            y=0.965,
+        )
+        fig.text(
+            0.5,
+            0.925,
+            f"Scenario: {scenario_title}  |  Method: Saaty (1980) Eigenvector Method  |  Criteria Count: {len(criteria_names)}",
+            ha="center",
+            fontsize=10,
+            color="#475569",
         )
 
-    ax_bar.set_yticks(y_pos)
-    ax_bar.set_yticklabels(sorted_names, fontsize=10, fontweight="bold", color="#1e293b")
-    ax_bar.set_xlabel("Eigenvector Weight Share", fontsize=10, fontweight="bold", color="#334155")
-    ax_bar.set_xlim(0, max_w * 1.38)
-    ax_bar.grid(axis="x", linestyle="--", alpha=0.45, color="#cbd5e1")
-    ax_bar.set_axisbelow(True)
-    ax_bar.spines["top"].set_visible(False)
-    ax_bar.spines["right"].set_visible(False)
-    ax_bar.spines["left"].set_color("#94a3b8")
-    ax_bar.spines["bottom"].set_color("#94a3b8")
-    ax_bar.set_title("Criterion Weights & Priority Ranking", fontsize=11, fontweight="bold", color="#1e293b", pad=12)
+        gs = fig.add_gridspec(
+            2,
+            2,
+            width_ratios=[1.3, 1.1],
+            height_ratios=[0.85, 1.15],
+            left=0.22,
+            right=0.94,
+            top=0.86,
+            bottom=0.10,
+            wspace=0.32,
+            hspace=0.28,
+        )
 
-    # 2. Consistency Summary Card (Top Right)
-    ax_card = fig.add_subplot(gs[0, 1])
-    ax_card.axis("off")
+        # 1. Bar Chart (Left Column)
+        ax_bar = fig.add_subplot(gs[:, 0])
+        pairs = list(zip(criteria_names, weights_arr))
+        pairs_sorted = sorted(pairs, key=lambda x: x[1])
+        sorted_names = [p[0] for p in pairs_sorted]
+        sorted_weights = [p[1] for p in pairs_sorted]
+        y_pos = np.arange(len(sorted_names))
 
-    status_bg = "#f0fdf4" if cr_ok else "#fef2f2"
-    status_border = "#16a34a" if cr_ok else "#dc2626"
-    badge_str = "[ CONSISTENT  (CR <= 0.10) ]" if cr_ok else "[ INCONSISTENT (CR > 0.10) ]"
+        colors = plt.cm.viridis(np.linspace(0.40, 0.82, len(sorted_names)))
+        bars = ax_bar.barh(y_pos, sorted_weights, height=0.55, color=colors, edgecolor="#0f172a", linewidth=0.7, alpha=0.9)
 
-    bbox = dict(boxstyle="round,pad=0.7", facecolor=status_bg, edgecolor=status_border, linewidth=1.5)
-    card_info = (
-        f"Saaty Consistency Check: {badge_str}\n"
-        f"--------------------------------------------------\n"
-        f"CR (Consistency Ratio)  : {cr:.4f}  (Threshold: <= 0.1000)\n"
-        f"lambda max (Eigenvalue) : {lambda_max:.4f}\n"
-        f"CI (Consistency Index) : {ci:.4f}\n"
-        f"RI (Random Index)       : {ri:.2f}  (n = {len(criteria_names)})\n\n"
-        f"{'-> Judgments are consistent. Reliable for WLC analysis.' if cr_ok else '-> WARNING: Consistency threshold exceeded! Revise comparisons.'}"
-    )
-    ax_card.text(
-        0.02,
-        0.95,
-        card_info,
-        va="top",
-        ha="left",
-        fontsize=9.0,
-        color="#0f172a",
-        bbox=bbox,
-        family="monospace",
-    )
+        max_w = max(sorted_weights) if sorted_weights else 0.5
+        for bar, w in zip(bars, sorted_weights):
+            pct_text = f" {w*100:4.1f}% ({w:.4f})"
+            ax_bar.text(
+                w + (max_w * 0.02),
+                bar.get_y() + bar.get_height() / 2.0,
+                pct_text,
+                va="center",
+                ha="left",
+                fontsize=9.5,
+                fontweight="bold",
+                color="#0f172a",
+            )
 
-    # 3. Saaty Reciprocal Matrix (Bottom Right)
-    ax_mat = fig.add_subplot(gs[1, 1])
-    ax_mat.axis("off")
+        ax_bar.set_yticks(y_pos)
+        ax_bar.set_yticklabels(sorted_names, fontsize=10, fontweight="bold", color="#1e293b")
+        ax_bar.set_xlabel("Eigenvector Weight Share", fontsize=10, fontweight="bold", color="#334155")
+        ax_bar.set_xlim(0, max_w * 1.38)
+        ax_bar.grid(axis="x", linestyle="--", alpha=0.45, color="#cbd5e1")
+        ax_bar.set_axisbelow(True)
+        ax_bar.spines["top"].set_visible(False)
+        ax_bar.spines["right"].set_visible(False)
+        ax_bar.spines["left"].set_color("#94a3b8")
+        ax_bar.spines["bottom"].set_color("#94a3b8")
+        ax_bar.set_title("Criterion Weights & Priority Ranking", fontsize=11, fontweight="bold", color="#1e293b", pad=12)
 
-    n = len(criteria_names)
-    short_headers = [f"C{i+1}" for i in range(n)]
+        # 2. Consistency Summary Card (Top Right)
+        ax_card = fig.add_subplot(gs[0, 1])
+        ax_card.axis("off")
 
-    cell_data = []
-    for i in range(n):
-        row = []
-        for j in range(n):
-            val = matrix[i, j]
-            if abs(val - 1.0) < 1e-4:
-                txt = "1"
-            elif val >= 1.0:
-                txt = f"{val:.1f}".rstrip("0").rstrip(".")
+        status_bg = "#f0fdf4" if cr_ok else "#fef2f2"
+        status_border = "#16a34a" if cr_ok else "#dc2626"
+        badge_str = "[ CONSISTENT  (CR <= 0.10) ]" if cr_ok else "[ INCONSISTENT (CR > 0.10) ]"
+
+        bbox = dict(boxstyle="round,pad=0.7", facecolor=status_bg, edgecolor=status_border, linewidth=1.5)
+        card_info = (
+            f"Saaty Consistency Check: {badge_str}\n"
+            f"--------------------------------------------------\n"
+            f"CR (Consistency Ratio)  : {cr:.4f}  (Threshold: <= 0.1000)\n"
+            f"lambda max (Eigenvalue) : {lambda_max:.4f}\n"
+            f"CI (Consistency Index) : {ci:.4f}\n"
+            f"RI (Random Index)       : {ri:.2f}  (n = {len(criteria_names)})\n\n"
+            f"{'-> Judgments are consistent. Reliable for WLC analysis.' if cr_ok else '-> WARNING: Consistency threshold exceeded! Revise comparisons.'}"
+        )
+        ax_card.text(
+            0.02,
+            0.95,
+            card_info,
+            va="top",
+            ha="left",
+            fontsize=9.0,
+            color="#0f172a",
+            bbox=bbox,
+            family="monospace",
+        )
+
+        # 3. Saaty Reciprocal Matrix (Bottom Right)
+        ax_mat = fig.add_subplot(gs[1, 1])
+        ax_mat.axis("off")
+
+        short_headers = [f"C{i+1}" for i in range(n)]
+        cell_data = []
+        for i in range(n):
+            row = []
+            for j in range(n):
+                val = matrix[i, j]
+                if abs(val - 1.0) < 1e-4:
+                    txt = "1"
+                elif val <= 1e-5:
+                    txt = "0"
+                elif val >= 1.0:
+                    txt = f"{val:.1f}".rstrip("0").rstrip(".")
+                else:
+                    inv = int(round(1.0 / max(val, 1e-5)))
+                    txt = f"1/{inv}"
+                row.append(txt)
+            cell_data.append(row)
+
+        table = ax_mat.table(
+            cellText=cell_data,
+            rowLabels=short_headers,
+            colLabels=short_headers,
+            cellLoc="center",
+            loc="upper center",
+            bbox=[0.05, 0.26, 0.90, 0.68],
+        )
+        table.auto_set_font_size(False)
+        table.set_fontsize(8.5)
+
+        for (i, j), cell in table.get_celld().items():
+            if i == 0 or j == -1:
+                cell.set_facecolor("#e2e8f0")
+                cell.set_text_props(weight="bold", color="#1e293b")
+            elif i - 1 == j:
+                cell.set_facecolor("#cbd5e1")
             else:
-                txt = f"1/{round(1.0/val)}"
-            row.append(txt)
-        cell_data.append(row)
+                cell.set_facecolor("#ffffff")
+            cell.set_edgecolor("#94a3b8")
+            cell.set_linewidth(0.6)
 
-    table = ax_mat.table(
-        cellText=cell_data,
-        rowLabels=short_headers,
-        colLabels=short_headers,
-        cellLoc="center",
-        loc="upper center",
-        bbox=[0.05, 0.26, 0.90, 0.68],
-    )
-    table.auto_set_font_size(False)
-    table.set_fontsize(8.5)
+        ax_mat.set_title(f"Saaty Reciprocal Comparison Matrix ({n}x{n})", fontsize=10.5, fontweight="bold", color="#1e293b", pad=10)
 
-    for (i, j), cell in table.get_celld().items():
-        if i == 0 or j == -1:
-            cell.set_facecolor("#e2e8f0")
-            cell.set_text_props(weight="bold", color="#1e293b")
-        elif i - 1 == j:
-            cell.set_facecolor("#cbd5e1")
-        else:
-            cell.set_facecolor("#ffffff")
-        cell.set_edgecolor("#94a3b8")
-        cell.set_linewidth(0.6)
+        legend_items = [f"C{i+1}: {criteria_names[i]}" for i in range(n)]
+        legend_line1 = "  |  ".join(legend_items[:3])
+        legend_line2 = "  |  ".join(legend_items[3:]) if n > 3 else ""
+        legend_str = legend_line1 + ("\n" + legend_line2 if legend_line2 else "")
+        ax_mat.text(
+            0.5,
+            0.05,
+            legend_str,
+            ha="center",
+            va="center",
+            fontsize=8.0,
+            color="#475569",
+            style="italic",
+        )
 
-    ax_mat.set_title(f"Saaty Reciprocal Comparison Matrix ({n}x{n})", fontsize=10.5, fontweight="bold", color="#1e293b", pad=10)
-
-    # Legend underneath table
-    legend_items = [f"C{i+1}: {criteria_names[i]}" for i in range(n)]
-    legend_line1 = "  |  ".join(legend_items[:3])
-    legend_line2 = "  |  ".join(legend_items[3:]) if n > 3 else ""
-    legend_str = legend_line1 + ("\n" + legend_line2 if legend_line2 else "")
-    ax_mat.text(
-        0.5,
-        0.05,
-        legend_str,
-        ha="center",
-        va="center",
-        fontsize=8.0,
-        color="#475569",
-        style="italic",
-    )
-
-    fig.text(
-        0.22,
-        0.03,
-        "DEU Dept. of City & Regional Planning  •  PLN3113 Land Suitability Studio  •  PlanX Suitability Lab",
-        fontsize=8.5,
-        color="#64748b",
-    )
+        fig.text(
+            0.22,
+            0.03,
+            "PlanX Suitability Lab  •  Multi-Criteria Decision Analysis (MCDA) Toolset",
+            fontsize=8.5,
+            color="#64748b",
+        )
 
     if output_path:
         fig.savefig(output_path, dpi=dpi, facecolor=fig.get_facecolor())
@@ -670,12 +901,14 @@ class AHPStudioDockWidget(QDockWidget):
             self._load_matrix(np.ones((n, n), dtype=float), scenario_name="Project Layers (Equal)")
 
     def _init_default_criteria(self):
-        project_layers = [l for l in QgsProject.instance().mapLayers().values() if isinstance(l, QgsRasterLayer)]
-        score_layers = [l for l in project_layers if "score_" in l.name().lower() or "score" in l.name().lower()]
+        project_layers = [lyr for lyr in QgsProject.instance().mapLayers().values()
+                          if isinstance(lyr, QgsRasterLayer)]
+        score_layers = [lyr for lyr in project_layers
+                        if "score_" in lyr.name().lower() or "score" in lyr.name().lower()]
 
         if len(score_layers) >= 2:
-            self.criteria_keys = [l.name() for l in score_layers[:15]]
-            self.criteria_names = [l.name() for l in score_layers[:15]]
+            self.criteria_keys = [lyr.name() for lyr in score_layers[:AHP_MAX_CRITERIA]]
+            self.criteria_names = [lyr.name() for lyr in score_layers[:AHP_MAX_CRITERIA]]
         else:
             self.criteria_keys = [k for k, _ in DEFAULT_CRITERIA_LABELS]
             self.criteria_names = [f"{lbl}" for _, lbl in DEFAULT_CRITERIA_LABELS]
@@ -827,10 +1060,10 @@ class AHPStudioDockWidget(QDockWidget):
             ("CI (Consistency Index):", self.stat_ci, 1),
             ("RI (Random Index):", self.stat_ri, 2),
         ]:
-            l = QLabel(lbl)
-            l.setStyleSheet("font-size: 10px; color: #64748b;")
+            caption = QLabel(lbl)
+            caption.setStyleSheet("font-size: 10px; color: #64748b;")
             val_w.setStyleSheet("font-size: 10px; font-weight: bold; color: #0f172a;")
-            stats_grid.addWidget(l, 0, col * 2)
+            stats_grid.addWidget(caption, 0, col * 2)
             stats_grid.addWidget(val_w, 0, col * 2 + 1)
         cr_vbox.addLayout(stats_grid)
         bottom_layout.addWidget(self.cr_card)
@@ -848,29 +1081,74 @@ class AHPStudioDockWidget(QDockWidget):
         self.weights_container_layout.setSpacing(5)
         self.weights_vbox.addWidget(self.weights_container)
 
-        # Export Buttons
-        export_row = QHBoxLayout()
-        export_row.setSpacing(6)
+        # Export Controls Box
+        export_box = QGroupBox("📊 Publication Chart & Infographic Export")
+        export_box.setStyleSheet(
+            "QGroupBox { font-weight: bold; color: #0f766e; border: 1px solid #99f6e4; border-radius: 6px; margin-top: 6px; padding-top: 10px; background: #f0fdfa; }"
+            "QGroupBox::title { subcontrol-origin: margin; left: 8px; padding: 0 4px; }"
+        )
+        export_vbox = QVBoxLayout(export_box)
+        export_vbox.setContentsMargins(6, 6, 6, 6)
+        export_vbox.setSpacing(5)
 
-        btn_export_png = QPushButton("📊 Export Chart (PNG 300 DPI)")
+        # Row 1: Chart Type and DPI selectors
+        opt_row = QHBoxLayout()
+        opt_row.setSpacing(5)
+
+        self.chart_type_combo = QComboBox()
+        self.chart_type_combo.addItems([
+            "📊 Executive Summary (All-in-One)",
+            "📶 Priority Ranking Bar Chart",
+            "🕸️ Multi-Criteria Radar Profile",
+            "🍩 Proportional Donut Composition",
+            "🔥 Pairwise Matrix Heatmap",
+            "📈 Pareto & Cumulative 80/20 Curve",
+        ])
+        self.chart_type_combo.setStyleSheet("font-size: 11px; padding: 3px 6px; border: 1px solid #cbd5e1; border-radius: 4px; background: white;")
+        opt_row.addWidget(self.chart_type_combo, 3)
+
+        self.chart_dpi_combo = QComboBox()
+        self.chart_dpi_combo.addItem("300 DPI (Publication)", 300)
+        self.chart_dpi_combo.addItem("600 DPI (Ultra Poster)", 600)
+        self.chart_dpi_combo.addItem("150 DPI (Web & Screen)", 150)
+        self.chart_dpi_combo.setStyleSheet("font-size: 11px; padding: 3px 6px; border: 1px solid #cbd5e1; border-radius: 4px; background: white;")
+        opt_row.addWidget(self.chart_dpi_combo, 2)
+
+        export_vbox.addLayout(opt_row)
+
+        # Row 2: Action Buttons
+        btn_row = QHBoxLayout()
+        btn_row.setSpacing(5)
+
+        btn_export_png = QPushButton("💾 Export Chart (PNG)")
         btn_export_png.setStyleSheet(
-            "background: #0f766e; color: white; font-weight: bold; padding: 6px 10px; border-radius: 4px; font-size: 11px;"
+            "background: #0f766e; color: white; font-weight: bold; padding: 6px 8px; border-radius: 4px; font-size: 11px;"
         )
         btn_export_png.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_export_png.setToolTip("Export a publication-grade (300 DPI) infographic graphic for synthesis posters and reports.")
+        btn_export_png.setToolTip("Export the selected chart type in high resolution (PNG) for posters and reports.")
         btn_export_png.clicked.connect(self._export_chart_png)
-        export_row.addWidget(btn_export_png, 2)
+        btn_row.addWidget(btn_export_png, 2)
 
         btn_copy_chart = QPushButton("📋 Copy to Clipboard")
         btn_copy_chart.setStyleSheet(
-            "background: #f1f5f9; color: #1e293b; font-weight: bold; padding: 6px 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 11px;"
+            "background: #f1f5f9; color: #1e293b; font-weight: bold; padding: 6px 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 11px;"
         )
         btn_copy_chart.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn_copy_chart.setToolTip("Copies 300 DPI chart directly to clipboard for pasting into Word, Photoshop, or InDesign.")
+        btn_copy_chart.setToolTip("Copies the selected high-resolution chart directly to system clipboard.")
         btn_copy_chart.clicked.connect(self._copy_chart_to_clipboard)
-        export_row.addWidget(btn_copy_chart, 1)
+        btn_row.addWidget(btn_copy_chart, 2)
 
-        self.weights_vbox.addLayout(export_row)
+        btn_export_bundle = QPushButton("📦 Export All 6 Charts")
+        btn_export_bundle.setStyleSheet(
+            "background: #f8fafc; color: #0284c7; font-weight: bold; padding: 6px 6px; border: 1px solid #bae6fd; border-radius: 4px; font-size: 11px;"
+        )
+        btn_export_bundle.setCursor(Qt.CursorShape.PointingHandCursor)
+        btn_export_bundle.setToolTip("Exports all 6 publication charts at once into a target folder.")
+        btn_export_bundle.clicked.connect(self._export_all_charts_bundle)
+        btn_row.addWidget(btn_export_bundle, 2)
+
+        export_vbox.addLayout(btn_row)
+        self.weights_vbox.addWidget(export_box)
         bottom_layout.addWidget(weights_group)
 
         # 3. Results & Integration
@@ -919,8 +1197,10 @@ class AHPStudioDockWidget(QDockWidget):
         self.setWidget(container)
 
     def _auto_pick_score_layers(self):
-        project_layers = [l for l in QgsProject.instance().mapLayers().values() if isinstance(l, QgsRasterLayer)]
-        score_layers = [l for l in project_layers if "score_" in l.name().lower() or "score" in l.name().lower()]
+        project_layers = [lyr for lyr in QgsProject.instance().mapLayers().values()
+                          if isinstance(lyr, QgsRasterLayer)]
+        score_layers = [lyr for lyr in project_layers
+                        if "score_" in lyr.name().lower() or "score" in lyr.name().lower()]
 
         if not score_layers:
             QMessageBox.information(
@@ -930,16 +1210,17 @@ class AHPStudioDockWidget(QDockWidget):
             )
             return
 
-        if len(score_layers) > 15:
-            score_layers = score_layers[:15]
+        if len(score_layers) > AHP_MAX_CRITERIA:
+            score_layers = score_layers[:AHP_MAX_CRITERIA]
             QMessageBox.information(
                 self,
                 "PlanX AHP Studio",
-                "Found more than 15 score layers. Selected the first 15 layers for AHP matrix consistency stability.",
+                f"Found more than {AHP_MAX_CRITERIA} score layers. Selected the first "
+                f"{AHP_MAX_CRITERIA} layers for AHP matrix consistency stability.",
             )
 
-        self.criteria_keys = [l.name() for l in score_layers]
-        self.criteria_names = [l.name() for l in score_layers]
+        self.criteria_keys = [lyr.name() for lyr in score_layers]
+        self.criteria_names = [lyr.name() for lyr in score_layers]
         n = len(self.criteria_names)
         self.crit_summary_lbl.setText(f"Active Criteria: {n} (from project)")
         self._load_matrix(np.ones((n, n), dtype=float), scenario_name=f"Project Layers ({n} criteria)")
@@ -950,7 +1231,8 @@ class AHPStudioDockWidget(QDockWidget):
         )
 
     def _choose_project_layers_dialog(self):
-        project_layers = [l for l in QgsProject.instance().mapLayers().values() if isinstance(l, QgsRasterLayer)]
+        project_layers = [lyr for lyr in QgsProject.instance().mapLayers().values()
+                          if isinstance(lyr, QgsRasterLayer)]
         if not project_layers:
             text, ok = QInputDialog.getText(
                 self,
@@ -965,8 +1247,8 @@ class AHPStudioDockWidget(QDockWidget):
             if len(items) < 2:
                 QMessageBox.warning(self, "Criteria Error", "AHP requires at least 2 criteria for pairwise comparison.")
                 return
-            self.criteria_keys = items[:15]
-            self.criteria_names = items[:15]
+            self.criteria_keys = items[:AHP_MAX_CRITERIA]
+            self.criteria_names = items[:AHP_MAX_CRITERIA]
             n = len(self.criteria_names)
             self.crit_summary_lbl.setText(f"Active Criteria: {n} (custom)")
             self._load_matrix(np.ones((n, n), dtype=float), scenario_name=f"Custom ({n} criteria)")
@@ -977,7 +1259,7 @@ class AHPStudioDockWidget(QDockWidget):
         dialog.resize(360, 420)
         vbox = QVBoxLayout(dialog)
 
-        info = QLabel("Select 2 to 15 raster layers to include as MCDA criteria:")
+        info = QLabel(f"Select 2 to {AHP_MAX_CRITERIA} raster layers to include as MCDA criteria:")
         info.setWordWrap(True)
         vbox.addWidget(info)
 
@@ -1009,9 +1291,13 @@ class AHPStudioDockWidget(QDockWidget):
             if len(selected) < 2:
                 QMessageBox.warning(self, "Selection Error", "Please select at least 2 raster layers for AHP.")
                 return
-            if len(selected) > 15:
-                selected = selected[:15]
-                QMessageBox.information(self, "Selection Notice", "Limited to top 15 layers for AHP consistency stability.")
+            if len(selected) > AHP_MAX_CRITERIA:
+                selected = selected[:AHP_MAX_CRITERIA]
+                QMessageBox.information(
+                    self,
+                    "Selection Notice",
+                    f"Limited to top {AHP_MAX_CRITERIA} layers for AHP consistency stability.",
+                )
 
             self.criteria_keys = selected
             self.criteria_names = selected
@@ -1212,12 +1498,22 @@ class AHPStudioDockWidget(QDockWidget):
         csv_str = ", ".join(f"{w:.4f}" for w in weights)
         self.csv_line.setText(csv_str)
 
+    def _get_selected_chart_key(self) -> str:
+        idx = self.chart_type_combo.currentIndex()
+        keys = ["infographic", "bar", "radar", "donut", "heatmap", "pareto"]
+        return keys[idx] if 0 <= idx < len(keys) else "infographic"
+
+    def _get_selected_dpi(self) -> int:
+        return self.chart_dpi_combo.currentData() or 300
+
     def _export_chart_png(self):
+        chart_key = self._get_selected_chart_key()
+        dpi = self._get_selected_dpi()
         safe_title = self.current_scenario_title.replace(" ", "_").replace("(", "").replace(")", "").replace("/", "_")
-        default_filename = f"AHP_Weights_Chart_{safe_title}.png"
+        default_filename = f"AHP_{chart_key.upper()}_{safe_title}.png"
         file_path, _ = QFileDialog.getSaveFileName(
             self,
-            "Export High-Resolution AHP Chart (300 DPI)",
+            f"Export High-Resolution AHP Chart ({dpi} DPI)",
             default_filename,
             "PNG Image (*.png);;All Files (*.*)",
         )
@@ -1236,17 +1532,20 @@ class AHPStudioDockWidget(QDockWidget):
             matrix=self.matrix,
             scenario_title=self.current_scenario_title,
             output_path=file_path,
-            dpi=300,
+            dpi=dpi,
+            chart_type=chart_key,
         )
 
         QMessageBox.information(
             self,
             "AHP Chart Exported",
-            f"🎯 Publication-grade (300 DPI) AHP infographic exported successfully:\n\n{file_path}\n\n"
+            f"🎯 Publication-grade ({dpi} DPI) {self.chart_type_combo.currentText()} exported successfully:\n\n{file_path}\n\n"
             "Ready to be inserted directly into your synthesis poster, report, or presentation.",
         )
 
     def _copy_chart_to_clipboard(self):
+        chart_key = self._get_selected_chart_key()
+        dpi = self._get_selected_dpi()
         res = calculate_ahp(self.matrix)
         raw_bytes = generate_ahp_infographic(
             criteria_names=[self._short_name(n) for n in self.criteria_names],
@@ -1259,7 +1558,8 @@ class AHPStudioDockWidget(QDockWidget):
             matrix=self.matrix,
             scenario_title=self.current_scenario_title,
             output_path=None,
-            dpi=300,
+            dpi=dpi,
+            chart_type=chart_key,
         )
 
         if not raw_bytes:
@@ -1272,11 +1572,58 @@ class AHPStudioDockWidget(QDockWidget):
             QMessageBox.information(
                 self,
                 "Copied to Clipboard",
-                "📋 300 DPI AHP summary infographic copied to system clipboard!\n\n"
+                f"📋 {dpi} DPI {self.chart_type_combo.currentText()} copied to system clipboard!\n\n"
                 "Press Ctrl+V to paste into InDesign, Photoshop, Word, or presentation slides.",
             )
         else:
             QMessageBox.warning(self, "Export Error", "Failed to transfer image to clipboard buffer.")
+
+    def _export_all_charts_bundle(self):
+        folder = QFileDialog.getExistingDirectory(
+            self,
+            "Select Output Folder for All 6 AHP Charts",
+            "",
+        )
+        if not folder:
+            return
+
+        dpi = self._get_selected_dpi()
+        safe_title = self.current_scenario_title.replace(" ", "_").replace("(", "").replace(")", "").replace("/", "_")
+        chart_defs = [
+            ("01_Executive_Summary_Infographic", "infographic"),
+            ("02_Priority_Ranking_Bar_Chart", "bar"),
+            ("03_Multi_Criteria_Radar_Profile", "radar"),
+            ("04_Proportional_Donut_Composition", "donut"),
+            ("05_Pairwise_Matrix_Heatmap", "heatmap"),
+            ("06_Pareto_Cumulative_80_20", "pareto"),
+        ]
+
+        res = calculate_ahp(self.matrix)
+        exported_files = []
+        for prefix, c_key in chart_defs:
+            out_file = os.path.join(folder, f"AHP_{prefix}_{safe_title}.png")
+            generate_ahp_infographic(
+                criteria_names=[self._short_name(n) for n in self.criteria_names],
+                weights=res["weights"],
+                cr=res["cr"],
+                ci=res["ci"],
+                ri=res["ri"],
+                lambda_max=res["lambda_max"],
+                cr_ok=res["cr_ok"],
+                matrix=self.matrix,
+                scenario_title=self.current_scenario_title,
+                output_path=out_file,
+                dpi=dpi,
+                chart_type=c_key,
+            )
+            exported_files.append(os.path.basename(out_file))
+
+        msg = (
+            f"🎯 Successfully exported all 6 publication charts ({dpi} DPI) to:\n\n"
+            f"{folder}\n\n"
+            "Exported Graphics:\n" + "\n".join(f"  • {f}" for f in exported_files)
+        )
+        QMessageBox.information(self, "All Charts Exported", msg)
 
     def _apply_tema_a(self):
         if len(self.criteria_names) == 6:
@@ -1354,12 +1701,13 @@ class AHPStudioDockWidget(QDockWidget):
 
     def _launch_wlc_with_weights(self):
         txt = self.csv_line.text().strip()
-        project_layers = [l for l in QgsProject.instance().mapLayers().values() if isinstance(l, QgsRasterLayer)]
+        project_layers = [lyr for lyr in QgsProject.instance().mapLayers().values()
+                          if isinstance(lyr, QgsRasterLayer)]
         matching_layers = []
         for key in self.criteria_keys:
-            for l in project_layers:
-                if l.name() == key:
-                    matching_layers.append(l)
+            for lyr in project_layers:
+                if lyr.name() == key:
+                    matching_layers.append(lyr)
                     break
 
         params = {"WEIGHTS_CSV": txt}
@@ -1386,10 +1734,10 @@ def open_ahp_studio(iface=None, parent=None) -> AHPStudioDockWidget:
             iface.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, dock)
             dash_dock = main_win.findChild(QDockWidget, "PlanX_Suitability_Lab_Dock")
             if dash_dock is not None and hasattr(main_win, "tabifyDockWidget"):
-                try:
+                # Tab grouping is cosmetic: a Qt that refuses the pairing must not
+                # stop the studio from opening. Narrow, so a real error still shows.
+                with contextlib.suppress(TypeError, RuntimeError):
                     main_win.tabifyDockWidget(dash_dock, dock)
-                except Exception:
-                    pass
         dock.show()
         dock.raise_()
         dock.activateWindow()

@@ -44,7 +44,9 @@ class AHPWeightsAlgorithm(QgsProcessingAlgorithm):
             "and cr_ok (1 if CR <= 0.10, 0 otherwise).<br>"
             "<b>Method:</b> Extracts the principal eigenvector of the pairwise matrix to derive priority weights. "
             "The consistency ratio CR = CI / RI is computed using Saaty's random index table keyed to matrix size; "
-            "CR <= 0.10 indicates acceptable consistency. A warning is emitted if CR exceeds this threshold.<br>"
+            "CR <= 0.10 indicates acceptable consistency. A warning is emitted if CR exceeds this threshold. "
+            "Matrices larger than 20 x 20 are rejected, because no random consistency index is published "
+            "beyond 20 criteria and CR cannot be evaluated honestly for them.<br>"
             "<b>Typical use:</b> Elicit expert or stakeholder judgments for MCDA suitability modelling "
             "when trade-offs must be grounded in pairwise preference comparisons.</p>"
         )

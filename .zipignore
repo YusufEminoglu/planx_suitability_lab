@@ -16,3 +16,7 @@ docs
 # Every Help link in the plugin resolves to the online manual; no shipped code
 # path opens a local copy. Same convention as planx_geostats.
 SUITABILITY_REFERENCE_MANUAL.html
+
+# QGIS writes its default local style library into the working directory when a
+# headless run starts there. It is ~1 MB of runtime artifact, not plugin code.
+symbology-style.db

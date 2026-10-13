@@ -1,5 +1,46 @@
 # Changelog
 
+## [1.7.6] - 2026-10-13
+
+### Changed
+- **The AHP criterion ceiling is 20 now, and it comes from the method rather
+  than from the interface.** Saaty's published random consistency index stops
+  at n = 15, which is the real reason the studio, the layer picker and the
+  `ahp_weights` algorithm all stopped there. The RI table continues to n = 20
+  with Alonso & Lamata's (2006) published values (RI(20) = 1.6341), so every
+  entry point now accepts up to 20 criteria and CR stays correct there.
+
+### Fixed
+- **A matrix above the RI table no longer receives an invented consistency
+  ratio.** Both AHP code paths fell back to the `1.98 * (n - 2) / n`
+  approximation past n = 15. That estimate is inflated - 1.782 where the
+  published trend gives 1.634 at n = 20 - and because CR = CI / RI, an inflated
+  RI *understates* CR: a matrix whose true CR is 0.105 was reported consistent.
+  The studio reports such a result as not evaluable, and `ahp_weights` refuses
+  the input rather than returning a CR that is not one.
+- The two copies of the RI table (the studio's and the one inside
+  `processing/_mcda_utils.py`) are pinned against each other by a test, so they
+  can no longer drift apart unnoticed.
+
+### Security
+- **The Hub security scan is clean again.** The v1.7.4 dock rework
+  reintroduced two `try/except: pass` blocks (`ahp_studio.py`, `dashboard.py`),
+  which Bandit reports as B110 and the Hub blocks a version on, together with
+  twelve ambiguous single-letter loop variables (Flake8 E741). Both are fixed in
+  code: the dock-tabifying guards are now
+  `contextlib.suppress(TypeError, RuntimeError)`, narrowed to the one call that
+  may legitimately fail, instead of a `# nosec` comment or a skip file.
+
+### Added
+- `tests/test_ahp_studio.py` existed but was not registered in `plugins.toml`,
+  so `pf verify` never ran it. It now runs on both QGIS runtimes, extended with
+  the RI coverage, the drift guard and the above-the-table cases.
+
+### Packaging
+- QGIS writes its default local style library (`symbology-style.db`, about
+  1 MB) into the working directory of any headless run started there. It is no
+  longer picked up by the release zip or by git.
+
 ## [1.7.1] - 2026-10-09
 
 ### Added

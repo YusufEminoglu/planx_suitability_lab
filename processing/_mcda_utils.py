@@ -327,11 +327,24 @@ def ahp_weights_from_json(matrix_json: str) -> Tuple[List[float], float]:
         w = np.ones(n, dtype=float)
     w = w / w.sum()
 
+    # Kept identical to RI_TABLE in ahp_studio.py (n = 16..20 from Alonso &
+    # Lamata 2006, doi:10.1142/S0218488506004114); tests/test_ahp_studio.py
+    # asserts the two never drift apart.
     ri_map = {
         1: 0.0, 2: 0.0, 3: 0.58, 4: 0.90, 5: 1.12, 6: 1.24, 7: 1.32,
         8: 1.41, 9: 1.45, 10: 1.49, 11: 1.51, 12: 1.54, 13: 1.56, 14: 1.57, 15: 1.59,
+        16: 1.5978, 17: 1.6086, 18: 1.6181, 19: 1.6265, 20: 1.6341,
     }
-    ri = ri_map.get(n, (1.98 * (n - 2) / n) if n > 2 else 0.0)
+    ri = ri_map.get(n)
+    if ri is None:
+        # Past n = 20 no RI is published, and the 1.98 * (n - 2) / n
+        # approximation inflates it. CR = CI / RI, so an inflated RI understates
+        # CR and would report a genuinely inconsistent matrix as consistent.
+        # Refuse the input instead of returning a number that is not one.
+        raise ValueError(
+            f"AHP supports at most {max(ri_map)} criteria; got {n}. No random "
+            "consistency index is published beyond that, so CR cannot be "
+            "evaluated for this matrix.")
     # lambda_max >= n for a positive reciprocal matrix; float noise can put it
     # a hair below, which must not report a negative consistency ratio
     ci = max(0.0, (lam - n) / max(1.0, n - 1))

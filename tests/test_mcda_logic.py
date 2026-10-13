@@ -229,6 +229,31 @@ def test_ahp_rejects_non_reciprocal_matrices():
     assert abs(sum(w) - 1.0) < 1e-9 and cr >= 0.0
 
 
+def test_ahp_weights_uses_the_published_ri_up_to_twenty_criteria():
+    """The 20-criterion CR must divide CI by the published RI, not an estimate.
+
+    Above Saaty's n = 15 the table continues with Alonso & Lamata (2006). The
+    1.98 * (n - 2) / n approximation would divide by 1.782 at n = 20 instead of
+    1.6341 and report a CR about 9% smaller - small enough to call a matrix
+    with CR = 0.105 consistent.
+    """
+    def reciprocal_matrix(n):
+        return [[1.0 if i == j else (2.0 if j > i else 0.5)
+                 for j in range(n)] for i in range(n)]
+
+    for n in (16, 20):
+        w, cr = U.ahp_weights_from_json(json.dumps(reciprocal_matrix(n)))
+        assert len(w) == n and abs(sum(w) - 1.0) < 1e-9
+        assert cr > 0.0
+    # above the table there is no defensible RI, so it refuses rather than
+    # inventing one that would understate CR
+    try:
+        U.ahp_weights_from_json(json.dumps(reciprocal_matrix(21)))
+        assert False, "a 21-criterion matrix was accepted"
+    except ValueError as exc:
+        assert "at most 20 criteria" in str(exc), exc
+
+
 def test_limit_layers_refuses_instead_of_truncating():
     assert U.limit_layers(["a", "b"], 6) == ["a", "b"]
     assert U.limit_layers(list("abcdef"), 6) == list("abcdef")

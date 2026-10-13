@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+import contextlib
 from datetime import datetime
 
 import processing
@@ -1084,10 +1085,10 @@ def open_dashboard(iface=None, parent=None) -> SuitabilityDashboard:
             iface.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, dock)
             ahp_dock = main_win.findChild(QDockWidget, "PlanX_AHP_Studio_Dock")
             if ahp_dock is not None and hasattr(main_win, "tabifyDockWidget"):
-                try:
+                # Tab grouping is cosmetic: a Qt that refuses the pairing must not
+                # stop the dashboard from opening. Narrow, so a real error still shows.
+                with contextlib.suppress(TypeError, RuntimeError):
                     main_win.tabifyDockWidget(dock, ahp_dock)
-                except Exception:
-                    pass
         dock.show()
         dock.raise_()
         dock.activateWindow()

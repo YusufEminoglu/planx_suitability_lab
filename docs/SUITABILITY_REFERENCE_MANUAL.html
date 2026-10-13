@@ -474,7 +474,7 @@ $$C(x,y) = \begin{cases} 1 & \text{if } R(x,y) \ge \tau \\ 0 & \text{otherwise} 
 <span class="eq-label">(11)</span> Consistency Ratio: \(CR = \dfrac{CI}{RI_n}\)
 </div>
 
-<p>Where \(RI_n\) is Saaty's Random Index for matrix size \(n\): RI(1)=0.00, RI(2)=0.00, RI(3)=0.58, RI(4)=0.90, RI(5)=1.12, RI(6)=1.24, RI(7)=1.32, RI(8)=1.41. Judgments are considered acceptably consistent when \(CR \le 0.10\); otherwise, the analyst should revisit the pairwise comparisons.</p>
+<p>Where \(RI_n\) is the Random Index for matrix size \(n\). Saaty's published table covers \(n \le 15\) &mdash; RI(1)=0.00, RI(2)=0.00, RI(3)=0.58, RI(4)=0.90, RI(5)=1.12, RI(6)=1.24, RI(7)=1.32, RI(8)=1.41 &hellip; RI(15)=1.59 &mdash; and this tool continues it with Alonso &amp; Lamata's (2006) values up to its maximum of 20 criteria: RI(16)=1.5978, RI(17)=1.6086, RI(18)=1.6181, RI(19)=1.6265, RI(20)=1.6341. No random index is published beyond \(n = 20\), so CR cannot be evaluated honestly there; matrices larger than \(20 \times 20\) are rejected rather than approximated (the \(1.98(n-2)/n\) shortcut used in the literature inflates \(RI\), which understates \(CR\) and can pass an inconsistent matrix). Judgments are considered acceptably consistent when \(CR \le 0.10\); otherwise, the analyst should revisit the pairwise comparisons.</p>
 
 <div class="eq-block">
 <span class="eq-label">(12)</span> The pairwise matrix has the structure: \(A = \begin{bmatrix} 1 & a_{12} & \cdots & a_{1n} \\ 1/a_{12} & 1 & \cdots & a_{2n} \\ \vdots & \vdots & \ddots & \vdots \\ 1/a_{1n} & 1/a_{2n} & \cdots & 1 \end{bmatrix}\)
@@ -509,6 +509,7 @@ $$C(x,y) = \begin{cases} 1 & \text{if } R(x,y) \ge \tau \\ 0 & \text{otherwise} 
   <li>Forman, E.H. &amp; Gass, S.I. (2001). The analytic hierarchy process&mdash;an exposition. <em>Operations Research</em>, 49(4), 469&ndash;486. DOI: <a href="https://doi.org/10.1287/opre.49.4.469.11231" target="_blank">10.1287/opre.49.4.469.11231</a></li>
   <li>Vaidya, O.S. &amp; Kumar, S. (2006). Analytic hierarchy process: an overview of applications. <em>EJOR</em>, 169(1), 1&ndash;29. DOI: <a href="https://doi.org/10.1016/j.ejor.2004.04.028" target="_blank">10.1016/j.ejor.2004.04.028</a></li>
   <li>Boroushaki, S. &amp; Malczewski, J. (2008). Implementing an extension of AHP using OWA operators with fuzzy quantifiers. <em>Computers &amp; Geosciences</em>, 34(4), 399&ndash;410. DOI: <a href="https://doi.org/10.1016/j.cageo.2007.04.003" target="_blank">10.1016/j.cageo.2007.04.003</a></li>
+  <li>Alonso, J.A. &amp; Lamata, M.T. (2006). Consistency in the analytic hierarchy process: a new approach. <em>Int. J. Uncertainty, Fuzziness and Knowledge-Based Systems</em>, 14(4), 445&ndash;459. DOI: <a href="https://doi.org/10.1142/S0218488506004114" target="_blank">10.1142/S0218488506004114</a> &mdash; source of the RI values for 16&ndash;20 criteria.</li>
 </ol></div>
 
 <hr class="algo-divider">
