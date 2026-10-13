@@ -32,6 +32,13 @@
   may legitimately fail, instead of a `# nosec` comment or a skip file.
 
 ### Added
+- **Six publication chart types for the AHP result**, each exportable on its
+  own or as one bundle: Executive Summary infographic, priority ranking bars,
+  multi-criteria radar profile, proportional donut, Saaty reciprocal matrix
+  heatmap and a Pareto 80/20 cumulative curve. Resolution is selectable (300 DPI
+  publication, 600 DPI, 150 DPI web) and any single chart can go straight to the
+  clipboard. This was written before the release but only ever existed as an
+  uncommitted working tree; it ships with this version.
 - `tests/test_ahp_studio.py` existed but was not registered in `plugins.toml`,
   so `pf verify` never ran it. It now runs on both QGIS runtimes, extended with
   the RI coverage, the drift guard and the above-the-table cases.
@@ -40,6 +47,49 @@
 - QGIS writes its default local style library (`symbology-style.db`, about
   1 MB) into the working directory of any headless run started there. It is no
   longer picked up by the release zip or by git.
+
+## [1.7.4] - 2026-10-11
+
+### Changed
+- **Dashboard and AHP Studio are right-docked panels (`QDockWidget`) instead of
+  free-floating windows.** They dock into `RightDockWidgetArea`, tabify with each
+  other so switching between them is one click on the tab strip, and stay
+  movable, floatable and resizable. Docking the studio is what moved the opening
+  logic into the shared `open_*` helpers.
+- **AHP Studio criterion selection is a "Choose Layers" dialog instead of an
+  automatic pick.** It lists the project's raster layers with the likely criteria
+  (`score*`) already checked, requires at least two, and falls back to a
+  comma-separated criteria entry box when the project holds no raster layers.
+  Previously criteria were taken from whatever happened to be loaded.
+- The studio's criterion cap went from a hard-coded 6 (8 in the auto-pick) to
+  15, and the RI table was extended from 10 rows to 15 rows to match.
+
+### Fixed
+- `tabifyDockWidget` was called on `mainWindow` rather than on the interface
+  object, so tab grouping did not happen; the call site is now guarded so a Qt
+  that refuses the pairing cannot stop the panel from opening.
+
+## [1.7.3] - 2026-10-10
+
+### Added
+- **AHP Studio** — a dockable panel that makes pairwise weighting something you
+  click through rather than type: verbal comparison cards on Saaty's 1–9 scale,
+  live maximum-eigenvalue, CI, RI and consistency-ratio readout behind the
+  CR <= 0.10 quality gate, weight distribution bars, preset planning themes
+  (hazard priority, equal weights), a reciprocal matrix view, and a hand-off
+  that pushes the derived weights straight into the WLC Suitability tool.
+- A 300 DPI AHP infographic export (PNG and OS clipboard) for posters and
+  synthesis reports.
+- `tests/test_ahp_studio.py`.
+
+### Changed
+- The studio is English-only, in line with the rest of the plugin.
+- The weight-progress labels no longer overlap while dragging: the cards update
+  in place instead of being rebuilt on every change.
+
+### Fixed
+- ZeroDivisionError in `ratio_to_index` and in the equal-weights case, both hit
+  whenever a single criterion or a flat matrix was in play.
 
 ## [1.7.1] - 2026-10-09
 
