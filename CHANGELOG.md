@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.7.8] - 2026-10-20
+
+- Docs: Essential guide with alternative models; compose help text says up to 20 rasters
+
 ## [1.7.7] - 2026-10-20
 
 ### Fixed
