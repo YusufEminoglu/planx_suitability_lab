@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+import html as _html
 import os
 from datetime import datetime
 
@@ -182,7 +183,7 @@ class BetaEvidenceReportAlgorithm(QgsProcessingAlgorithm):
             artifact_ok = valid_dir and (found == len(expected))
             artifact_status_line = f"{found}/{len(expected)} found" if valid_dir else "INVALID DIRECTORY"
             artifacts_html = (
-                f"<p><b>Directory:</b> {artifact_dir}</p>"
+                f"<p><b>Directory:</b> {_html.escape(artifact_dir)}</p>"
                 f"<p><b>Artifact status:</b> {'PASS' if artifact_ok else 'FAIL'} ({artifact_status_line})</p>"
                 "<table><thead><tr><th>Artifact</th><th>Check</th></tr></thead><tbody>"
                 + "".join(a_rows)
@@ -201,8 +202,9 @@ class BetaEvidenceReportAlgorithm(QgsProcessingAlgorithm):
 <table><thead><tr><th>Algorithm</th><th>Check</th></tr></thead><tbody>{''.join(rows)}</tbody></table>
 <h2>Artifact checks</h2>
 {artifacts_html}
-<h2>Summary</h2><pre>{txt}</pre>
+<h2>Summary</h2><pre>{_html.escape(txt)}</pre>
 </body></html>"""
+        os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
         with open(out, "w", encoding="utf-8") as f:
             f.write(html)
         return {self.OUTPUT: out}

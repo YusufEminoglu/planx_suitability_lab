@@ -67,15 +67,19 @@ class LocalContributionAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterFolderDestination(self.OUTPUT_DIR, "Output folder for xai_local_contribution_*"))
 
     def processAlgorithm(self, parameters, context, feedback):
-        layers = limit_layers(ensure_list(self.parameterAsLayerList(parameters, self.INPUT_RASTERS, context)), 20, "criterion rasters")
+        # The denominator is one gdal raster-calculator expression, limited to six inputs.
+        layers = limit_layers(ensure_list(self.parameterAsLayerList(parameters, self.INPUT_RASTERS, context)), 6, "criterion rasters")
         if not layers:
             raise Exception("No criterion rasters were provided.")
         out_dir = self.parameterAsString(parameters, self.OUTPUT_DIR, context)
+        os.makedirs(out_dir, exist_ok=True)
         weights = parse_weights_csv(self.parameterAsString(parameters, self.WEIGHTS_CSV, context), len(layers))
 
         letters = ["A", "B", "C", "D", "E", "F"]
         abs_terms = []
         for i, lyr in enumerate(layers):
+            if feedback.isCanceled():
+                return {}
             out_abs = os.path.join(out_dir, f"xai_local_contribution_{i+1}.tif")
             raster_calc([lyr.source()], f"{letters[0]}*{weights[i]:.12f}", out_abs)
             abs_terms.append(out_abs)
@@ -87,6 +91,8 @@ class LocalContributionAlgorithm(QgsProcessingAlgorithm):
         raster_calc(abs_terms, d_formula, denom)
 
         for i, abs_path in enumerate(abs_terms):
+            if feedback.isCanceled():
+                return {}
             out_pct = os.path.join(out_dir, f"xai_local_contribution_pct_{i+1}.tif")
             raster_calc([abs_path, denom], "(A/B)*100.0", out_pct)
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-from qgis.core import Qgis, QgsFeature, QgsFields, QgsField, QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParameterMultipleLayers, QgsProcessingParameterFeatureSink, QgsCoordinateReferenceSystem
+from qgis.core import Qgis, QgsProcessingException, QgsFeature, QgsFields, QgsField, QgsProcessing, QgsProcessingAlgorithm, QgsProcessingParameterMultipleLayers, QgsProcessingParameterFeatureSink, QgsCoordinateReferenceSystem
 from qgis.PyQt.QtCore import QMetaType
 
 from .._mcda_utils import ensure_list, pca_proxy_weights_from_rasters
@@ -57,6 +57,8 @@ class PCAWeightsAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField('criterion_id', QMetaType.Type.Int))
         fields.append(QgsField('weight', QMetaType.Type.Double))
         sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
+        if sink is None:
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
         for i, wi in enumerate(weights, start=1):
             f = QgsFeature(fields)
             f['criterion_id'] = i

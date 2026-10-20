@@ -88,6 +88,8 @@ class CriticWeightsAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField("contrast", QMetaType.Type.Double))
         fields.append(QgsField("critic_score", QMetaType.Type.Double))
         sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
+        if sink is None:
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
 
         for i, wi in enumerate(weights, start=1):
             sc = float(sigma[i - 1] * contrast[i - 1]) if i - 1 < len(sigma) else 0.0

@@ -246,6 +246,8 @@ class WeightSensitivityOATAlgorithm(QgsProcessingAlgorithm):
             fields.append(QgsField(name, kind))
         sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields,
                                           Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
+        if sink is None:
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
         for i in order:
             f = QgsFeature(fields)
             f.setAttributes([

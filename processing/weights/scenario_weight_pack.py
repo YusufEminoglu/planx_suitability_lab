@@ -6,6 +6,7 @@ from collections import defaultdict
 from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (
     Qgis,
+    QgsProcessingException,
     QgsFeature,
     QgsField,
     QgsFields,
@@ -103,6 +104,8 @@ class ScenarioWeightPackAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField("weight_raw", QMetaType.Type.Double))
         fields.append(QgsField("weight_norm", QMetaType.Type.Double))
         sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
+        if sink is None:
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
 
         for method, cid, w in rows:
             denom = by_method[method] if by_method[method] > 0 else 1.0

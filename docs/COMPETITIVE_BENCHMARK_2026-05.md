@@ -1,8 +1,7 @@
 # PlanX Suitability Lab - Competitive Benchmark (2026-05-24)
 
 ## Why this matters
-- **EN:** This note maps current QGIS/Python MCDA capabilities so PlanX can target clear technical superiority.
-- **TR:** Bu not, PlanX'in teknik ustunluk hedefi icin guncel QGIS/Python MCDA kapasitesini ozetler.
+- This note maps current QGIS/Python MCDA capabilities so PlanX can target clear technical superiority.
 
 ## QGIS plugin landscape (official repository)
 - **Easy AHP**: classic AHP + WLC workflow, long-running plugin line.  
@@ -43,4 +42,4 @@
 - `policy_sensitivity_frontier` (risk-aversion breakpoint analysis for policy choice).
 - `action_playbook_generator` (decision-to-action bridge producing structured intervention playbooks).
 - `intervention_budget_phasing` (budget-step impact capture planning layer).
-- `release_narrative_builder` (evidence-driven release communication automation in EN/TR).
+- `release_narrative_builder` (evidence-driven release communication automation in English).

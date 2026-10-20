@@ -124,7 +124,7 @@ ALGO_GROUPS = [
             ("Implementation Decision Gate", "planx_suitability_lab:deployment_readiness_gate", "Automated GO/CONDITIONAL/HOLD decision using scorecard, minimax, wave plan and fragility burden."),
             ("Intervention Budget Phasing", "planx_suitability_lab:intervention_budget_phasing", "Budget-step capture curve from priority zoning and index."),
             ("Action Playbook Generator", "planx_suitability_lab:action_playbook_generator", "Markdown playbook from priority zones and policy diagnostics."),
-            ("Planning Narrative Builder", "planx_suitability_lab:release_narrative_builder", "Auto-builds EN/TR planning narrative paragraphs from diagnostics tables."),
+            ("Planning Narrative Builder", "planx_suitability_lab:release_narrative_builder", "Auto-builds English planning narrative paragraphs from diagnostics tables."),
             ("Project Evidence Summary", "planx_suitability_lab:beta_evidence_report", "Creates consolidated project evidence summary tables."),
         ],
     ),

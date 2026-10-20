@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+import html as _html
+import os
 from datetime import datetime
 
 from qgis.core import (
@@ -78,10 +80,10 @@ class SuitabilityHtmlReportAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterFileDestination(self.OUTPUT, "HTML report", fileFilter="HTML files (*.html)"))
 
     def processAlgorithm(self, parameters, context, feedback):
-        project = self.parameterAsString(parameters, self.PROJECT, context)
-        txt = self.parameterAsString(parameters, self.SUMMARY, context)
-        weight_method = self.parameterAsString(parameters, self.WEIGHT_METHOD, context)
-        qa = self.parameterAsString(parameters, self.QA_SUMMARY, context).strip()
+        project = _html.escape(self.parameterAsString(parameters, self.PROJECT, context))
+        txt = _html.escape(self.parameterAsString(parameters, self.SUMMARY, context))
+        weight_method = _html.escape(self.parameterAsString(parameters, self.WEIGHT_METHOD, context))
+        qa = _html.escape(self.parameterAsString(parameters, self.QA_SUMMARY, context).strip())
         out = self.parameterAsFileOutput(parameters, self.OUTPUT, context)
 
         qa_block = (
@@ -128,6 +130,7 @@ class SuitabilityHtmlReportAlgorithm(QgsProcessingAlgorithm):
 </body>
 </html>
 """
+        os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
         with open(out, "w", encoding="utf-8") as f:
             f.write(html)
         return {self.OUTPUT: out}

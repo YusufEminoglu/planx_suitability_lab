@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+import os
 from datetime import datetime
 
 import numpy as np
@@ -198,6 +199,7 @@ class ReleaseNarrativeBuilderAlgorithm(QgsProcessingAlgorithm):
                 highlights,
             ]
 
+        os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
         with open(out, "w", encoding="utf-8") as f:
             f.write("\n".join(lines))
         return {self.OUTPUT: out}

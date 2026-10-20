@@ -24,6 +24,13 @@ from contextlib import suppress
 # --------------------------------------------------------------------------
 _STYLE_PROCESSORS: list = []
 
+# Letters NFKD cannot decompose into an ASCII base letter.
+_ASCII_FOLD = str.maketrans({
+    "\u0131": "i", "\u0130": "I", "\u00f8": "o", "\u00d8": "O", "\u0142": "l",
+    "\u0141": "L", "\u00df": "ss", "\u00e6": "ae", "\u00c6": "AE", "\u0111": "d",
+    "\u0110": "D",
+})
+
 #: 0-100 suitability ramp, light yellow (low) to dark green (high): sequential,
 #: colour-blind safe, and fixed to the score's own range so two runs compare.
 SCORE_RAMP = ("#ffffcc", "#c2e699", "#78c679", "#31a354", "#006837")
@@ -65,14 +72,19 @@ def style_raster_output(context, output_path: str, kind: str = "score") -> bool:
 
     class _Style(QgsProcessingLayerPostProcessorInterface):
         def postProcessLayer(self, layer, ctx, feedback):
-            if layer is None or not hasattr(layer, "dataProvider"):
-                return
             try:
-                apply(layer)
-                layer.triggerRepaint()
-            except Exception as exc:  # noqa: BLE001 - styling never fails a run
-                if feedback is not None:
-                    feedback.reportError(f"Could not style the output: {exc}", False)
+                if layer is None or not hasattr(layer, "dataProvider"):
+                    return
+                try:
+                    apply(layer)
+                    layer.triggerRepaint()
+                except Exception as exc:  # noqa: BLE001 - styling never fails a run
+                    if feedback is not None:
+                        feedback.reportError(f"Could not style the output: {exc}", False)
+            finally:
+                # QGIS runs a post-processor once; release our keep-alive reference.
+                with suppress(ValueError):
+                    _STYLE_PROCESSORS.remove(self)
 
     processor = _Style()
     _STYLE_PROCESSORS.append(processor)
@@ -150,7 +162,9 @@ def slugify_ascii(text: str, fallback: str = "layer", max_len: int = 64) -> str:
     src = (text or "").strip()
     if not src:
         src = fallback
-    # Turkish and unicode friendly normalization to ascii-ish ids
+    # Unicode-friendly normalization to ascii ids. Letters with no NFKD
+    # decomposition (dotless i, slashed o, ...) would otherwise be dropped.
+    src = src.translate(_ASCII_FOLD)
     src = unicodedata.normalize("NFKD", src)
     src = src.encode("ascii", "ignore").decode("ascii")
     out = []
@@ -283,6 +297,9 @@ def raster_calc(inputs: List[str], formula: str, out_path: str):
             f"raster_calc formula {formula!r} contains {''.join(unsafe)}, which the "
             f"Windows command line mangles; compute it with numpy instead.")
     letters = ["A", "B", "C", "D", "E", "F"]
+    if len(inputs) > len(letters):
+        raise ValueError(
+            f"raster_calc accepts at most {len(letters)} input rasters; {len(inputs)} were given.")
     params = {
         "INPUT_A": None,
         "BAND_A": 1,
@@ -303,7 +320,7 @@ def raster_calc(inputs: List[str], formula: str, out_path: str):
         "OPTIONS": "",
         "OUTPUT": out_path,
     }
-    for i, path in enumerate(inputs[:6]):
+    for i, path in enumerate(inputs):
         params[f"INPUT_{letters[i]}"] = path
     processing.run("gdal:rastercalculator", params)
 
@@ -315,6 +332,8 @@ def ahp_weights_from_json(matrix_json: str) -> Tuple[List[float], float]:
     n = m.shape[0]
     if n == 0:
         raise ValueError("AHP matrix cannot be empty")
+    if not np.all(np.isfinite(m)):
+        raise ValueError("AHP matrix values must be finite.")
     if np.any(m <= 0):
         raise ValueError("AHP matrix values must be positive.")
     validate_ahp_matrix(m)

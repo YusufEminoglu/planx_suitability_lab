@@ -98,6 +98,8 @@ class WeightConsensusAuditAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField("cv_pct", QMetaType.Type.Double))
         fields.append(QgsField("agreement", QMetaType.Type.QString))
         sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
+        if sink is None:
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
 
         for cid in sorted(by_criterion.keys()):
             vals = by_criterion[cid]

@@ -72,9 +72,9 @@ def test_slugify_ascii():
     assert U.slugify_ascii(None, fallback="fb") == "fb"
     assert U.slugify_ascii("  A B  C  ") == "a_b_c"
     assert U.slugify_ascii("path/to/file.tif") == "path_to_file_tif"
-    # Turkish chars stripped
-    res = U.slugify_ascii("uygunluk", fallback="x")
-    assert "u" in res
+    # Non-decomposable letters are transliterated, never dropped
+    assert U.slugify_ascii("\u0131\u015f\u0131k \u00fcretim") == "isik_uretim"
+    assert U.slugify_ascii("uygunluk", fallback="x") == "uygunluk"
 
 
 # ===================================================================
@@ -477,6 +477,26 @@ def test_weight_math():
     w2 = U.parse_weights_csv("10, 20, 30, 40", 4)
     assert abs(sum(w2) - 1.0) < 1e-9
     assert w2 == [0.1, 0.2, 0.3, 0.4]
+
+
+# ===================================================================
+# regression: input hardening
+# ===================================================================
+def test_ahp_rejects_non_finite():
+    for bad in ("[[1, NaN], [NaN, 1]]", "[[1, Infinity], [0.5, 1]]"):
+        try:
+            U.ahp_weights_from_json(bad)
+        except ValueError:
+            continue
+        raise AssertionError("non-finite AHP matrix must be rejected")
+
+
+def test_raster_calc_rejects_more_than_six_inputs():
+    try:
+        U.raster_calc([f"{i}.tif" for i in range(7)], "A+B", "out.tif")
+    except ValueError:
+        return
+    raise AssertionError("7 inputs must be rejected, not truncated")
 
 
 # ===================================================================

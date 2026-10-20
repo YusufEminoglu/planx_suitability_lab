@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.7.7] - 2026-10-20
+
+### Fixed
+- Turkish leftovers removed from shipped copy and docs (English only).
+- `slugify_ascii` transliterates dotless/stroked letters instead of dropping them.
+- `raster_calc` and Local Contribution reject more than 6 criteria instead of silently truncating (which produced shares above 100%).
+- AHP matrices containing NaN/Infinity are rejected.
+- Normalizer: NaN/Inf cells get a declared nodata; missing input raster is reported.
+- Report writers escape user text in HTML and create the output folder.
+- Reference manual algorithm count corrected to 69.
+
 ## [1.7.6] - 2026-10-13
 
 ### Changed

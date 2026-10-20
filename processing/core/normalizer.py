@@ -131,6 +131,8 @@ class NormalizerAlgorithm(QgsProcessingAlgorithm):
 
     def processAlgorithm(self, parameters, context, feedback):
         rl = self.parameterAsRasterLayer(parameters, self.INPUT, context)
+        if rl is None:
+            raise QgsProcessingException("Input must be a valid raster layer.")
         method = int(self.parameterAsEnum(parameters, self.METHOD, context))
         low = float(self.parameterAsDouble(parameters, self.LOW, context))
         high = float(self.parameterAsDouble(parameters, self.HIGH, context))
@@ -171,6 +173,9 @@ class NormalizerAlgorithm(QgsProcessingAlgorithm):
             norm = np.exp(-0.5 * ((x - mid) / spread) ** 2)
 
         norm = np.clip(norm, 0.0, 1.0) * 100.0
+        if nodata is None and not valid.all():
+            # NaN/Inf cells need a declared nodata or they leak into later stages.
+            nodata = -9999.0
         if nodata is not None:
             norm[~valid] = nodata
         self._write_like(ds, out, norm, nodata)

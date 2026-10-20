@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+import os
 from datetime import datetime
 
 import numpy as np
@@ -243,6 +244,7 @@ class ActionPlaybookGeneratorAlgorithm(QgsProcessingAlgorithm):
             notes if notes else "_No additional notes provided._",
         ]
 
+        os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
         with open(out, "w", encoding="utf-8") as f:
             f.write("\n".join(md))
         return {self.OUTPUT: out}

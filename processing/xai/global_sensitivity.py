@@ -6,6 +6,7 @@ from osgeo import gdal
 from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (
     Qgis,
+    QgsProcessingException,
     QgsFeature,
     QgsField,
     QgsFields,
@@ -114,6 +115,8 @@ class GlobalSensitivityAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField("weighted_std", QMetaType.Type.Double))
         fields.append(QgsField("importance", QMetaType.Type.Double))
         sink, dest = self.parameterAsSink(parameters, self.OUTPUT, context, fields, Qgis.WkbType.NoGeometry, QgsCoordinateReferenceSystem())
+        if sink is None:
+            raise QgsProcessingException(self.invalidSinkError(parameters, self.OUTPUT))
         for row in stats:
             f = QgsFeature(fields)
             f["criterion"] = row[0]
