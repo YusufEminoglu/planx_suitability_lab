@@ -44,7 +44,7 @@ class TOPSISSuitabilityAlgorithm(QgsProcessingAlgorithm):
         return (
             "<p><b>Multi-criteria suitability via Technique for Order Preference "
             "by Similarity to Ideal Solution (TOPSIS).</b></p>\n"
-            "<p><b>Inputs:</b> Up to 6 criterion rasters (normalized 0–100); "
+            "<p><b>Inputs:</b> Up to 20 criterion rasters (normalized 0–100); "
             "optional criteria weights CSV; optional impacts CSV "
             "(B/C or +/-1, default all benefit); optional constraint mask (0/1); "
             "block size 64–2048.<br>\n"

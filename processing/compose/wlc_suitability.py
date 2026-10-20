@@ -42,7 +42,7 @@ class WLCSuitabilityAlgorithm(QgsProcessingAlgorithm):
     def shortHelpString(self):
         return (
             "<p><b>Multi-criteria suitability via Weighted Linear Combination (WLC).</b></p>\n"
-            "<p><b>Inputs:</b> Up to 6 criterion rasters (normalized 0–100); "
+            "<p><b>Inputs:</b> Up to 20 criterion rasters (normalized 0–100); "
             "criteria weights as CSV (e.g. 0.4,0.3,0.3); "
             "optional binary constraint mask (0/1, cells >0.5 pass); "
             "block size 64–2048 pixels.<br>\n"

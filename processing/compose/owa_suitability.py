@@ -47,7 +47,7 @@ class OWASuitabilityAlgorithm(QgsProcessingAlgorithm):
     def shortHelpString(self):
         return (
             "<p><b>Multi-criteria suitability via Ordered Weighted Averaging (OWA).</b></p>\n"
-            "<p><b>Inputs:</b> Up to 6 criterion rasters (normalized 0–100); "
+            "<p><b>Inputs:</b> Up to 20 criterion rasters (normalized 0–100); "
             "optional criteria weights CSV; optional order weights CSV; "
             "ordering mode (Descending = optimistic, Ascending = pessimistic); "
             "optional constraint mask (0/1); block size 64–2048.<br>\n"

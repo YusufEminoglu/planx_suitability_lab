@@ -246,7 +246,7 @@ pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x:
 <tr><td>5 Extract final sites</td><td>Candidate Site Extractor</td><td>Step 8</td></tr></table>
 
 <h4>Why two stages?</h4>
-<p>WLC Suitability accepts at most <b>6 criteria</b> per run. With 14 criteria the model is therefore built hierarchically: the 14 criteria are grouped into four themes (components), each weighted by its own AHP, and the four components are weighted by a top-level AHP. This is also easier to defend, because each pairwise comparison only involves 3 or 4 related items.</p>
+<p>The compose tools (WLC, OWA, TOPSIS, VIKOR) accept up to <b>20 criterion rasters</b> per run, so a flat 14-criterion model is technically possible. The model is still built hierarchically on purpose: a flat AHP over 14 criteria needs 91 pairwise judgements and is very hard to keep consistent (CR &le; 0.10). Instead the 14 criteria are grouped into four themes (components), each weighted by its own small AHP (3 or 4 items, 3&ndash;6 judgements), and the four components are weighted by a top-level AHP.</p>
 <table><tr><th>Component</th><th>Criteria</th><th>Count</th></tr><tr><td>Terrain</td><td>C01, C02, C03</td><td>3</td></tr><tr><td>Water and fault risk</td><td>C04, C05, C06</td><td>3</td></tr><tr><td>Vegetation and climate</td><td>C07, C08, C09, C10</td><td>4</td></tr><tr><td>Access and built fabric</td><td>C11, C12, C13, C14</td><td>4</td></tr></table>
 <table><tr><th>Code</th><th>Criterion</th><th>Source raster</th><th>Unit</th><th>Direction</th><th>Component</th></tr><tr><td>C01</td><td>Slope</td><td><code>02_egim_derece.tif</code></td><td>degrees</td><td>higher is worse</td><td>Terrain</td></tr><tr><td>C02</td><td>TPI (absolute)</td><td><code>05_tpi_150m.tif</code></td><td>m</td><td>higher is worse</td><td>Terrain</td></tr><tr><td>C03</td><td>Elevation</td><td><code>01_dem_yukseklik.tif</code></td><td>m</td><td>higher is worse</td><td>Terrain</td></tr><tr><td>C04</td><td>HAND</td><td><code>12_hand_m.tif</code></td><td>m</td><td>higher is better</td><td>Water and fault risk</td></tr><tr><td>C05</td><td>TWI</td><td><code>14_twi_islaklik_indeksi.tif</code></td><td>ln</td><td>higher is worse</td><td>Water and fault risk</td></tr><tr><td>C06</td><td>Distance to active fault</td><td><code>72_mesafe_diri_fay_m.tif</code></td><td>m</td><td>higher is better</td><td>Water and fault risk</td></tr><tr><td>C07</td><td>EVI (summer 2024)</td><td><code>25_evi_yaz_2024.tif</code></td><td>index</td><td>higher is better</td><td>Vegetation and climate</td></tr><tr><td>C08</td><td>Land surface temperature</td><td><code>20_lst_yaz_ortalama.tif</code></td><td>deg C</td><td>higher is worse</td><td>Vegetation and climate</td></tr><tr><td>C09</td><td>Albedo</td><td><code>23_albedo_yaz.tif</code></td><td>0-1</td><td>higher is better</td><td>Vegetation and climate</td></tr><tr><td>C10</td><td>Cropland probability</td><td><code>39_dw_tarim_olasiligi.tif</code></td><td>0-1</td><td>higher is worse</td><td>Vegetation and climate</td></tr><tr><td>C11</td><td>Distance to roads</td><td><code>65_mesafe_yol_m.tif</code></td><td>m</td><td>higher is worse</td><td>Access and built fabric</td></tr><tr><td>C12</td><td>Distance to main roads</td><td><code>66_mesafe_ana_karayolu_m.tif</code></td><td>m</td><td>higher is worse</td><td>Access and built fabric</td></tr><tr><td>C13</td><td>Distance to buildings</td><td><code>68_mesafe_bina_m.tif</code></td><td>m</td><td>higher is worse</td><td>Access and built fabric</td></tr><tr><td>C14</td><td>Building density</td><td><code>69_bina_yogunlugu_300m.tif</code></td><td>0-1</td><td>higher is better</td><td>Access and built fabric</td></tr></table>
 <p class="note">Raster file names in the data package are abbreviated and partly non-English. Glossary: egim = slope, yukseklik = elevation, mesafe = distance, diri fay = active fault, yaz = summer, tarim = agriculture, bina = building, yogunlugu = density, orani = ratio, yol = road, ana karayolu = main highway, su sikligi = water frequency, kisit = constraint, ova koruma = plain protection, arazi kullanimi = land use, kirpik = clipped, calisma alani = study area.</p>
@@ -586,9 +586,67 @@ Output: <code>component_access.tif</code></p>
 <li>Export a report with the plugin's reporting algorithms, and keep the harmonizer manifest, all matrices and the breakpoint tables as the methods appendix.</li>
 </ul>
 
+
+<h3 id="g-s10"><span class="step">10</span>Try other aggregation models on the same inputs</h3>
+<p>WLC adds weighted scores, so a very bad value in one component can be offset by good values elsewhere. Other models in the plugin treat that trade-off differently. They all take the <b>same four component rasters, the same top-level weights and the same constraint mask</b> you already have, so changing the model takes one dialog each. Compare the results instead of trusting one formula.</p>
+<table><tr><th>Model</th><th>Idea</th><th>Use it when</th></tr>
+<tr><td>WLC</td><td>Weighted average; good scores compensate bad ones</td><td>Baseline, easy to explain</td></tr>
+<tr><td>TOPSIS</td><td>Closeness to the best possible cell and distance from the worst</td><td>You want a ranking relative to the study area&rsquo;s own best and worst</td></tr>
+<tr><td>VIKOR</td><td>Compromise between overall performance and the single worst weighted gap</td><td>One very poor component should count against a cell</td></tr>
+<tr><td>OWA</td><td>Sorts each cell&rsquo;s component scores, then weights by rank (risk attitude)</td><td>You want to dial between &ldquo;all must be good&rdquo; and &ldquo;one strength is enough&rdquo;</td></tr></table>
+<p class="note">Settings that stay the same in every dialog: criterion rasters = the four component rasters (Terrain, Water and fault risk, Vegetation and climate, Access and built fabric, in that order), weights = <code>0.215820,0.480366,0.107910,0.195904</code>, constraint mask = <code>constraint_mask</code>, block size 256.</p>
+
+<h4>10.1 TOPSIS</h4>
+<p>Open <b>PlanX Suitability Lab &rarr; Compose &rarr; TOPSIS Suitability</b>. Leave <b>Impacts</b> as <code>B,B,B,B</code>: every component is a benefit (higher score is better). Use <code>C</code> only for a layer where higher is worse.</p>
+<figure><img src="essential_guide/img/dlg_topsis.png" alt="TOPSIS Suitability dialog" loading="lazy"><figcaption>TOPSIS Suitability with the four components, top-level weights, impacts B,B,B,B and the constraint mask.</figcaption></figure>
+<h4>10.2 VIKOR</h4>
+<p>Open <b>Compose &rarr; VIKOR Suitability</b>. Same inputs plus <b>v</b>, the compromise weight: values near 1 favour overall (group) utility, values near 0 favour minimising the worst individual regret. Keep the default <b>0.5</b> unless you can justify another value.</p>
+<figure><img src="essential_guide/img/dlg_vikor.png" alt="VIKOR Suitability dialog" loading="lazy"><figcaption>VIKOR Suitability with v = 0.5.</figcaption></figure>
+<figure><img src="essential_guide/img/alt_wlc_topsis.png" alt="WLC and TOPSIS maps" loading="lazy"><figcaption>WLC (left) and TOPSIS (right) on the same scale.</figcaption></figure>
+<h4>10.3 OWA &mdash; choose your risk attitude</h4>
+<p>Open <b>Compose &rarr; OWA Suitability</b>. Besides the criteria weights it needs <b>order weights</b>, which are applied to each cell&rsquo;s scores <i>after sorting</i>, not to specific components. The example uses <code>0.5,0.3,0.15,0.05</code>:</p>
+<ul>
+<li><b>Ordering mode = Ascending</b> (lowest score first): half of the weight goes to the cell&rsquo;s weakest component. This is <b>pessimistic</b> (AND-like): a cell only scores high if every component is acceptable.</li>
+<li><b>Ordering mode = Descending</b> with the same order weights: half of the weight goes to the strongest component. This is <b>optimistic</b> (OR-like): one strong theme lifts the cell.</li>
+</ul>
+<figure><img src="essential_guide/img/dlg_owa.png" alt="OWA Suitability dialog" loading="lazy"><figcaption>OWA Suitability, pessimistic run: ascending order, order weights 0.5, 0.3, 0.15, 0.05.</figcaption></figure>
+<p>Run it twice (once per ordering mode, with different output names) and compare.</p>
+<figure><img src="essential_guide/img/alt_owa_pair.png" alt="OWA optimistic and pessimistic maps" loading="lazy"><figcaption>OWA optimistic (left) and pessimistic (right). Same inputs, very different picture: the pessimistic version is far more selective.</figcaption></figure>
+
+<h4>10.4 Compare the models</h4>
+<p>Different formulas produce different score scales, so compare <b>patterns</b> (correlation, overlap of the best cells), not raw values. The overlap column is the share of WLC&rsquo;s best 10 % of settleable cells (1,117 ha) that the other model also puts in its own best 10 %.</p>
+<table><tr><th>Model</th><th>Score p5 / p50 / p95</th><th>Range</th><th>Correlation with WLC</th><th>Overlap of top 10 % with WLC</th></tr><tr><td>WLC (baseline)</td><td>49.4 / 65.1 / 80.4</td><td>27.5 &ndash; 91.2</td><td>1.00</td><td>100 %</td></tr><tr><td>TOPSIS</td><td>45.9 / 63.7 / 78.1</td><td>26.2 &ndash; 90.0</td><td>0.94</td><td>90 %</td></tr><tr><td>VIKOR (v = 0.5)</td><td>38.8 / 62.5 / 85.0</td><td>0.9 &ndash; 99.8</td><td>0.93</td><td>85 %</td></tr><tr><td>OWA pessimistic</td><td>30.3 / 49.7 / 69.4</td><td>15.2 &ndash; 84.3</td><td>0.75</td><td>63 %</td></tr><tr><td>OWA optimistic</td><td>62.3 / 78.6 / 90.7</td><td>38.7 &ndash; 96.8</td><td>0.84</td><td>62 %</td></tr></table>
+<div class="callout"><b>How to read it.</b> TOPSIS and VIKOR track WLC closely (correlation 0.94 and 0.93), so the WLC ranking is not an artefact of the formula. OWA is the one that changes the answer, because it encodes a different attitude to risk. Neither is &ldquo;right&rdquo;; they answer different questions.</div>
+
+<h4>10.5 Ensemble &mdash; where do the models agree?</h4>
+<p>Open <b>Compose &rarr; Ensemble Suitability</b> and give it 2&ndash;8 suitability rasters: here WLC, TOPSIS, VIKOR and OWA pessimistic, with equal weights (leave the weights empty). It writes five rasters: mean, standard deviation, 10th and 90th percentile, and a <b>confidence index</b> (100 &minus; standard deviation; higher means the models agree).</p>
+<figure><img src="essential_guide/img/dlg_ensemble.png" alt="Ensemble Suitability dialog" loading="lazy"><figcaption>Ensemble Suitability over four model outputs.</figcaption></figure>
+<figure><img src="essential_guide/img/alt_ensemble.png" alt="Ensemble mean and confidence" loading="lazy"><figcaption>Ensemble mean (left) and confidence (right).</figcaption></figure>
+<p>Measured: ensemble mean p5 / p50 / p95 = 42.6 / 59.3 / 77.6; confidence p5 / p50 / p95 = 86.6 / 94.2 / 97.4. Where confidence is low, treat the result as model-dependent and look at the field.</p>
+<p>The map below counts how many of the four models place a cell in <i>their own</i> top 10 %. All four agree on <b>625 ha</b> (5.6 % of settleable cells); at least one model picks <b>1,717 ha</b>. The dark areas are the robust candidates.</p>
+<figure><img src="essential_guide/img/alt_agreement.png" alt="Model agreement map" loading="lazy"><figcaption>Model agreement: dark = all four models rank the cell in their top 10 %.</figcaption></figure>
+<h4>10.6 Weight sensitivity</h4>
+<p>Open <b>Uncertainty &rarr; Weight Sensitivity (OAT)</b>. It changes one weight at a time by &plusmn;20 % (the others are rescaled) and measures how the suitability map moves. The optional change raster shows where the focus criterion (here 2, Water and fault risk) matters most.</p>
+<figure><img src="essential_guide/img/dlg_sensitivity.png" alt="Weight Sensitivity dialog" loading="lazy"><figcaption>Weight Sensitivity (OAT): four components, &amp;plusmn;20 %, change threshold 5 points, focus criterion 2.</figcaption></figure>
+<table><tr><th>Rank</th><th>Component</th><th>Weight</th><th>Mean abs. change (points)</th><th>Max change (points)</th><th>Cells changing &gt; 5 points</th></tr><tr><td>1</td><td>Water and fault risk</td><td>0.480</td><td>2.87</td><td>8.4</td><td>18.6 %</td></tr><tr><td>2</td><td>Terrain</td><td>0.216</td><td>1.32</td><td>3.9</td><td>0.0 %</td></tr><tr><td>3</td><td>Access and built fabric</td><td>0.196</td><td>1.04</td><td>3.2</td><td>0.0 %</td></tr><tr><td>4</td><td>Vegetation and climate</td><td>0.108</td><td>0.61</td><td>1.7</td><td>0.0 %</td></tr></table>
+<p>Water and fault risk, the heaviest component, is by far the most influential: a 20 % change in its weight moves the average cell by about 2.9 points and changes 18.6 % of cells by more than 5 points. The other components barely move the map. If the final ranking matters, spend your effort justifying that one judgement.</p>
+<h4>10.7 Candidate sites per model</h4>
+<p>Run Candidate Site Extractor on each model output. Because score scales differ, use each model&rsquo;s own 95th percentile as the threshold (minimum area 5 ha, all sites, 8-connectivity):</p>
+<table><tr><th>Model</th><th>Threshold</th><th>Sites</th></tr>
+<tr><td>WLC</td><td>80</td><td>25</td></tr>
+<tr><td>TOPSIS</td><td>78.1</td><td>20</td></tr>
+<tr><td>VIKOR</td><td>85.0</td><td>21</td></tr>
+<tr><td>OWA pessimistic</td><td>69.4</td><td>20</td></tr></table>
+<h4>Which model should you report?</h4>
+<ul>
+<li>Use <b>WLC</b> as the main, explainable result and <b>TOPSIS or VIKOR</b> as a check that the formula does not drive the answer.</li>
+<li>Use <b>OWA pessimistic</b> for conservative screening when a single failing component must disqualify land; use <b>OWA optimistic</b> to scan for opportunities.</li>
+<li>Report the <b>ensemble agreement map</b> and the <b>weight-sensitivity table</b> with the final sites, so a reader sees how robust they are.</li>
+</ul>
+
 <h3 id="g-faq">Pitfalls and assumptions</h3>
 <table><tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr>
-<tr><td>WLC says it accepts at most 6 criteria</td><td>Too many rasters in one run</td><td>Use the hierarchy in this guide: components first, then a top-level WLC</td></tr>
+<tr><td>WLC says it accepts at most N criteria</td><td>More than 20 rasters in one run</td><td>Group criteria into components first (as in this guide), then run a top-level WLC</td></tr>
 <tr><td>Weights count error</td><td>Number of weights differs from number of rasters</td><td>Paste exactly one weight per raster, in raster order</td></tr>
 <tr><td>Raster dimensions error</td><td>Criteria are not on one grid</td><td>Run Data Harmonizer with a snap raster</td></tr>
 <tr><td>Faults appear 1.7 km away from where they should be</td><td>Fault file is in EPSG:5253</td><td>Reproject to EPSG:32635 first</td></tr>

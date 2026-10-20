@@ -44,7 +44,7 @@ class VIKORSuitabilityAlgorithm(QgsProcessingAlgorithm):
     def shortHelpString(self):
         return (
             "<p><b>Multi-criteria suitability via VIKOR compromise ranking.</b></p>\n"
-            "<p><b>Inputs:</b> Up to 6 criterion rasters (normalized 0–100); "
+            "<p><b>Inputs:</b> Up to 20 criterion rasters (normalized 0–100); "
             "optional criteria weights CSV; optional impacts CSV "
             "(B/C or +/-1, default all benefit); "
             "compromise weight v (0–1, higher favours group utility S); "
