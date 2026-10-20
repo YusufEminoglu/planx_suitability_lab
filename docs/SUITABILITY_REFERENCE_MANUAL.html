@@ -225,7 +225,7 @@ pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x:
 <h3 id="g-overview">Overview</h3>
 <p>This guide walks through the <b>Essential Suitability</b> model flow from an empty project to a ranked list of candidate settlement sites. It uses
 14 criteria and a real study area (728 &times; 584 cells at 30 m, EPSG:32635, about 38,000 ha). Every number in this guide was produced by running the steps on the example data with the plugin's own algorithms; every dialog and map is a real render from QGIS 3.44 LTR.</p>
-<div class="callout"><b>What you will produce:</b> 14 tier-score rasters &rarr; 4 component rasters (one AHP each) &rarr; 1 constraint mask &rarr; 1 final 0&ndash;100 suitability raster &rarr; 27 candidate sites.</div>
+<div class="callout"><b>What you will produce:</b> 14 criterion score rasters &rarr; 4 component rasters (one AHP each) &rarr; 1 constraint mask &rarr; 1 final 0&ndash;100 suitability raster &rarr; 25 candidate sites. Apart from preparing the constraint <i>vector</i> layers (Step 6.1&ndash;6.3, standard QGIS vector tools), every step uses PlanX Suitability Lab algorithms.</div>
 <p><b>About the screenshots.</b> Dialogs are rendered from the actual Processing dialogs with the parameters filled in exactly as in the steps. The QGIS main window is omitted so that every parameter stays readable. Maps are rendered with QGIS map-rendering code from the real output rasters.</p>
 
 <h4>Requirements</h4>
@@ -240,7 +240,7 @@ pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x:
 <figure><img src="essential_guide/img/dashboard_essential_flow.png" alt="Model Flow tab with Essential Suitability" loading="lazy"><figcaption>Model Flow tab. Stage 2 is repeated for every criterion; stages 3 and 4 are repeated here once per component and once for the final map.</figcaption></figure>
 <table><tr><th>Console stage</th><th>Algorithm</th><th>Where in this guide</th></tr>
 <tr><td>1 Prepare the grid</td><td>Data Harmonizer</td><td>Step 2</td></tr>
-<tr><td>2 Score the criteria</td><td>Normalizer / Reclassify by table</td><td>Step 3</td></tr>
+<tr><td>2 Score the criteria</td><td>Normalizer/Reclassifier</td><td>Step 3</td></tr>
 <tr><td>3 Set the weights</td><td>AHP Weights (and AHP Studio)</td><td>Step 4</td></tr>
 <tr><td>4 Build the suitability map</td><td>WLC Suitability</td><td>Steps 5 and 7</td></tr>
 <tr><td>5 Extract final sites</td><td>Candidate Site Extractor</td><td>Step 8</td></tr></table>
@@ -276,217 +276,159 @@ pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x:
 <p>Click <b>Run</b>. The manifest reported: 14 inputs, target CRS EPSG:32635, resolution 30 m, extent 550620, 4209540 : 572460, 4227060, resampling Nearest, NoData &minus;9999.</p>
 <p>In this guide the following steps use the original rasters (they were already aligned). With your own data, use the files written to the aligned folder instead.</p>
 
-<h3 id="g-s3"><span class="step">3</span>Score every criterion on one 0&ndash;100 scale</h3>
-<p>Different criteria have different units, so each is converted into five tiers scored <b>100 / 80 / 60 / 40 / 20</b>. A score of 100 means most suitable. The tool is the QGIS native <b>Reclassify by table</b> (<b>Processing Toolbox &rarr; Raster analysis</b>).</p>
-<h4>How the table is built</h4>
+<h3 id="g-s3"><span class="step">3</span>Score every criterion on one 0&ndash;100 scale &mdash; Normalizer</h3>
+<p>Different criteria have different units, so each one is converted to a continuous <b>0&ndash;100 suitability score</b> (100 = most suitable) with the plugin's own tool: <b>Processing Toolbox &rarr; PlanX Suitability Lab &rarr; Core &rarr; Normalizer/Reclassifier</b>.</p>
+<h4>How the settings are chosen</h4>
 <ul>
-<li>Four breakpoints define five tiers. Each tier is a range <code>minimum &lt; value &le; maximum</code> (set <b>Range boundaries</b> to <i>min &lt; value &le; max</i>).</li>
-<li>For a <b>higher is worse</b> criterion (for example slope) the lowest tier scores 100 and the highest tier scores 20. For <b>higher is better</b> it is the reverse.</li>
-<li>Use &minus;1000000000 as the open lower bound of tier 1 and 1000000000 as the open upper bound of tier 5.</li>
-<li>Set <b>Output NoData</b> to &minus;9999 and <b>Use NoData when no range matches</b> on; <b>Output data type</b> Float32.</li>
+<li><b>Method.</b> Use <b>Fuzzy Linear (Benefit)</b> when a higher value is better and <b>Fuzzy Linear (Cost)</b> when a higher value is worse. The score is a straight ramp between the two bounds and is clipped to 0&ndash;100.</li>
+<li><b>Low / High bound.</b> The two breakpoints of the ramp: at or beyond the &ldquo;bad&rdquo; bound the score is 0, at or beyond the &ldquo;good&rdquo; bound it is 100. Pick them from the data distribution (here, roughly the 5th&ndash;95th percentile) or from a legal standard.</li>
+<li><b>Fuzzy Gaussian (Benefit)</b> is a bell curve around the <b>Midpoint</b> with width <b>Spread</b>. It suits criteria where a target value is best and both directions are worse, such as signed TPI.</li>
+<li>Midpoint and Spread are ignored by the linear methods; Low and High are ignored by the Gaussian method.</li>
+<li>NoData cells of the input stay NoData in the output.</li>
 </ul>
-<p>Worked example, C01 Slope (degrees):</p>
-<table><tr><th>Minimum</th><th>Maximum</th><th>Value</th></tr>
-<tr><td>&minus;1000000000</td><td>1</td><td>100</td></tr><tr><td>1</td><td>2.5</td><td>80</td></tr>
-<tr><td>2.5</td><td>5</td><td>60</td></tr><tr><td>5</td><td>8</td><td>40</td></tr><tr><td>8</td><td>1000000000</td><td>20</td></tr></table>
-<figure><img src="essential_guide/img/dlg_reclassify.png" alt="Reclassify by table dialog" loading="lazy"><figcaption>Reclassify by table for C01 Slope. The table is shown collapsed as Fixed table (5x3); click the ... button to see and edit the rows listed above.</figcaption></figure>
-<div class="callout"><b>Sanity check for every tier map.</b> The map should show clear spatial structure, and no single tier should swallow almost the whole grid unless the data really is that skewed (C06 is, because most land is far from the three mapped faults). A tier holding 90 % or more for no good reason usually means the breakpoints do not match the data range. The tables below show the measured shares.</div>
-<p>Repeat the reclassification for all 14 criteria with the breakpoints in the sections below. The breakpoints are teaching values chosen from the data distribution; replace them with legal or local standards where those exist.</p>
+<p>Worked example, C01 Slope (degrees, lower is better): ramp from 12&deg; (score 0) down to 0&deg; (score 100).</p>
+<figure><img src="essential_guide/img/dlg_normalizer.png" alt="Normalizer dialog" loading="lazy"><figcaption>Normalizer for C01 Slope: Fuzzy Linear (Cost), low bound 0, high bound 12.</figcaption></figure>
+<div class="callout"><b>Sanity check for every score map.</b> The map should show clear spatial structure, and the score percentiles should be spread out rather than piled at 0 or 100. A criterion whose median is 0 or 100 usually has bounds that do not match the data range. The tables below show the measured percentiles.</div>
+<p>Repeat the Normalizer for all 14 criteria with the settings in the sections below. The bounds are teaching values chosen from the data distribution; replace them with legal or local standards where those exist.</p>
 
 <h4 id="g-tier-C01">C01 &mdash; Slope</h4>
 <p>Input: <code>02_egim_derece.tif</code>. Direction: <b>higher value is worse</b>. Steep ground raises grading cost and landslide exposure. Gentle slopes score highest.</p>
 
-<table><tr><th>Tier</th><th>Source value</th><th>Score</th><th>Share of grid</th></tr>
-<tr><td>1</td><td>&le; 1</td><td><b>100</b></td><td>33.5 %</td></tr>
-<tr><td>2</td><td>&gt; 1 and &le; 2.5</td><td><b>80</b></td><td>14.8 %</td></tr>
-<tr><td>3</td><td>&gt; 2.5 and &le; 5</td><td><b>60</b></td><td>7.5 %</td></tr>
-<tr><td>4</td><td>&gt; 5 and &le; 8</td><td><b>40</b></td><td>5.4 %</td></tr>
-<tr><td>5</td><td>&gt; 8</td><td><b>20</b></td><td>38.8 %</td></tr>
+<table><tr><th>Setting</th><th>Value</th></tr>
+<tr><td>Method</td><td><b>Fuzzy Linear (Cost)</b></td></tr><tr><td>Parameters</td><td>Low bound <b>0</b>, High bound <b>12</b></td></tr><tr><td>Source p5 / p50 / p95</td><td>0.2038 / 2.9 / 26.3</td></tr><tr><td>Score p5 / p50 / p95</td><td>0.0 / 75.8 / 98.3</td></tr>
 </table>
 
-<figure><img src="essential_guide/img/tier_C01.png" alt="C01 source and tier maps" loading="lazy"><figcaption>C01 Slope: source raster (left) and tier score (right).</figcaption></figure>
+<figure><img src="essential_guide/img/score_C01.png" alt="C01 source and score maps" loading="lazy"><figcaption>C01 Slope: source raster (left) and 0-100 score (right).</figcaption></figure>
 <p>Output name: <code>C01_slope_score.tif</code></p>
 
 <h4 id="g-tier-C02">C02 &mdash; TPI (absolute)</h4>
-<p>Input: <code>05_tpi_150m.tif (via tpi_abs.tif)</code>. Direction: <b>higher value is worse</b>. Topographic Position Index at 150 m. Large positive or negative values mark ridges and hollows, so the absolute value is scored.</p>
-<p><b>Extra step for this criterion.</b> TPI is signed,         so first run <b>Processing Toolbox &rarr; GDAL &rarr; Raster miscellaneous &rarr; Raster calculator</b> with the formula <code>abs(A)</code> on the TPI raster (NoData &minus;9999, Float32) and save <code>tpi_abs.tif</code>. Then reclassify <code>tpi_abs</code>.</p>
-<table><tr><th>Tier</th><th>Source value</th><th>Score</th><th>Share of grid</th></tr>
-<tr><td>1</td><td>&le; 0.5</td><td><b>100</b></td><td>39.4 %</td></tr>
-<tr><td>2</td><td>&gt; 0.5 and &le; 1.5</td><td><b>80</b></td><td>18.2 %</td></tr>
-<tr><td>3</td><td>&gt; 1.5 and &le; 3</td><td><b>60</b></td><td>10.3 %</td></tr>
-<tr><td>4</td><td>&gt; 3 and &le; 6</td><td><b>40</b></td><td>13.0 %</td></tr>
-<tr><td>5</td><td>&gt; 6</td><td><b>20</b></td><td>19.1 %</td></tr>
+<p>Input: <code>05_tpi_150m.tif</code>. Direction: <b>higher value is worse</b>. Topographic Position Index at 150 m. Large positive or negative values mark ridges and hollows, so the absolute value is scored.</p>
+<p><b>No absolute-value step is needed.</b> TPI is signed (ridges positive, hollows negative) and flat ground is best. A <b>Fuzzy Gaussian (Benefit)</b> curve centred on <b>0</b> scores both extremes low symmetrically, so the raw TPI raster is used as is.</p><figure><img src="essential_guide/img/dlg_normalizer_tpi.png" alt="Normalizer dialog for TPI" loading="lazy"><figcaption>Normalizer for C02: Fuzzy Gaussian (Benefit), midpoint 0, spread 2.5.</figcaption></figure>
+<table><tr><th>Setting</th><th>Value</th></tr>
+<tr><td>Method</td><td><b>Fuzzy Gaussian (Benefit)</b></td></tr><tr><td>Parameters</td><td>Midpoint <b>0</b>, Spread <b>2.5</b> (Low/High are not used by this method)</td></tr><tr><td>Source p5 / p50 / p95</td><td>-9.051 / -0.1007 / 10.04</td></tr><tr><td>Score p5 / p50 / p95</td><td>0.0 / 94.0 / 100.0</td></tr>
 </table>
 
-<figure><img src="essential_guide/img/tier_C02.png" alt="C02 source and tier maps" loading="lazy"><figcaption>C02 TPI (absolute): source raster (left) and tier score (right).</figcaption></figure>
+<figure><img src="essential_guide/img/score_C02.png" alt="C02 source and score maps" loading="lazy"><figcaption>C02 TPI (absolute): source raster (left) and 0-100 score (right).</figcaption></figure>
 <p>Output name: <code>C02_tpi_score.tif</code></p>
 
 <h4 id="g-tier-C03">C03 &mdash; Elevation</h4>
 <p>Input: <code>01_dem_yukseklik.tif</code>. Direction: <b>higher value is worse</b>. Higher ground costs more to serve with infrastructure and is more exposed. The study area spans roughly 21 m to 1,144 m.</p>
 
-<table><tr><th>Tier</th><th>Source value</th><th>Score</th><th>Share of grid</th></tr>
-<tr><td>1</td><td>&le; 40</td><td><b>100</b></td><td>15.6 %</td></tr>
-<tr><td>2</td><td>&gt; 40 and &le; 80</td><td><b>80</b></td><td>31.4 %</td></tr>
-<tr><td>3</td><td>&gt; 80 and &le; 150</td><td><b>60</b></td><td>18.2 %</td></tr>
-<tr><td>4</td><td>&gt; 150 and &le; 300</td><td><b>40</b></td><td>12.6 %</td></tr>
-<tr><td>5</td><td>&gt; 300</td><td><b>20</b></td><td>22.1 %</td></tr>
+<table><tr><th>Setting</th><th>Value</th></tr>
+<tr><td>Method</td><td><b>Fuzzy Linear (Cost)</b></td></tr><tr><td>Parameters</td><td>Low bound <b>0</b>, High bound <b>300</b></td></tr><tr><td>Source p5 / p50 / p95</td><td>28.83 / 85.2 / 925</td></tr><tr><td>Score p5 / p50 / p95</td><td>0.0 / 71.6 / 90.4</td></tr>
 </table>
 
-<figure><img src="essential_guide/img/tier_C03.png" alt="C03 source and tier maps" loading="lazy"><figcaption>C03 Elevation: source raster (left) and tier score (right).</figcaption></figure>
+<figure><img src="essential_guide/img/score_C03.png" alt="C03 source and score maps" loading="lazy"><figcaption>C03 Elevation: source raster (left) and 0-100 score (right).</figcaption></figure>
 <p>Output name: <code>C03_elevation_score.tif</code></p>
 
 <h4 id="g-tier-C04">C04 &mdash; HAND</h4>
 <p>Input: <code>12_hand_m.tif</code>. Direction: <b>higher value is better</b>. Height Above Nearest Drainage. Cells that sit well above the drainage network are safer from flooding.</p>
 
-<table><tr><th>Tier</th><th>Source value</th><th>Score</th><th>Share of grid</th></tr>
-<tr><td>1</td><td>&le; 2</td><td><b>20</b></td><td>27.9 %</td></tr>
-<tr><td>2</td><td>&gt; 2 and &le; 5</td><td><b>40</b></td><td>12.8 %</td></tr>
-<tr><td>3</td><td>&gt; 5 and &le; 10</td><td><b>60</b></td><td>8.7 %</td></tr>
-<tr><td>4</td><td>&gt; 10 and &le; 20</td><td><b>80</b></td><td>8.0 %</td></tr>
-<tr><td>5</td><td>&gt; 20</td><td><b>100</b></td><td>42.5 %</td></tr>
+<table><tr><th>Setting</th><th>Value</th></tr>
+<tr><td>Method</td><td><b>Fuzzy Linear (Benefit)</b></td></tr><tr><td>Parameters</td><td>Low bound <b>0</b>, High bound <b>20</b></td></tr><tr><td>Source p5 / p50 / p95</td><td>0.2847 / 10.47 / 279.2</td></tr><tr><td>Score p5 / p50 / p95</td><td>1.4 / 52.3 / 100.0</td></tr>
 </table>
 
-<figure><img src="essential_guide/img/tier_C04.png" alt="C04 source and tier maps" loading="lazy"><figcaption>C04 HAND: source raster (left) and tier score (right).</figcaption></figure>
+<figure><img src="essential_guide/img/score_C04.png" alt="C04 source and score maps" loading="lazy"><figcaption>C04 HAND: source raster (left) and 0-100 score (right).</figcaption></figure>
 <p>Output name: <code>C04_hand_score.tif</code></p>
 
 <h4 id="g-tier-C05">C05 &mdash; TWI</h4>
 <p>Input: <code>14_twi_islaklik_indeksi.tif</code>. Direction: <b>higher value is worse</b>. Topographic Wetness Index. A high index means water accumulates, which is unfavourable for building.</p>
 
-<table><tr><th>Tier</th><th>Source value</th><th>Score</th><th>Share of grid</th></tr>
-<tr><td>1</td><td>&le; 7</td><td><b>100</b></td><td>26.9 %</td></tr>
-<tr><td>2</td><td>&gt; 7 and &le; 9</td><td><b>80</b></td><td>24.3 %</td></tr>
-<tr><td>3</td><td>&gt; 9 and &le; 11</td><td><b>60</b></td><td>24.7 %</td></tr>
-<tr><td>4</td><td>&gt; 11 and &le; 13</td><td><b>40</b></td><td>12.2 %</td></tr>
-<tr><td>5</td><td>&gt; 13</td><td><b>20</b></td><td>11.9 %</td></tr>
+<table><tr><th>Setting</th><th>Value</th></tr>
+<tr><td>Method</td><td><b>Fuzzy Linear (Cost)</b></td></tr><tr><td>Parameters</td><td>Low bound <b>7</b>, High bound <b>13</b></td></tr><tr><td>Source p5 / p50 / p95</td><td>5.607 / 8.917 / 15.46</td></tr><tr><td>Score p5 / p50 / p95</td><td>0.0 / 68.1 / 100.0</td></tr>
 </table>
 
-<figure><img src="essential_guide/img/tier_C05.png" alt="C05 source and tier maps" loading="lazy"><figcaption>C05 TWI: source raster (left) and tier score (right).</figcaption></figure>
+<figure><img src="essential_guide/img/score_C05.png" alt="C05 source and score maps" loading="lazy"><figcaption>C05 TWI: source raster (left) and 0-100 score (right).</figcaption></figure>
 <p>Output name: <code>C05_twi_score.tif</code></p>
 
 <h4 id="g-tier-C06">C06 &mdash; Distance to active fault</h4>
-<p>Input: <code>72_mesafe_diri_fay_m.tif</code>. Direction: <b>higher value is better</b>. Distance to the nearest active fault. Farther is safer. Most of the area is far from the three mapped faults, so tier 100 dominates.</p>
+<p>Input: <code>72_mesafe_diri_fay_m.tif</code>. Direction: <b>higher value is better</b>. Distance to the nearest active fault. Farther is safer. Most of the area is far from the three mapped faults, so most cells score 100.</p>
 
-<table><tr><th>Tier</th><th>Source value</th><th>Score</th><th>Share of grid</th></tr>
-<tr><td>1</td><td>&le; 100</td><td><b>20</b></td><td>1.4 %</td></tr>
-<tr><td>2</td><td>&gt; 100 and &le; 250</td><td><b>40</b></td><td>1.8 %</td></tr>
-<tr><td>3</td><td>&gt; 250 and &le; 500</td><td><b>60</b></td><td>2.9 %</td></tr>
-<tr><td>4</td><td>&gt; 500 and &le; 1000</td><td><b>80</b></td><td>5.8 %</td></tr>
-<tr><td>5</td><td>&gt; 1000</td><td><b>100</b></td><td>88.1 %</td></tr>
+<table><tr><th>Setting</th><th>Value</th></tr>
+<tr><td>Method</td><td><b>Fuzzy Linear (Benefit)</b></td></tr><tr><td>Parameters</td><td>Low bound <b>0</b>, High bound <b>1000</b></td></tr><tr><td>Source p5 / p50 / p95</td><td>402.5 / 4381 / 1.146e+04</td></tr><tr><td>Score p5 / p50 / p95</td><td>40.2 / 100.0 / 100.0</td></tr>
 </table>
 
-<figure><img src="essential_guide/img/tier_C06.png" alt="C06 source and tier maps" loading="lazy"><figcaption>C06 Distance to active fault: source raster (left) and tier score (right).</figcaption></figure>
+<figure><img src="essential_guide/img/score_C06.png" alt="C06 source and score maps" loading="lazy"><figcaption>C06 Distance to active fault: source raster (left) and 0-100 score (right).</figcaption></figure>
 <p>Output name: <code>C06_distance_to_active_fault_score.tif</code></p>
 
 <h4 id="g-tier-C07">C07 &mdash; EVI (summer 2024)</h4>
 <p>Input: <code>25_evi_yaz_2024.tif</code>. Direction: <b>higher value is better</b>. Enhanced Vegetation Index for summer 2024. Denser vegetation indicates healthier, cooler surroundings and scores higher.</p>
 
-<table><tr><th>Tier</th><th>Source value</th><th>Score</th><th>Share of grid</th></tr>
-<tr><td>1</td><td>&le; 0.12</td><td><b>20</b></td><td>7.2 %</td></tr>
-<tr><td>2</td><td>&gt; 0.12 and &le; 0.2</td><td><b>40</b></td><td>18.6 %</td></tr>
-<tr><td>3</td><td>&gt; 0.2 and &le; 0.3</td><td><b>60</b></td><td>23.3 %</td></tr>
-<tr><td>4</td><td>&gt; 0.3 and &le; 0.45</td><td><b>80</b></td><td>31.0 %</td></tr>
-<tr><td>5</td><td>&gt; 0.45</td><td><b>100</b></td><td>20.0 %</td></tr>
+<table><tr><th>Setting</th><th>Value</th></tr>
+<tr><td>Method</td><td><b>Fuzzy Linear (Benefit)</b></td></tr><tr><td>Parameters</td><td>Low bound <b>0.1</b>, High bound <b>0.45</b></td></tr><tr><td>Source p5 / p50 / p95</td><td>0.1098 / 0.3041 / 0.5833</td></tr><tr><td>Score p5 / p50 / p95</td><td>2.8 / 58.3 / 100.0</td></tr>
 </table>
 <p class="note">Direction is set to higher = better here. If your policy treats vegetated land as something to protect from building, reverse the direction.</p>
-<figure><img src="essential_guide/img/tier_C07.png" alt="C07 source and tier maps" loading="lazy"><figcaption>C07 EVI (summer 2024): source raster (left) and tier score (right).</figcaption></figure>
+<figure><img src="essential_guide/img/score_C07.png" alt="C07 source and score maps" loading="lazy"><figcaption>C07 EVI (summer 2024): source raster (left) and 0-100 score (right).</figcaption></figure>
 <p>Output name: <code>C07_evi_score.tif</code></p>
 
 <h4 id="g-tier-C08">C08 &mdash; Land surface temperature</h4>
 <p>Input: <code>20_lst_yaz_ortalama.tif</code>. Direction: <b>higher value is worse</b>. Summer land surface temperature (Landsat). Hot cells score lower because they add to urban heat load.</p>
 
-<table><tr><th>Tier</th><th>Source value</th><th>Score</th><th>Share of grid</th></tr>
-<tr><td>1</td><td>&le; 38</td><td><b>100</b></td><td>17.1 %</td></tr>
-<tr><td>2</td><td>&gt; 38 and &le; 41</td><td><b>80</b></td><td>20.1 %</td></tr>
-<tr><td>3</td><td>&gt; 41 and &le; 44</td><td><b>60</b></td><td>27.4 %</td></tr>
-<tr><td>4</td><td>&gt; 44 and &le; 47</td><td><b>40</b></td><td>21.3 %</td></tr>
-<tr><td>5</td><td>&gt; 47</td><td><b>20</b></td><td>14.2 %</td></tr>
+<table><tr><th>Setting</th><th>Value</th></tr>
+<tr><td>Method</td><td><b>Fuzzy Linear (Cost)</b></td></tr><tr><td>Parameters</td><td>Low bound <b>36</b>, High bound <b>48</b></td></tr><tr><td>Source p5 / p50 / p95</td><td>33.46 / 42.37 / 48.98</td></tr><tr><td>Score p5 / p50 / p95</td><td>0.0 / 46.9 / 100.0</td></tr>
 </table>
 
-<figure><img src="essential_guide/img/tier_C08.png" alt="C08 source and tier maps" loading="lazy"><figcaption>C08 Land surface temperature: source raster (left) and tier score (right).</figcaption></figure>
+<figure><img src="essential_guide/img/score_C08.png" alt="C08 source and score maps" loading="lazy"><figcaption>C08 Land surface temperature: source raster (left) and 0-100 score (right).</figcaption></figure>
 <p>Output name: <code>C08_land_surface_temperature_score.tif</code></p>
 
 <h4 id="g-tier-C09">C09 &mdash; Albedo</h4>
 <p>Input: <code>23_albedo_yaz.tif</code>. Direction: <b>higher value is better</b>. Summer surface albedo. Brighter surfaces reflect more heat, so higher albedo scores higher.</p>
 
-<table><tr><th>Tier</th><th>Source value</th><th>Score</th><th>Share of grid</th></tr>
-<tr><td>1</td><td>&le; 0.16</td><td><b>20</b></td><td>21.9 %</td></tr>
-<tr><td>2</td><td>&gt; 0.16 and &le; 0.18</td><td><b>40</b></td><td>22.8 %</td></tr>
-<tr><td>3</td><td>&gt; 0.18 and &le; 0.2</td><td><b>60</b></td><td>30.9 %</td></tr>
-<tr><td>4</td><td>&gt; 0.2 and &le; 0.22</td><td><b>80</b></td><td>15.6 %</td></tr>
-<tr><td>5</td><td>&gt; 0.22</td><td><b>100</b></td><td>8.8 %</td></tr>
+<table><tr><th>Setting</th><th>Value</th></tr>
+<tr><td>Method</td><td><b>Fuzzy Linear (Benefit)</b></td></tr><tr><td>Parameters</td><td>Low bound <b>0.14</b>, High bound <b>0.24</b></td></tr><tr><td>Source p5 / p50 / p95</td><td>0.1296 / 0.1834 / 0.2318</td></tr><tr><td>Score p5 / p50 / p95</td><td>0.0 / 43.4 / 91.8</td></tr>
 </table>
 
-<figure><img src="essential_guide/img/tier_C09.png" alt="C09 source and tier maps" loading="lazy"><figcaption>C09 Albedo: source raster (left) and tier score (right).</figcaption></figure>
+<figure><img src="essential_guide/img/score_C09.png" alt="C09 source and score maps" loading="lazy"><figcaption>C09 Albedo: source raster (left) and 0-100 score (right).</figcaption></figure>
 <p>Output name: <code>C09_albedo_score.tif</code></p>
 
 <h4 id="g-tier-C10">C10 &mdash; Cropland probability</h4>
 <p>Input: <code>39_dw_tarim_olasiligi.tif</code>. Direction: <b>higher value is worse</b>. Dynamic World probability of cropland. Productive agricultural land should be kept open, so a high probability scores lower.</p>
 
-<table><tr><th>Tier</th><th>Source value</th><th>Score</th><th>Share of grid</th></tr>
-<tr><td>1</td><td>&le; 0.15</td><td><b>100</b></td><td>35.0 %</td></tr>
-<tr><td>2</td><td>&gt; 0.15 and &le; 0.3</td><td><b>80</b></td><td>15.3 %</td></tr>
-<tr><td>3</td><td>&gt; 0.3 and &le; 0.45</td><td><b>60</b></td><td>8.0 %</td></tr>
-<tr><td>4</td><td>&gt; 0.45 and &le; 0.6</td><td><b>40</b></td><td>30.2 %</td></tr>
-<tr><td>5</td><td>&gt; 0.6</td><td><b>20</b></td><td>11.5 %</td></tr>
+<table><tr><th>Setting</th><th>Value</th></tr>
+<tr><td>Method</td><td><b>Fuzzy Linear (Cost)</b></td></tr><tr><td>Parameters</td><td>Low bound <b>0</b>, High bound <b>0.6</b></td></tr><tr><td>Source p5 / p50 / p95</td><td>0.03921 / 0.2951 / 0.6149</td></tr><tr><td>Score p5 / p50 / p95</td><td>0.0 / 50.8 / 93.5</td></tr>
 </table>
 
-<figure><img src="essential_guide/img/tier_C10.png" alt="C10 source and tier maps" loading="lazy"><figcaption>C10 Cropland probability: source raster (left) and tier score (right).</figcaption></figure>
+<figure><img src="essential_guide/img/score_C10.png" alt="C10 source and score maps" loading="lazy"><figcaption>C10 Cropland probability: source raster (left) and 0-100 score (right).</figcaption></figure>
 <p>Output name: <code>C10_cropland_probability_score.tif</code></p>
 
 <h4 id="g-tier-C11">C11 &mdash; Distance to roads</h4>
 <p>Input: <code>65_mesafe_yol_m.tif</code>. Direction: <b>higher value is worse</b>. Distance to any road. Settling close to the road network lowers servicing cost.</p>
 
-<table><tr><th>Tier</th><th>Source value</th><th>Score</th><th>Share of grid</th></tr>
-<tr><td>1</td><td>&le; 50</td><td><b>100</b></td><td>11.9 %</td></tr>
-<tr><td>2</td><td>&gt; 50 and &le; 150</td><td><b>80</b></td><td>15.2 %</td></tr>
-<tr><td>3</td><td>&gt; 150 and &le; 400</td><td><b>60</b></td><td>22.7 %</td></tr>
-<tr><td>4</td><td>&gt; 400 and &le; 1000</td><td><b>40</b></td><td>26.0 %</td></tr>
-<tr><td>5</td><td>&gt; 1000</td><td><b>20</b></td><td>24.1 %</td></tr>
+<table><tr><th>Setting</th><th>Value</th></tr>
+<tr><td>Method</td><td><b>Fuzzy Linear (Cost)</b></td></tr><tr><td>Parameters</td><td>Low bound <b>0</b>, High bound <b>1000</b></td></tr><tr><td>Source p5 / p50 / p95</td><td>30 / 400.2 / 3091</td></tr><tr><td>Score p5 / p50 / p95</td><td>0.0 / 60.0 / 97.0</td></tr>
 </table>
 
-<figure><img src="essential_guide/img/tier_C11.png" alt="C11 source and tier maps" loading="lazy"><figcaption>C11 Distance to roads: source raster (left) and tier score (right).</figcaption></figure>
+<figure><img src="essential_guide/img/score_C11.png" alt="C11 source and score maps" loading="lazy"><figcaption>C11 Distance to roads: source raster (left) and 0-100 score (right).</figcaption></figure>
 <p>Output name: <code>C11_distance_to_roads_score.tif</code></p>
 
 <h4 id="g-tier-C12">C12 &mdash; Distance to main roads</h4>
 <p>Input: <code>66_mesafe_ana_karayolu_m.tif</code>. Direction: <b>higher value is worse</b>. Distance to main highways. Close to a main highway is treated as better connected, but see the note on direction below.</p>
 
-<table><tr><th>Tier</th><th>Source value</th><th>Score</th><th>Share of grid</th></tr>
-<tr><td>1</td><td>&le; 150</td><td><b>100</b></td><td>14.8 %</td></tr>
-<tr><td>2</td><td>&gt; 150 and &le; 400</td><td><b>80</b></td><td>17.3 %</td></tr>
-<tr><td>3</td><td>&gt; 400 and &le; 800</td><td><b>60</b></td><td>20.5 %</td></tr>
-<tr><td>4</td><td>&gt; 800 and &le; 1500</td><td><b>40</b></td><td>21.6 %</td></tr>
-<tr><td>5</td><td>&gt; 1500</td><td><b>20</b></td><td>25.8 %</td></tr>
+<table><tr><th>Setting</th><th>Value</th></tr>
+<tr><td>Method</td><td><b>Fuzzy Linear (Cost)</b></td></tr><tr><td>Parameters</td><td>Low bound <b>0</b>, High bound <b>3000</b></td></tr><tr><td>Source p5 / p50 / p95</td><td>42.43 / 737.9 / 2922</td></tr><tr><td>Score p5 / p50 / p95</td><td>2.6 / 75.4 / 98.6</td></tr>
 </table>
 <p class="note">Direction is set to high = bad, meaning the nearer a main highway the better. A planning team may instead want a buffer away from highways: flip the direction if so.</p>
-<figure><img src="essential_guide/img/tier_C12.png" alt="C12 source and tier maps" loading="lazy"><figcaption>C12 Distance to main roads: source raster (left) and tier score (right).</figcaption></figure>
+<figure><img src="essential_guide/img/score_C12.png" alt="C12 source and score maps" loading="lazy"><figcaption>C12 Distance to main roads: source raster (left) and 0-100 score (right).</figcaption></figure>
 <p>Output name: <code>C12_distance_to_main_roads_score.tif</code></p>
 
 <h4 id="g-tier-C13">C13 &mdash; Distance to buildings</h4>
 <p>Input: <code>68_mesafe_bina_m.tif</code>. Direction: <b>higher value is worse</b>. Distance to the nearest existing building. Cells next to existing fabric are cheaper to connect.</p>
 
-<table><tr><th>Tier</th><th>Source value</th><th>Score</th><th>Share of grid</th></tr>
-<tr><td>1</td><td>&le; 50</td><td><b>100</b></td><td>10.9 %</td></tr>
-<tr><td>2</td><td>&gt; 50 and &le; 150</td><td><b>80</b></td><td>18.6 %</td></tr>
-<tr><td>3</td><td>&gt; 150 and &le; 400</td><td><b>60</b></td><td>25.1 %</td></tr>
-<tr><td>4</td><td>&gt; 400 and &le; 1000</td><td><b>40</b></td><td>24.6 %</td></tr>
-<tr><td>5</td><td>&gt; 1000</td><td><b>20</b></td><td>20.8 %</td></tr>
+<table><tr><th>Setting</th><th>Value</th></tr>
+<tr><td>Method</td><td><b>Fuzzy Linear (Cost)</b></td></tr><tr><td>Parameters</td><td>Low bound <b>0</b>, High bound <b>1000</b></td></tr><tr><td>Source p5 / p50 / p95</td><td>30 / 339.4 / 3265</td></tr><tr><td>Score p5 / p50 / p95</td><td>0.0 / 66.1 / 97.0</td></tr>
 </table>
 
-<figure><img src="essential_guide/img/tier_C13.png" alt="C13 source and tier maps" loading="lazy"><figcaption>C13 Distance to buildings: source raster (left) and tier score (right).</figcaption></figure>
+<figure><img src="essential_guide/img/score_C13.png" alt="C13 source and score maps" loading="lazy"><figcaption>C13 Distance to buildings: source raster (left) and 0-100 score (right).</figcaption></figure>
 <p>Output name: <code>C13_distance_to_buildings_score.tif</code></p>
 
 <h4 id="g-tier-C14">C14 &mdash; Building density</h4>
 <p>Input: <code>69_bina_yogunlugu_300m.tif</code>. Direction: <b>higher value is better</b>. Share of built-up area in a window of about 600 m. Denser surroundings mean existing urban fabric.</p>
 
-<table><tr><th>Tier</th><th>Source value</th><th>Score</th><th>Share of grid</th></tr>
-<tr><td>1</td><td>&le; 0.0005</td><td><b>20</b></td><td>57.6 %</td></tr>
-<tr><td>2</td><td>&gt; 0.0005 and &le; 0.003</td><td><b>40</b></td><td>18.7 %</td></tr>
-<tr><td>3</td><td>&gt; 0.003 and &le; 0.02</td><td><b>60</b></td><td>16.5 %</td></tr>
-<tr><td>4</td><td>&gt; 0.02 and &le; 0.1</td><td><b>80</b></td><td>4.7 %</td></tr>
-<tr><td>5</td><td>&gt; 0.1</td><td><b>100</b></td><td>2.4 %</td></tr>
+<table><tr><th>Setting</th><th>Value</th></tr>
+<tr><td>Method</td><td><b>Fuzzy Linear (Benefit)</b></td></tr><tr><td>Parameters</td><td>Low bound <b>0</b>, High bound <b>0.01</b></td></tr><tr><td>Source p5 / p50 / p95</td><td>0 / 0 / 0.03351</td></tr><tr><td>Score p5 / p50 / p95</td><td>0.0 / 0.0 / 100.0</td></tr>
 </table>
 
-<figure><img src="essential_guide/img/tier_C14.png" alt="C14 source and tier maps" loading="lazy"><figcaption>C14 Building density: source raster (left) and tier score (right).</figcaption></figure>
+<figure><img src="essential_guide/img/score_C14.png" alt="C14 source and score maps" loading="lazy"><figcaption>C14 Building density: source raster (left) and 0-100 score (right).</figcaption></figure>
 <p>Output name: <code>C14_building_density_score.tif</code></p>
 
 
@@ -532,8 +474,8 @@ pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x:
 <div class="callout"><b>Pair rationale (Terrain, as an example).</b> Slope is judged moderately more important than TPI (2) and clearly more important than elevation (3); TPI and elevation are equal (1). Write a one-sentence reason for every pair that is not 1 in your own project.</div>
 
 <h3 id="g-s5"><span class="step">5</span>Combine each component &mdash; WLC Suitability</h3>
-<p>Open <b>Processing Toolbox &rarr; PlanX Suitability Lab &rarr; Compose &rarr; WLC Suitability</b>. Select the tier rasters of one component, paste the weights as a comma-separated list <b>in the same order as the rasters are listed</b>, leave the constraint empty for now, and save the output.</p>
-<figure><img src="essential_guide/img/dlg_wlc_terrain.png" alt="WLC Suitability for the Terrain component" loading="lazy"><figcaption>WLC Suitability for the Terrain component: C01, C02, C03 tier rasters and weights 0.549948, 0.240213, 0.209839.</figcaption></figure>
+<p>Open <b>Processing Toolbox &rarr; PlanX Suitability Lab &rarr; Compose &rarr; WLC Suitability</b>. Select the score rasters of one component, paste the weights as a comma-separated list <b>in the same order as the rasters are listed</b>, leave the constraint empty for now, and save the output.</p>
+<figure><img src="essential_guide/img/dlg_wlc_terrain.png" alt="WLC Suitability for the Terrain component" loading="lazy"><figcaption>WLC Suitability for the Terrain component: C01, C02, C03 score rasters and weights 0.549948, 0.240213, 0.209839.</figcaption></figure>
 <div class="warn"><b>Order matters.</b> The k-th weight is applied to the k-th raster in the selected list. After selecting, open the selection dialog again and confirm the order before running.</div>
 
 <h4>1. Terrain</h4>
@@ -578,18 +520,31 @@ Output: <code>component_access.tif</code></p>
 <p>Run <b>Reproject layer</b> on <code>diri_fay_2026</code> with target CRS <b>EPSG:32635</b> (14 fault lines), then <b>Buffer</b> with distance 100 m, segments 8, <b>Dissolve result</b> ticked.</p>
 <h4>6.3 Merge and dissolve the vector constraints</h4>
 <p>Run <b>Merge vector layers</b> with the plain layer, the forest layer, the archaeology layer and the fault buffer (destination CRS EPSG:32635). Then <b>Dissolve</b> the merged layer into <code>constraints_dissolved</code>.</p>
-<h4>6.4 Rasterize the dissolved constraints</h4>
-<p>Run <b>Rasterize (vector to raster)</b>. Burn <b>0</b> into the constrained cells and pre-initialise the raster with <b>1</b>, so every other cell stays settleable.</p>
-<figure><img src="essential_guide/img/dlg_rasterize.png" alt="Rasterize dialog" loading="lazy"><figcaption>Rasterize: fixed burn value 0, pixel size 30 m, extent of the slope raster, pre-initialise 1, NoData -9999, Float32.</figcaption></figure>
-<ul>
-<li>Input layer: <code>constraints_dissolved</code>; fixed value to burn: <b>0</b>; units: <b>georeferenced units</b>; width and height: <b>30</b>.</li>
-<li>Output extent: copy it from the slope raster so the grid matches exactly (<code>550620, 572460, 4209540, 4227060 [EPSG:32635]</code>).</li>
-<li>Assign NoData &minus;9999, output type Float32, and set <b>Pre-initialize the output image with value</b> to <b>1</b>.</li>
-</ul>
-<h4>6.5 Add the raster constraints</h4>
-<p>Open <b>Raster &rarr; Raster Calculator</b> (QGIS Raster Calculator). Combine the three layers so a cell stays 1 only if every rule passes:</p>
-<p><code>"mask_vector_part@1" * ("slope_percent@1" &lt;= 20) * ("water_frequency@1" &lt; 50)</code></p>
-<figure><img src="essential_guide/img/dlg_rastercalc_mask.png" alt="Raster Calculator dialog" loading="lazy"><figcaption>Raster Calculator (Processing version): output extent and 30 m cell size match the study grid.</figcaption></figure>
+<h4>6.4 Rasterize the dissolved constraints &mdash; Vector Rasterizer</h4>
+<p>Open <b>PlanX Suitability Lab &rarr; Core &rarr; Vector Rasterizer</b>. Burn <b>0</b> into the constrained cells and give every other cell the background value <b>1</b>. Setting the <b>reference raster</b> puts the result exactly on the analysis grid, so no extent has to be typed.</p>
+<figure><img src="essential_guide/img/dlg_rasterizer.png" alt="Vector Rasterizer dialog" loading="lazy"><figcaption>Vector Rasterizer: burn 0, background 1, Treat background as NoData off, reference raster = the slope raster.</figcaption></figure>
+<table><tr><th>Parameter</th><th>Value</th></tr>
+<tr><td>Vector input</td><td><code>constraints_dissolved</code></td></tr>
+<tr><td>Value field</td><td>empty (the burn value is used)</td></tr>
+<tr><td>Burn value</td><td><b>0</b></td></tr>
+<tr><td>Pixel size</td><td>30 (ignored once a reference raster is set)</td></tr>
+<tr><td>Reference raster</td><td><code>02_egim_derece</code></td></tr>
+<tr><td>Background value</td><td><b>1</b></td></tr>
+<tr><td>Treat background as NoData</td><td><b>off</b></td></tr></table>
+<h4>6.5 Turn slope and water into masks &mdash; Normalizer + Constraint Builder</h4>
+<p>Constraint Builder marks cells <b>at or above</b> a threshold as 1 (pass). To express &ldquo;slope must not exceed 20 %&rdquo; or &ldquo;water frequency must stay below 50&rdquo;, first turn the raster into a score where passing cells are high:</p>
+<ol>
+<li>Run <b>Normalizer</b> on <code>03_egim_yuzde</code> with <b>Fuzzy Linear (Cost)</b>, low bound <b>0</b>, high bound <b>40</b>. A slope of 20 % scores exactly 50.
+<figure><img src="essential_guide/img/dlg_norm_slope_mask.png" alt="Normalizer dialog for the slope mask" loading="lazy"><figcaption>Normalizer on slope in percent: Fuzzy Linear (Cost), 0 to 40.</figcaption></figure></li>
+<li>Run <b>Core &rarr; Constraint Builder</b> on that score with threshold <b>50</b>. Cells with slope &le; 20 % become 1, steeper cells become 0.
+<figure><img src="essential_guide/img/dlg_constraint_slope.png" alt="Constraint Builder dialog" loading="lazy"><figcaption>Constraint Builder: threshold 50 on the slope score.</figcaption></figure></li>
+<li>Repeat for <code>15_gsw_su_sikligi</code>: Normalizer with <b>Fuzzy Linear (Cost)</b>, low 0, high 100 (score = 100 &minus; frequency), then Constraint Builder with threshold <b>50.0001</b>, so only frequencies below 50 pass.</li>
+</ol>
+<figure><img src="essential_guide/img/mask_parts.png" alt="The three constraint masks" loading="lazy"><figcaption>The three masks: rasterized vector rules, slope rule and water rule (green = pass).</figcaption></figure>
+<h4>6.6 Combine the masks &mdash; WLC Suitability + Constraint Builder</h4>
+<p>A cell must pass all three masks. Run <b>WLC Suitability</b> on the three mask rasters with weights <code>1,1,1</code> (they are normalised, so the result is the share of rules passed: 1 only when every rule passes, at most 0.67 otherwise). Then run <b>Constraint Builder</b> on that raster with threshold <b>0.99</b> to obtain the final 0/1 mask.</p>
+<figure><img src="essential_guide/img/dlg_mask_combine.png" alt="WLC Suitability combining three masks" loading="lazy"><figcaption>WLC Suitability on the three masks with equal weights.</figcaption></figure>
+<figure><img src="essential_guide/img/dlg_constraint_final.png" alt="Constraint Builder dialog for the final mask" loading="lazy"><figcaption>Constraint Builder: threshold 0.99 gives the final constraint mask.</figcaption></figure>
 <figure><img src="essential_guide/img/constraint_mask.png" alt="Combined constraint mask" loading="lazy"><figcaption>Combined constraint mask.</figcaption></figure>
 <p><b>Measured result:</b> 29.2 % of the grid is settleable (about 11,171 ha) and 70.8 % is excluded. Slope &gt; 20 % alone removes 32.8 %; the vector constraints together remove 42.1 %; permanent water removes 0.0 %.</p>
 
@@ -612,20 +567,20 @@ Output: <code>component_access.tif</code></p>
 <figure><img src="essential_guide/img/dlg_candidates.png" alt="Candidate Site Extractor dialog" loading="lazy"><figcaption>Candidate Site Extractor: threshold 80, minimum area 5 ha, all sites, 8-connectivity.</figcaption></figure>
 <table><tr><th>Parameter</th><th>Value</th><th>Why</th></tr>
 <tr><td>Suitability raster</td><td><code>suitability_final</code></td><td>The 0&ndash;100 map from Step 7</td></tr>
-<tr><td>Site threshold</td><td>80</td><td>Roughly the top 5 % of settleable cells (p95 = 80.9). A threshold of 90 would return almost nothing because only 3 ha reach 90.</td></tr>
+<tr><td>Site threshold</td><td>80</td><td>Roughly the top 5 % of settleable cells (p95 = 80.4). A threshold of 90 would return almost nothing because only 3 ha reach 90.</td></tr>
 <tr><td>Minimum site area</td><td>5 ha</td><td>Drops specks that are too small to plan</td></tr>
 <tr><td>Maximum number of sites</td><td>0</td><td>0 means keep all</td></tr>
 <tr><td>Connectivity</td><td>8</td><td>Diagonal neighbours join one site</td></tr></table>
 <figure><img src="essential_guide/img/candidate_sites.png" alt="Candidate sites" loading="lazy"><figcaption>Candidate sites over the final suitability map.</figcaption></figure>
-<p>Measured: <b>27 sites</b>. The attribute table has <code>site_id</code>, <code>rank</code>, <code>cells</code>, <code>area_ha</code>, <code>mean_suit</code>, <code>max_suit</code> and <code>compactness</code>.</p>
-<table><tr><th>Rank</th><th>Site</th><th>Area (ha)</th><th>Mean score</th><th>Max score</th></tr><tr><td>3</td><td>3</td><td>79.4</td><td>83.4</td><td>90.7</td></tr><tr><td>2</td><td>2</td><td>77.3</td><td>83.7</td><td>91.8</td></tr><tr><td>1</td><td>1</td><td>51.3</td><td>84.3</td><td>93.9</td></tr><tr><td>16</td><td>16</td><td>48.1</td><td>82.4</td><td>88.4</td></tr><tr><td>11</td><td>11</td><td>47.0</td><td>82.7</td><td>88.8</td></tr><tr><td>4</td><td>4</td><td>36.1</td><td>83.2</td><td>88.4</td></tr></table>
+<p>Measured: <b>25 sites</b>. The attribute table has <code>site_id</code>, <code>rank</code>, <code>cells</code>, <code>area_ha</code>, <code>mean_suit</code>, <code>max_suit</code> and <code>compactness</code>.</p>
+<table><tr><th>Rank</th><th>Site</th><th>Area (ha)</th><th>Mean score</th><th>Max score</th></tr><tr><td>3</td><td>3</td><td>68.6</td><td>84.3</td><td>89.9</td></tr><tr><td>4</td><td>4</td><td>57.5</td><td>84.2</td><td>89.5</td></tr><tr><td>2</td><td>2</td><td>53.1</td><td>84.5</td><td>89.1</td></tr><tr><td>12</td><td>12</td><td>48.5</td><td>83.0</td><td>88.2</td></tr><tr><td>1</td><td>1</td><td>39.1</td><td>84.8</td><td>91.2</td></tr><tr><td>8</td><td>8</td><td>37.9</td><td>83.5</td><td>88.5</td></tr></table>
 <div class="warn"><b>Rank is by mean suitability, not by size.</b> To see the largest sites first, sort the table by <code>area_ha</code> (the table above is sorted that way).</div>
 
 <h3 id="g-s9"><span class="step">9</span>Check and read the result</h3>
-<table><tr><th>Score class</th><th>Area (ha, settleable cells only)</th></tr><tr><td><40</td><td>0</td></tr><tr><td>40-60</td><td>869</td></tr><tr><td>60-70</td><td>5,006</td></tr><tr><td>70-80</td><td>4,561</td></tr><tr><td>80-90</td><td>731</td></tr><tr><td>>=90</td><td>3</td></tr></table>
+<table><tr><th>Score class</th><th>Area (ha, settleable cells only)</th></tr><tr><td><40</td><td>25</td></tr><tr><td>40-60</td><td>2,994</td></tr><tr><td>60-70</td><td>4,889</td></tr><tr><td>70-80</td><td>2,656</td></tr><tr><td>80-90</td><td>605</td></tr><tr><td>>=90</td><td>1</td></tr></table>
 <ul>
-<li>5th / 50th / 95th percentile of settleable cells: <b>58.1 / 69.6 / 80.9</b>; range 37.4 &ndash; 93.9.</li>
-<li>Most settleable land falls between 60 and 80, which is what a five-tier scheme usually produces. Extreme classes are rare by construction.</li>
+<li>5th / 50th / 95th percentile of settleable cells: <b>49.4 / 65.1 / 80.4</b>; range 27.5 &ndash; 91.2.</li>
+<li>Most settleable land falls between 60 and 80, as is typical for a weighted average of many criteria: extreme scores need every criterion to agree, so they are rare.</li>
 <li>Look at the map, not only the numbers. High scores should sit where you would expect them (gentle slopes, away from faults, near roads). If they do not, re-check the direction of each criterion.</li>
 <li>Run the Sensitivity tools of the plugin (<b>Uncertainty &rarr; Weight sensitivity</b>) on the four top-level weights to see how stable the best sites are.</li>
 <li>Export a report with the plugin's reporting algorithms, and keep the harmonizer manifest, all matrices and the breakpoint tables as the methods appendix.</li>
@@ -638,16 +593,16 @@ Output: <code>component_access.tif</code></p>
 <tr><td>Raster dimensions error</td><td>Criteria are not on one grid</td><td>Run Data Harmonizer with a snap raster</td></tr>
 <tr><td>Faults appear 1.7 km away from where they should be</td><td>Fault file is in EPSG:5253</td><td>Reproject to EPSG:32635 first</td></tr>
 <tr><td>Averages look far too low</td><td>Excluded cells are 0</td><td>Compute statistics only where the mask is 1</td></tr>
-<tr><td>Almost no candidate sites</td><td>Threshold too high for a five-tier score</td><td>Use 80&ndash;85 and inspect the percentiles first</td></tr>
-<tr><td>One tier holds almost the whole map</td><td>Breakpoints do not fit the data (for example the 30 m building-share raster)</td><td>Use the 300 m density raster for C14 or change the breakpoints</td></tr>
+<tr><td>Almost no candidate sites</td><td>Threshold too high for a weighted-average score</td><td>Use 80&ndash;85 and inspect the percentiles first</td></tr>
+<tr><td>A criterion score is 0 (or 100) almost everywhere</td><td>Normalizer bounds do not fit the data (for example a density raster with a very long tail)</td><td>Set the bounds near the 5th and 95th percentile of the source raster</td></tr>
 <tr><td>CR above 0.10</td><td>Judgements contradict each other</td><td>Revise the judgements for the most inconsistent pair and run again</td></tr></table>
-<p>Assumptions to state in your report: tier breakpoints and the 20 % slope, 100 m fault buffer and 50 % water-frequency thresholds are teaching values; the pairwise judgements express one possible planning priority; the model ranks relative suitability and does not replace legal approvals or field surveys.</p>
+<p>Assumptions to state in your report: normalizer bounds and the 20 % slope, 100 m fault buffer and 50 % water-frequency thresholds are teaching values; the pairwise judgements express one possible planning priority; the model ranks relative suitability and does not replace legal approvals or field surveys.</p>
 
 <h4>Quick checklist</h4>
 <ol>
 <li>Project in EPSG:32635; 14 criterion rasters, slope in percent and water frequency loaded.</li>
 <li>Data Harmonizer run with a snap raster; manifest saved.</li>
-<li>14 tier rasters made with Reclassify by table (TPI after <code>abs</code>), every tier share checked.</li>
+<li>14 score rasters made with the Normalizer (TPI with the Gaussian method), percentiles checked.</li>
 <li>Four AHP runs for the components, all CR &le; 0.10; four component WLC rasters.</li>
 <li>Constraint mask built (fault layer reprojected); settleable share around 29.2 %.</li>
 <li>Top-level AHP, then final WLC with the mask.</li>
