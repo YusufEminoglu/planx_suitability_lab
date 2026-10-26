@@ -20,8 +20,7 @@ icon=icons/icon.png
 
 experimental=False
 deprecated=False
-license=GPL-3
-
+license=GPL-3.0-or-later
 changelog=
     PlanX Suitability Lab 1.7.6 - AHP criterion ceiling raised from 15 to 20, matched by the random consistency index table (Saaty for 1-15, Alonso and Lamata 2006 for 16-20 criteria). Matrices larger than the published table are now refused or flagged as not evaluable instead of receiving an approximated consistency ratio that could pass an inconsistent matrix off as consistent. The AHP Studio test suite is now registered in the release gate and runs on both QGIS runtimes. Hub security scan returned to clean: the dock rework had reintroduced two try/except/pass blocks (Bandit B110, which blocks a Hub version) and twelve ambiguous loop variables (Flake8 E741), both now fixed in code. Also ships the multi-format AHP chart export suite: 6 publication-grade chart types (Executive Summary infographic, priority ranking bars, multi-criteria radar profile, proportional donut, Saaty reciprocal matrix heatmap, Pareto 80/20 cumulative curve), configurable 300/600/150 DPI output, single-chart clipboard copy and one-click bundle export.
     PlanX Suitability Lab 1.7.4 - Converted entire plugin console and AHP Studio to right-docked architecture (QDockWidget): both tools dock seamlessly into QGIS RightDockWidgetArea with automatic tabified switching, fully movable, floatable, and resizable layout. Added a Choose Layers dialog for criterion selection (project rasters listed with likely criteria pre-checked, comma-separated custom entry when the project has none) and raised the studio criterion cap from 6 to 15 with the RI table extended to match.
