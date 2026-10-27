@@ -2,12 +2,19 @@
 name=MCDA Suitability Lab
 qgisMinimumVersion=3.28
 qgisMaximumVersion=4.99
-description=Raster-based MCDA land suitability workflows with explainable analytics and uncertainty.
+description=Land suitability analysis from start to finish: harmonize rasters, build criteria, weight them with AHP, PCA or entropy, combine with WLC, OWA or TOPSIS, then test uncertainty and explain the result.
 version=1.7.8
 author=Geophilo
 email=yusuf.eminoglu@deu.edu.tr
 
-about=PlanX Suitability Lab provides an end-to-end raster MCDA pipeline in QGIS: data harmonization, criterion generation, AHP/PCA/Entropy weighting, WLC/OWA suitability composition, Monte Carlo uncertainty, and explainability outputs for planning-grade decision support. Online User Manual & Documentation: https://geophilo.com/planx_suitability_lab/ | If you find this plugin helpful, please consider starring the repository on GitLab (https://gitlab.com/geophilo1/planx_suitability_lab)!
+about=MCDA Suitability Lab carries a raster multi-criteria analysis through every step a site-selection or land suitability study needs, and then documents the decision. It provides 69 Processing tools in six groups and a dashboard; because every step is a Processing tool, a whole study can be rebuilt in the Model Designer and rerun with new data.
+    CORE: PREPARE THE CRITERIA (7): A data harmonizer that aligns extent, resolution and CRS, a vector rasterizer, a proximity builder for distance criteria, a normalizer and reclassifier, a constraint builder for 0/1 exclusion masks, and a synthetic sample pack with an end-to-end pipeline runner for teaching and testing.
+    WEIGHTS (7): AHP pairwise comparison for up to 20 criteria with a consistency check, entropy, CRITIC and PCA-derived objective weights, a scenario weight pack that produces all of them at once, a weight consensus audit and a consolidator that merges weight sets.
+    COMPOSE: BUILD THE SUITABILITY SURFACE (16): Weighted linear combination, ordered weighted averaging, TOPSIS and VIKOR; ensemble suitability with mean, uncertainty and confidence; uncertainty-adjusted suitability; candidate site extraction and priority zoning; decision-quadrant, risk-opportunity and opportunity-loss maps that show what each hard constraint costs; regret-fragility maps; and scenario comparison, consensus and disagreement layers that point to where alternative weightings agree and where they do not.
+    UNCERTAINTY (2): Monte Carlo suitability and one-at-a-time weight sensitivity, showing which weights the answer depends on.
+    EXPLAINABILITY (3): Local contribution decomposition, global sensitivity and a GeoShapley-style approximation, so reviewers can see why a cell scored high.
+    REPORTING AND DECISION SUPPORT (34): Area statistics for every class and map type, raster alignment and numerical QA checks, criterion redundancy diagnostics, constraint impact and spatial fragmentation audits, threshold coverage curves, a method benchmark leaderboard, scenario dominance, similarity and robustness rankings, minimax-regret and scenario selection recommenders, a policy sensitivity frontier, implementation wave planning and budget phasing, an executive KPI snapshot, and HTML and Markdown reports, briefs and action playbooks.
+    Manual: https://geophilo.com/planx_suitability_lab/manual.html
 
 tracker=https://gitlab.com/geophilo1/planx_suitability_lab/-/issues
 repository=https://gitlab.com/geophilo1/planx_suitability_lab
@@ -15,7 +22,7 @@ homepage=https://geophilo.com/planx_suitability_lab/
 
 category=Processing
 hasProcessingProvider=yes
-tags=planx,qgis,processing,mcda,suitability,raster,ahp,pca,entropy,topsis,xai,montecarlo
+tags=planx,processing,mcda,suitability,raster,ahp,pca,entropy,topsis,xai,montecarlo,site selection,owa,wlc,sensitivity,geophilo
 icon=icons/icon.png
 
 experimental=False
