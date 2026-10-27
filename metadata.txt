@@ -3,7 +3,7 @@ name=MCDA Suitability Lab
 qgisMinimumVersion=3.28
 qgisMaximumVersion=4.99
 description=Land suitability analysis from start to finish: harmonize rasters, build criteria, weight them with AHP, PCA or entropy, combine with WLC, OWA or TOPSIS, then test uncertainty and explain the result.
-version=1.7.8
+version=1.7.9
 author=Geophilo
 email=yusuf.eminoglu@deu.edu.tr
 

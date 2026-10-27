@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.7.9] - 2026-10-27
+
+- Hub listing text rewritten; author Geophilo; university affiliation removed; documentation links use the standard geophilo.com pages (manual.html, guide/); manual HTML no longer ships in the plugin package.
+
 ## [1.7.8] - 2026-10-20
 
 - Docs: Essential guide with alternative models; compose help text says up to 20 rasters
