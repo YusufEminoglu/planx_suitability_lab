@@ -1,13 +1,13 @@
 [general]
-name=PlanX Suitability Lab
+name=MCDA Suitability Lab
 qgisMinimumVersion=3.28
 qgisMaximumVersion=4.99
 description=Raster-based MCDA land suitability workflows with explainable analytics and uncertainty.
 version=1.7.8
-author=Yusuf Eminoglu
+author=Geophilo
 email=yusuf.eminoglu@deu.edu.tr
 
-about=PlanX Suitability Lab provides an end-to-end raster MCDA pipeline in QGIS: data harmonization, criterion generation, AHP/PCA/Entropy weighting, WLC/OWA suitability composition, Monte Carlo uncertainty, and explainability outputs for planning-grade decision support. Developed with feedback from educational workflows at Dokuz Eylul University, Department of City and Regional Planning. Online User Manual & Documentation: https://geophilo.com/planx_suitability_lab/ | If you find this plugin helpful, please consider starring the repository on GitLab (https://gitlab.com/geophilo1/planx_suitability_lab)!
+about=PlanX Suitability Lab provides an end-to-end raster MCDA pipeline in QGIS: data harmonization, criterion generation, AHP/PCA/Entropy weighting, WLC/OWA suitability composition, Monte Carlo uncertainty, and explainability outputs for planning-grade decision support. Online User Manual & Documentation: https://geophilo.com/planx_suitability_lab/ | If you find this plugin helpful, please consider starring the repository on GitLab (https://gitlab.com/geophilo1/planx_suitability_lab)!
 
 tracker=https://gitlab.com/geophilo1/planx_suitability_lab/-/issues
 repository=https://gitlab.com/geophilo1/planx_suitability_lab
